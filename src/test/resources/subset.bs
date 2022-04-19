@@ -1,0 +1,24 @@
+function SubSet(nums) {
+    var result = []
+                
+    function dfs(index, set) {
+        if (index == nums.length()) {
+            result.addLast(set.copy())
+            return
+        }
+                
+        dfs(index + 1, set)
+                
+        set.addLast(nums[index])
+        dfs(index + 1, set)
+        set.removeLast()
+    }
+                
+    dfs(0, [])
+    return result
+}
+
+var result = SubSet([1, 2, 3])
+for (var i = 0; i < result.length(); i++) {
+    Console.println(result[i])
+}

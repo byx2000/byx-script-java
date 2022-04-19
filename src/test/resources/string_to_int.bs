@@ -1,0 +1,13 @@
+function stringToInt(s) {
+    var result = 0
+    for (var i = 0; i < s.length(); ++i) {
+        var d = s.codeAt(i) - '0'.codeAt(0)
+        result = result * 10 + d
+    }
+    return result
+}
+
+Console.println(stringToInt('0'))
+Console.println(stringToInt('2'))
+Console.println(stringToInt('123'))
+Console.println(stringToInt('32453532'))

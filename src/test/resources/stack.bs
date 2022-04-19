@@ -1,0 +1,23 @@
+function Stack() {
+    var elems = []
+    return {
+        push: e => elems.addLast(e),
+        pop: () => elems.removeLast(),
+        top: () => elems[elems.length() - 1]
+    }
+}
+
+var stack = Stack()
+stack.push(1)
+stack.push(2)
+stack.push(3)
+Console.println(stack.pop())
+Console.println(stack.pop())
+stack.push(4)
+stack.push(5)
+Console.println(stack.top())
+Console.println(stack.pop())
+Console.println(stack.top())
+stack.pop()
+Console.println(stack.top())
+Console.println(stack.pop())

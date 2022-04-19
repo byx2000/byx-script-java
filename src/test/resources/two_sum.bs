@@ -1,0 +1,31 @@
+function twoSum1(nums, target) {
+    for (var i = 0; i < nums.length(); ++i) {
+        for (var j = i + 1; j < nums.length(); ++j) {
+            if (nums[i] + nums[j] == target) {
+                return [i, j]
+            }
+        }
+    }
+    return undefined
+}
+
+Console.println(twoSum1([2, 7, 11, 15], 9))
+Console.println(twoSum1([3, 2, 4], 6))
+Console.println(twoSum1([3, 3], 6))
+Console.println(twoSum1([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))
+
+function twoSum2(nums, target) {
+    var map = Map()
+    for (var i = 0; i < nums.length(); ++i) {
+        if (map.containsKey(target - nums[i])) {
+            return [map.get(target - nums[i]), i]
+        }
+        map.put(nums[i], i)
+    }
+    return undefined
+}
+
+Console.println(twoSum2([2, 7, 11, 15], 9))
+Console.println(twoSum2([3, 2, 4], 6))
+Console.println(twoSum2([3, 3], 6))
+Console.println(twoSum2([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))

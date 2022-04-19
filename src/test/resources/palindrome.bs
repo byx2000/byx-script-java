@@ -1,0 +1,73 @@
+function LongestPalindrome1(s) {
+    function isPalindrome(i, j) {
+        if (i == j) {
+            return true
+        } else if (i + 1 == j) {
+            return s.charAt(i) == s.charAt(j)
+        } else if (s.charAt(i) == s.charAt(j)) {
+            return isPalindrome(i + 1, j - 1)
+        } else {
+            return false
+        }
+    }
+  
+    var maxLen = -1
+    for (var i = 0; i < s.length(); i++) {
+        for (var j = i; j < s.length(); j++) {
+            if (isPalindrome(i, j) && j - i + 1 > maxLen) {
+                maxLen = j - i + 1
+            }
+        }
+    }
+
+    return maxLen
+}
+    
+Console.println(LongestPalindrome1('babad'))
+Console.println(LongestPalindrome1('cbbd'))
+Console.println(LongestPalindrome1('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
+Console.println(LongestPalindrome1('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
+
+function LongestPalindrome2(s) {
+    var cache = []
+    for (var i = 0; i < s.length(); ++i) {
+        cache.addLast([])
+        for (var j = 0; j < s.length(); ++j) {
+            cache[i].addLast(undefined)
+        }
+    }
+      
+    function isPalindrome(i, j) {
+        if (cache[i][j] != undefined) {
+            return cache[i][j]
+        }
+  
+        if (i == j) {
+            cache[i][j] = true
+        } else if (i + 1 == j) {
+            cache[i][j] = s.charAt(i) == s.charAt(j)
+        } else if (s.charAt(i) == s.charAt(j)) {
+            cache[i][j] = isPalindrome(i + 1, j - 1)
+        } else {
+            cache[i][j] = false
+        }
+  
+        return cache[i][j]
+    }
+  
+    var maxLen = -1
+    for (var i = 0; i < s.length(); ++i) {
+        for (var j = i; j < s.length(); ++j) {
+            if (isPalindrome(i, j) && j - i + 1 > maxLen) {
+                maxLen = j - i + 1
+            }
+        }
+    }
+
+    return maxLen
+}
+    
+Console.println(LongestPalindrome2('babad'))
+Console.println(LongestPalindrome2('cbbd'))
+Console.println(LongestPalindrome2('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
+Console.println(LongestPalindrome2('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
