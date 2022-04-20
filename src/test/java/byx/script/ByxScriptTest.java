@@ -1212,13 +1212,16 @@ public class ByxScriptTest {
                 var obj = {a: 123, b: 3.14, str: 'hello', c: {x: 100, y: 200}}
                 obj.setField('a', 12345)
                 obj.setField('b', 'hi')
+                obj.setField('x', [1, 2, 3])
                 obj.c.setField('y', 101.5)
                 Console.println(obj.a)
                 Console.println(obj.b)
+                Console.println(obj.x)
                 Console.println(obj.c.y)
                 """, """
                 12345
                 hi
+                [1, 2, 3]
                 101.5
                 """);
     }

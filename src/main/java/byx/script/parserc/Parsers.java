@@ -1,5 +1,7 @@
 package byx.script.parserc;
 
+import byx.script.parserc.exception.ParseException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

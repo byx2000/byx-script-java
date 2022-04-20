@@ -1,6 +1,6 @@
 package byx.script.ast;
 
-import byx.script.runtime.InterpretException;
+import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.Scope;
 import byx.script.runtime.Value;
 

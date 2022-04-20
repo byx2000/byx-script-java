@@ -1,7 +1,7 @@
 package byx.script;
 
 import byx.script.ast.Program;
-import byx.script.runtime.InterpretException;
+import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.Scope;
 
 import java.io.IOException;

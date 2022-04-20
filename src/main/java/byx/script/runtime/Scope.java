@@ -1,11 +1,16 @@
 package byx.script.runtime;
 
 import byx.script.runtime.builtin.Console;
-import byx.script.runtime.builtin.Set;
+import byx.script.runtime.builtin.MapValue;
+import byx.script.runtime.builtin.SetValue;
+import byx.script.runtime.exception.InterpretException;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 封装ByxScript运行时的作用域
+ */
 public class Scope {
     private final Map<String, Value> vars = new HashMap<>();
     private final Scope next;
@@ -13,8 +18,8 @@ public class Scope {
     public Scope() {
         this(null);
         vars.put("Console", Console.INSTANCE);
-        vars.put("Set", Value.of(args -> new Set()));
-        vars.put("Map", Value.of(args -> new byx.script.runtime.builtin.Map()));
+        vars.put("Set", Value.of(args -> new SetValue()));
+        vars.put("Map", Value.of(args -> new MapValue()));
     }
 
     public Scope(Scope next) {
@@ -23,7 +28,7 @@ public class Scope {
 
     public void declareVar(String varName, Value value) {
         if (vars.containsKey(varName)) {
-            throw new InterpretException("变量重复定义：" + varName);
+            throw new InterpretException("var already exist: " + varName);
         }
         vars.put(varName, value);
     }
@@ -34,7 +39,7 @@ public class Scope {
             return;
         }
         if (next == null) {
-            throw new InterpretException("变量未定义：" + varName);
+            throw new InterpretException("var not exist: " + varName);
         }
         next.setVar(varName, value);
     }
@@ -44,7 +49,7 @@ public class Scope {
             return vars.get(varName);
         }
         if (next == null) {
-            throw new InterpretException("变量未定义：" + varName);
+            throw new InterpretException("var not exist: " + varName);
         }
         return next.getVar(varName);
     }
