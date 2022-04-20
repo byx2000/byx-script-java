@@ -1,0 +1,10 @@
+function Stack() {
+    var elems = []
+    return {
+        push: e => elems.addLast(e),
+        pop: e => elems.removeLast(),
+        top: () => elems[elems.length() - 1],
+        size: () => elems.length(),
+        isEmpty: () => elems.isEmpty()
+    }
+}

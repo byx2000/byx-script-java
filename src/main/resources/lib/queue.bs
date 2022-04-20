@@ -1,0 +1,11 @@
+function Queue() {
+    var elems = []
+    return {
+        enQueue: e => elems.addLast(e),
+        deQueue: () => return elems.removeFirst(),
+        front: () => elems[0],
+        tail: () => elems[elems.length() - 1],
+        size: () => elems.length(),
+        isEmpty: () => elems.isEmpty()
+    }
+}

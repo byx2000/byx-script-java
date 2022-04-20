@@ -88,6 +88,7 @@ public class ByxScriptParser {
     private static final Parser<String> assignOp = oneOf(assign, addAssign, subAssign, mulAssign, divAssign);
 
     // 关键字
+    private static final Parser<String> import_ = string("import").surroundBy(ignorable);
     private static final Parser<String> var_ = string("var").surroundBy(ignorable);
     private static final Parser<String> if_ = string("if").surroundBy(ignorable);
     private static final Parser<String> else_ = string("else").surroundBy(ignorable);
@@ -98,7 +99,7 @@ public class ByxScriptParser {
     private static final Parser<String> return_ = string("return").surroundBy(ignorable);
     private static final Parser<String> function_ = string("function").surroundBy(ignorable);
     private static final Parser<String> undefined_ = string("undefined").surroundBy(ignorable);
-    private static final Parser<String> kw = oneOf(var_, if_, else_, for_, while_, break_, continue_, return_, function_, undefined_);
+    private static final Parser<String> kw = oneOf(import_, var_, if_, else_, for_, while_, break_, continue_, return_, function_, undefined_);
 
     // 标识符
     private static final Parser<String> identifier = peek(kw, fail(),
@@ -263,8 +264,14 @@ public class ByxScriptParser {
             exprStmt
     );
 
+    // 导入声明
+    private static final Parser<String> importName = oneOf(digit, alpha, underline, ch('/')).many1().surroundBy(ignorable)
+            .map(ByxScriptParser::join);
+    private static final Parser<List<String>> imports = skip(import_).and(importName).many();
+
     // 程序
-    private static final Parser<Program> program = stmts.map(Program::new);
+    private static final Parser<Program> program = imports.and(stmts)
+            .map(p -> new Program(p.getFirst(), p.getSecond()));
 
     private static Parser<Expr> getExpr() {
         return expr;
@@ -350,7 +357,12 @@ public class ByxScriptParser {
         throw new RuntimeException("invalid assign expression: " + op);
     }
 
-    public static Program parse(String input) {
-        return program.parse(input);
+    /**
+     * 解析脚本
+     * @param script 脚本字符串
+     * @return Program对象
+     */
+    public static Program parse(String script) {
+        return program.parse(script);
     }
 }

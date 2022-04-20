@@ -4,6 +4,8 @@ import org.junit.jupiter.api.function.Executable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +16,19 @@ public class TestUtils {
     public static void verify(String script, String expectedOutput) {
         String output = getScriptOutput(script);
         assertEquals(replaceBlank(expectedOutput), replaceBlank(output), "实际输出与期望输出不符");
+    }
+
+    public static void verify(List<Path> importPaths, String script, String expectedOutput) {
+        String output = getScriptOutput(script, importPaths);
+        assertEquals(replaceBlank(expectedOutput), replaceBlank(output), "实际输出与期望输出不符");
+    }
+
+    public static void verifyException(Class<? extends Exception> type, String script) {
+        assertThrows(type, () -> ByxScriptRunner.run(script));
+    }
+
+    public static void verifyException(Class<? extends Exception> type, List<Path> importPaths, String script) {
+        assertThrows(type, () -> ByxScriptRunner.run(script, importPaths));
     }
 
     public static String getOutput(Executable executable) {
@@ -30,6 +45,10 @@ public class TestUtils {
 
     private static String getScriptOutput(String script) {
         return getOutput(() -> ByxScriptRunner.run(script));
+    }
+
+    private static String getScriptOutput(String script, List<Path> importPaths) {
+        return getOutput(() -> ByxScriptRunner.run(script, importPaths));
     }
 
     private static String replaceBlank(String s) {
