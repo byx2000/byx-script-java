@@ -1,10 +1,6 @@
 package byx.script.runtime.builtin;
 
-import byx.script.runtime.*;
-import byx.script.runtime.value.CallableValue;
-import byx.script.runtime.value.ListValue;
-import byx.script.runtime.value.ObjectValue;
-import byx.script.runtime.value.UndefinedValue;
+import byx.script.runtime.value.*;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * 内建Console对象
  */
-public class Console extends Value {
+public class Console extends FieldReadableValue {
     public static final Console INSTANCE = new Console();
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -41,20 +37,31 @@ public class Console extends Value {
         return "Console";
     }
 
+    // 将Value转换成可打印的字符串
     private static String valueToString(Value value, boolean deep) {
-        if (!deep) {
-            return value.toString();
-        }
-
-        if (value instanceof ObjectValue) {
-            Map<String, Value> fields = value.getFields();
+        if (value instanceof IntegerValue) {
+            return String.valueOf(((IntegerValue) value).getValue());
+        } else if (value instanceof DoubleValue) {
+            return String.valueOf(((DoubleValue) value).getValue());
+        } else if (value instanceof BoolValue) {
+            return String.valueOf(((BoolValue) value).getValue());
+        } else if (value instanceof StringValue) {
+            return ((StringValue) value).getValue();
+        } else if (value instanceof ListValue) {
+            if (!deep) {
+                return "List";
+            }
+            List<Value> values = ((ListValue) value).getValue();
+            return "[" + values.stream().map(v -> valueToString(v, false)).collect(Collectors.joining(", ")) + "]";
+        } else if (value instanceof ObjectValue) {
+            if (!deep) {
+                return "Object";
+            }
+            Map<String, Value> fields = ((ObjectValue) value).getFields();
             return "{" + fields.entrySet().stream()
                     .filter(e -> !(e.getValue() instanceof CallableValue))
                     .map(e -> e.getKey() + ": " + valueToString(e.getValue(), false))
                     .collect(Collectors.joining(", ")) + "}";
-        } else if (value instanceof ListValue) {
-            List<Value> values = ((ListValue) value).getValue();
-            return "[" + values.stream().map(v -> valueToString(v, false)).collect(Collectors.joining(", ")) + "]";
         } else {
             return value.toString();
         }

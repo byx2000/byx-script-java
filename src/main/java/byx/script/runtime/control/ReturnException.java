@@ -1,6 +1,6 @@
 package byx.script.runtime.control;
 
-import byx.script.runtime.Value;
+import byx.script.runtime.value.Value;
 
 public class ReturnException extends RuntimeException {
     private final Value retVal;

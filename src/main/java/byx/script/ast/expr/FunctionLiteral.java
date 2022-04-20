@@ -1,11 +1,10 @@
 package byx.script.ast.expr;
 
-import byx.script.ast.Expr;
-import byx.script.ast.Statement;
+import byx.script.ast.stmt.Statement;
 import byx.script.runtime.control.ReturnException;
 import byx.script.runtime.Scope;
 import byx.script.runtime.value.UndefinedValue;
-import byx.script.runtime.Value;
+import byx.script.runtime.value.Value;
 
 import java.util.List;
 

@@ -1,12 +1,12 @@
 package byx.script.ast.stmt;
 
-import byx.script.ast.Statement;
-import byx.script.ast.Expr;
+import byx.script.ast.expr.Expr;
 import byx.script.runtime.*;
 import byx.script.runtime.control.BreakException;
 import byx.script.runtime.control.ContinueException;
 import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.BoolValue;
+import byx.script.runtime.value.Value;
 
 public class WhileLoop implements Statement {
     private final Expr cond;

@@ -1,7 +1,6 @@
 package byx.script.ast.stmt;
 
-import byx.script.ast.Statement;
-import byx.script.ast.Expr;
+import byx.script.ast.expr.Expr;
 import byx.script.runtime.Scope;
 
 public class ExprStatement implements Statement {

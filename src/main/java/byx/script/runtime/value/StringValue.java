@@ -1,12 +1,11 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
 import byx.script.runtime.exception.InterpretException;
 
 import java.util.Map;
 import java.util.Objects;
 
-public class StringValue extends Value {
+public class StringValue extends FieldReadableValue {
     private final String value;
 
     public StringValue(String value) {
@@ -67,7 +66,7 @@ public class StringValue extends Value {
 
     @Override
     public String toString() {
-        return value;
+        return "String";
     }
 
     @Override

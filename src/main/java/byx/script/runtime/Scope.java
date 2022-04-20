@@ -4,6 +4,7 @@ import byx.script.runtime.builtin.Console;
 import byx.script.runtime.builtin.MapValue;
 import byx.script.runtime.builtin.SetValue;
 import byx.script.runtime.exception.InterpretException;
+import byx.script.runtime.value.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Scope {
 
     public Scope() {
         this(null);
+        // 添加内建变量
         vars.put("Console", Console.INSTANCE);
         vars.put("Set", Value.of(args -> new SetValue()));
         vars.put("Map", Value.of(args -> new MapValue()));

@@ -1,8 +1,9 @@
 package byx.script.runtime.builtin;
 
 import byx.script.runtime.exception.InterpretException;
+import byx.script.runtime.value.FieldReadableValue;
 import byx.script.runtime.value.UndefinedValue;
-import byx.script.runtime.Value;
+import byx.script.runtime.value.Value;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import java.util.Set;
 /**
  * 内建集合对象
  */
-public class SetValue extends Value {
+public class SetValue extends FieldReadableValue {
     private final Set<Value> set = new HashSet<>();
 
     public SetValue() {

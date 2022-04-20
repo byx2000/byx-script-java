@@ -1,10 +1,8 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
-
 import java.util.Objects;
 
-public class BoolValue extends Value {
+public class BoolValue implements Value {
     private static final BoolValue TRUE = new BoolValue(true);
     private static final BoolValue FALSE = new BoolValue(false);
 
@@ -37,7 +35,7 @@ public class BoolValue extends Value {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return "Bool";
     }
 
     @Override
@@ -45,7 +43,7 @@ public class BoolValue extends Value {
         if (rhs instanceof StringValue) {
             return new StringValue(value + ((StringValue) rhs).getValue());
         }
-        return super.add(rhs);
+        return Value.super.add(rhs);
     }
 
     @Override
@@ -53,7 +51,7 @@ public class BoolValue extends Value {
         if (rhs instanceof BoolValue) {
             return new BoolValue(value && ((BoolValue) rhs).getValue());
         }
-        return super.and(rhs);
+        return Value.super.and(rhs);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class BoolValue extends Value {
         if (rhs instanceof BoolValue) {
             return new BoolValue(value || ((BoolValue) rhs).getValue());
         }
-        return super.or(rhs);
+        return Value.super.or(rhs);
     }
 
     @Override

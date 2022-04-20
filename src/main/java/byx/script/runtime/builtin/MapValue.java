@@ -1,8 +1,9 @@
 package byx.script.runtime.builtin;
 
 import byx.script.runtime.exception.InterpretException;
+import byx.script.runtime.value.FieldReadableValue;
 import byx.script.runtime.value.UndefinedValue;
-import byx.script.runtime.Value;
+import byx.script.runtime.value.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
 /**
  * 内建哈希表对象
  */
-public class MapValue extends Value {
+public class MapValue extends FieldReadableValue {
     private final Map<Value, Value> map = new HashMap<>();
 
     public MapValue() {

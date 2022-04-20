@@ -1,6 +1,5 @@
 package byx.script.ast.stmt;
 
-import byx.script.ast.Statement;
 import byx.script.runtime.Scope;
 
 /**

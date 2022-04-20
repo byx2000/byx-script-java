@@ -1,11 +1,9 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
-
 import java.util.List;
 import java.util.function.Function;
 
-public class CallableValue extends Value {
+public class CallableValue implements Value {
     private final Function<List<Value>, Value> callable;
 
     public CallableValue(Function<List<Value>, Value> callable) {

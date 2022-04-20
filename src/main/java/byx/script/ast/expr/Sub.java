@@ -1,7 +1,6 @@
 package byx.script.ast.expr;
 
-import byx.script.ast.Expr;
-import byx.script.runtime.Value;
+import byx.script.runtime.value.Value;
 
 public class Sub extends BinaryOp {
     public Sub(Expr lhs, Expr rhs) {

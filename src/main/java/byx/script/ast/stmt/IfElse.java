@@ -1,11 +1,10 @@
 package byx.script.ast.stmt;
 
-import byx.script.ast.Statement;
-import byx.script.ast.Expr;
+import byx.script.ast.expr.Expr;
 import byx.script.runtime.value.BoolValue;
 import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.Scope;
-import byx.script.runtime.Value;
+import byx.script.runtime.value.Value;
 
 public class IfElse implements Statement {
     private final Expr cond;

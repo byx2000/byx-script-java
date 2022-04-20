@@ -1,4 +1,4 @@
-package byx.script.ast;
+package byx.script.ast.stmt;
 
 import byx.script.runtime.Scope;
 

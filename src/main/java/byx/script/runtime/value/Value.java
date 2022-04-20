@@ -1,9 +1,7 @@
-package byx.script.runtime;
+package byx.script.runtime.value;
 
 import byx.script.runtime.exception.InterpretException;
-import byx.script.runtime.value.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -11,46 +9,32 @@ import java.util.function.Function;
 /**
  * 封装ByxScript运行时的值类型
  */
-public abstract class Value {
-    private final Map<String, Value> fields = new HashMap<>();
-
-    public Map<String, Value> getFields() {
-        return fields;
-    }
-
-    protected void setField(String field, Value value) {
-        fields.put(field, value);
-    }
-
-    protected void setFields(Map<String, Value> fieldsToAdd) {
-        fields.putAll(fieldsToAdd);
-    }
-
-    public static Value of(int val) {
+public interface Value {
+    static Value of(int val) {
         return new IntegerValue(val);
     }
 
-    public static Value of (double val) {
+    static Value of (double val) {
         return new DoubleValue(val);
     }
 
-    public static Value of(boolean val) {
+    static Value of(boolean val) {
         return BoolValue.of(val);
     }
 
-    public static Value of (String val) {
+    static Value of (String val) {
         return new StringValue(val);
     }
 
-    public static Value of(Function<List<Value>, Value> callable) {
+    static Value of(Function<List<Value>, Value> callable) {
         return new CallableValue(callable);
     }
 
-    public static Value of(Map<String, Value> val) {
+    static Value of(Map<String, Value> val) {
         return new ObjectValue(val);
     }
 
-    public static Value of(List<Value> val) {
+    static Value of(List<Value> val) {
         return new ListValue(val);
     }
 
@@ -59,7 +43,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value add(Value rhs) {
+    default Value add(Value rhs) {
         throw new InterpretException(String.format("unsupported operator + between %s and %s", this, rhs));
     }
 
@@ -68,7 +52,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value sub(Value rhs) {
+    default Value sub(Value rhs) {
         throw new InterpretException(String.format("unsupported operator - between %s and %s", this, rhs));
     }
 
@@ -77,7 +61,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value mul(Value rhs) {
+    default Value mul(Value rhs) {
         throw new InterpretException(String.format("unsupported operator * between %s and %s", this, rhs));
     }
 
@@ -86,7 +70,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value div(Value rhs) {
+    default Value div(Value rhs) {
         throw new InterpretException(String.format("unsupported operator / between %s and %s", this, rhs));
     }
 
@@ -95,7 +79,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value rem(Value rhs) {
+    default Value rem(Value rhs) {
         throw new InterpretException(String.format("unsupported operator %% between %s and %s", this, rhs));
     }
 
@@ -103,7 +87,7 @@ public abstract class Value {
      * 相反数（-）
      * @return 运算结果
      */
-    public Value neg() {
+    default Value neg() {
         throw new InterpretException(String.format("unsupported operator - on %s", this));
     }
 
@@ -112,7 +96,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value lessThan(Value rhs) {
+    default Value lessThan(Value rhs) {
         throw new InterpretException(String.format("unsupported operator < between %s and %s", this, rhs));
     }
 
@@ -121,7 +105,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value lessEqualThan(Value rhs) {
+    default Value lessEqualThan(Value rhs) {
         throw new InterpretException(String.format("unsupported operator <= between %s and %s", this, rhs));
     }
 
@@ -130,7 +114,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value greaterThan(Value rhs) {
+    default Value greaterThan(Value rhs) {
         throw new InterpretException(String.format("unsupported operator > between %s and %s", this, rhs));
     }
 
@@ -139,7 +123,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value greaterEqualThan(Value rhs) {
+    default Value greaterEqualThan(Value rhs) {
         throw new InterpretException(String.format("unsupported operator >= between %s and %s", this, rhs));
     }
 
@@ -148,7 +132,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value equal(Value rhs) {
+    default Value equal(Value rhs) {
         throw new InterpretException(String.format("unsupported operator == between %s and %s", this, rhs));
     }
 
@@ -157,7 +141,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value notEqual(Value rhs) {
+    default Value notEqual(Value rhs) {
         Value v = equal(rhs);
         if (v instanceof BoolValue) {
             return Value.of(!((BoolValue) v).getValue());
@@ -170,7 +154,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value and(Value rhs) {
+    default Value and(Value rhs) {
         throw new InterpretException(String.format("unsupported operator && between %s and %s", this, rhs));
     }
 
@@ -179,7 +163,7 @@ public abstract class Value {
      * @param rhs rhs
      * @return 运算结果
      */
-    public Value or(Value rhs) {
+    default Value or(Value rhs) {
         throw new InterpretException(String.format("unsupported operator || between %s and %s", this, rhs));
     }
 
@@ -187,7 +171,7 @@ public abstract class Value {
      * 非（!）
      * @return 运算结果
      */
-    public Value not() {
+    default Value not() {
         throw new InterpretException(String.format("unsupported operator ! on %s", this));
     }
 
@@ -196,7 +180,7 @@ public abstract class Value {
      * @param args 参数列表
      * @return 返回值
      */
-    public Value call(List<Value> args) {
+    default Value call(List<Value> args) {
         throw new InterpretException(String.format("%s is not callable", this));
     }
 
@@ -205,10 +189,7 @@ public abstract class Value {
      * @param field 属性名
      * @return 属性值
      */
-    public Value getField(String field) {
-        if (fields.containsKey(field)) {
-            return fields.get(field);
-        }
+    default Value getField(String field) {
         throw new InterpretException(String.format("field %s not exist", field));
     }
 
@@ -217,7 +198,7 @@ public abstract class Value {
      * @param field 属性名
      * @param rhs 属性值
      */
-    public void fieldAssign(String field, Value rhs) {
+    default void fieldAssign(String field, Value rhs) {
         throw new InterpretException(String.format("unsupported field assign: %s", this));
     }
 
@@ -226,7 +207,7 @@ public abstract class Value {
      * @param sub 下标值
      * @return 下标对应的值
      */
-    public Value subscript(Value sub) {
+    default Value subscript(Value sub) {
         throw new InterpretException(String.format("unsupported subscript: %s", this));
     }
 
@@ -235,7 +216,7 @@ public abstract class Value {
      * @param subscript 下标值
      * @param rhs rhs
      */
-    public void subscriptAssign(Value subscript, Value rhs) {
+    default void subscriptAssign(Value subscript, Value rhs) {
         throw new InterpretException(String.format("unsupported subscript assign: %s", this));
     }
 }

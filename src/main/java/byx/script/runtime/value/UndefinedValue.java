@@ -1,8 +1,6 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
-
-public class UndefinedValue extends Value {
+public class UndefinedValue implements Value {
     public static UndefinedValue INSTANCE = new UndefinedValue();
 
     private UndefinedValue() {}
@@ -17,7 +15,7 @@ public class UndefinedValue extends Value {
         if (rhs instanceof StringValue) {
             return new StringValue("undefined" + ((StringValue) rhs).getValue());
         }
-        return super.add(rhs);
+        return Value.super.add(rhs);
     }
 
     @Override

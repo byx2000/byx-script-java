@@ -1,11 +1,10 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
 import byx.script.runtime.exception.InterpretException;
 
 import java.util.*;
 
-public class ListValue extends Value {
+public class ListValue extends FieldReadableValue {
     private final LinkedList<Value> value;
 
     public ListValue(List<Value> value) {

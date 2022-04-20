@@ -1,10 +1,8 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
-
 import java.util.Objects;
 
-public class DoubleValue extends Value {
+public class DoubleValue implements Value {
     private final double value;
 
     public DoubleValue(double value) {
@@ -30,7 +28,7 @@ public class DoubleValue extends Value {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return "Double";
     }
 
     @Override
@@ -42,7 +40,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof StringValue) {
             return new StringValue(value + ((StringValue) rhs).getValue());
         }
-        return super.add(rhs);
+        return Value.super.add(rhs);
     }
 
     @Override
@@ -52,7 +50,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return new DoubleValue(value - ((DoubleValue) rhs).getValue());
         }
-        return super.sub(rhs);
+        return Value.super.sub(rhs);
     }
 
     @Override
@@ -62,7 +60,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return new DoubleValue(value * ((DoubleValue) rhs).getValue());
         }
-        return super.mul(rhs);
+        return Value.super.mul(rhs);
     }
 
     @Override
@@ -72,7 +70,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return new DoubleValue(value / ((DoubleValue) rhs).getValue());
         }
-        return super.div(rhs);
+        return Value.super.div(rhs);
     }
 
 
@@ -88,7 +86,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return BoolValue.of(value < ((DoubleValue) rhs).getValue());
         }
-        return super.lessThan(rhs);
+        return Value.super.lessThan(rhs);
     }
 
     @Override
@@ -98,7 +96,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return BoolValue.of(value <= ((DoubleValue) rhs).getValue());
         }
-        return super.lessEqualThan(rhs);
+        return Value.super.lessEqualThan(rhs);
     }
 
     @Override
@@ -108,7 +106,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return BoolValue.of(value > ((DoubleValue) rhs).getValue());
         }
-        return super.greaterThan(rhs);
+        return Value.super.greaterThan(rhs);
     }
 
     @Override
@@ -118,7 +116,7 @@ public class DoubleValue extends Value {
         } else if (rhs instanceof DoubleValue) {
             return BoolValue.of(value >= ((DoubleValue) rhs).getValue());
         }
-        return super.greaterEqualThan(rhs);
+        return Value.super.greaterEqualThan(rhs);
     }
 
     @Override

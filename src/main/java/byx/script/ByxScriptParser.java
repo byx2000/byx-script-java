@@ -1,8 +1,8 @@
 package byx.script;
 
-import byx.script.ast.Expr;
+import byx.script.ast.expr.Expr;
 import byx.script.ast.Program;
-import byx.script.ast.Statement;
+import byx.script.ast.stmt.Statement;
 import byx.script.ast.expr.*;
 import byx.script.ast.stmt.*;
 import byx.script.parserc.Pair;

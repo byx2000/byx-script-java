@@ -1,11 +1,10 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.Value;
 import byx.script.runtime.exception.InterpretException;
 
 import java.util.Map;
 
-public class ObjectValue extends Value {
+public class ObjectValue extends FieldWritableValue {
     public ObjectValue(Map<String, Value> fields) {
         setFields(Map.of(
                 "getField", Value.of(args -> {
@@ -35,10 +34,5 @@ public class ObjectValue extends Value {
     @Override
     public String toString() {
         return "Object";
-    }
-
-    @Override
-    public void fieldAssign(String field, Value rhs) {
-        setField(field, rhs);
     }
 }

@@ -1,6 +1,6 @@
 package byx.script.ast;
 
-import byx.script.ast.Statement;
+import byx.script.ast.stmt.Statement;
 import byx.script.runtime.Scope;
 
 import java.util.List;
