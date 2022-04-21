@@ -21,9 +21,7 @@ public class ByxScriptTest {
     public void testEmptyObject() {
         verify("""
                 var obj = {}
-                Console.println(obj)
                 """, """
-                {}
                 """);
     }
 
@@ -519,6 +517,13 @@ public class ByxScriptTest {
                 Console.println(3.14 == 12.56)
                 Console.println(true == false)
                 Console.println('apple' == 'banana')
+                Console.println({a: 123, b: 'hello'} == {a: 123, b: 'hello'})
+                
+                var a = {a: 123, b: 'hello'}
+                var b = a
+                var c = {a: 123, b: 'hello'}
+                Console.println(a == b)
+                Console.println(a == c)
                 """, """
                 true
                 true
@@ -528,6 +533,9 @@ public class ByxScriptTest {
                 false
                 false
                 false
+                false
+                false
+                true
                 false
                 """);
     }
@@ -544,6 +552,13 @@ public class ByxScriptTest {
                 Console.println(3.14 != 12.56)
                 Console.println(true != false)
                 Console.println('apple' != 'banana')
+                Console.println({a: 123, b: 'hello'} != {a: 123, b: 'hello'})
+                
+                var a = {a: 123, b: 'hello'}
+                var b = a
+                var c = {a: 123, b: 'hello'}
+                Console.println(a != b)
+                Console.println(a != c)
                 """, """
                 false
                 false
@@ -553,6 +568,9 @@ public class ByxScriptTest {
                 true
                 true
                 true
+                true
+                true
+                false
                 true
                 """
         );
@@ -617,8 +635,12 @@ public class ByxScriptTest {
                 Console.println(undefined == {})
                 Console.println({m: 100} == undefined)
                 Console.println(undefined == {m: 100})
+                Console.println((a => a + 1) == undefined)
+                Console.println(undefined == (a => a + 1))
                 """, """
                 true
+                false
+                false
                 false
                 false
                 false

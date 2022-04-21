@@ -101,4 +101,108 @@ public class StandardLibraryTest {
                 0 true
                 """);
     }
+
+    @Test
+    public void testList() {
+        verify("""
+                import list
+                
+                var list1 = [1, 2, 3, 4, 5]
+                List.reverse(list1)
+                Console.println(list1)
+                
+                var list2 = [1, 2, 3, 4, 5, 6]
+                List.reverse(list2)
+                Console.println(list2)
+                
+                var list3 = [1]
+                List.reverse(list3)
+                Console.println(list3)
+                
+                var list4 = [1, 2]
+                List.reverse(list4)
+                Console.println(list4)
+                """, """
+                [5, 4, 3, 2, 1]
+                [6, 5, 4, 3, 2, 1]
+                [1]
+                [2, 1]
+                """);
+        verify("""
+                import list
+                
+                var list1 = [5, 2, 1, 3, 4, 7, 6]
+                List.sort(list1)
+                Console.println(list1)
+                
+                var list2 = [5, 2, 1, 3, 4, 7, 8, 6]
+                List.sort(list2, (a, b) => b - a)
+                Console.println(list2)
+                
+                function Student(name, age, score) {
+                    return {
+                        name: name,
+                        age: age,
+                        score: score,
+                        toString: () => '(' + name + ', ' + age + ', ' + score + ')'
+                    }
+                }
+                
+                var students = [
+                    Student('Marry', 17, 87.5),
+                    Student('John', 21, 67.0),
+                    Student('Tom', 18, 95.5)
+                ]
+                
+                List.sort(students, (s1, s2) => s1.name.compareTo(s2.name))
+                for (var i = 0; i < students.length(); ++i) {
+                    Console.print(students[i].toString() + ' ')
+                }
+                Console.println()
+                
+                List.sort(students, (s1, s2) => s1.age - s2.age)
+                for (var i = 0; i < students.length(); ++i) {
+                    Console.print(students[i].toString() + ' ')
+                }
+                Console.println()
+                
+                List.sort(students, (s1, s2) => s2.score - s1.score)
+                for (var i = 0; i < students.length(); ++i) {
+                    Console.print(students[i].toString() + ' ')
+                }
+                """, """
+                [1, 2, 3, 4, 5, 6, 7]
+                [8, 7, 6, 5, 4, 3, 2, 1]
+                (John, 21, 67.0) (Marry, 17, 87.5) (Tom, 18, 95.5)
+                (Marry, 17, 87.5) (Tom, 18, 95.5) (John, 21, 67.0)
+                (Tom, 18, 95.5) (Marry, 17, 87.5) (John, 21, 67.0)
+                """);
+    }
+
+    @Test
+    public void testStream() {
+        verify("""
+                import stream
+                
+                Stream.of([1, 2, 3, 4, 5])
+                    .map(n => n + 1)
+                    .filter(n => n % 2 == 0)
+                    .forEach(Console.println)
+                """, """
+                2
+                4
+                6
+                """);
+        verify("""
+                import stream
+                
+                var s = Stream.of([1, 2, 3, 4, 5])
+                    .map(n => n + 1)
+                    .filter(n => n % 2 == 1)
+                    .toList()
+                Console.println(s)
+                """, """
+                [3, 5]
+                """);
+    }
 }

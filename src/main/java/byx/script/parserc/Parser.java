@@ -88,4 +88,8 @@ public interface Parser<R> {
     default Parser<List<R>> manyUntil(Parser<?> until) {
         return Parsers.manyUntil(this, until);
     }
+
+    default <R2> Parser<R2> then(Function<R, Parser<R2>> flatMap) {
+        return Parsers.then(this, flatMap);
+    }
 }

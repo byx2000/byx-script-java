@@ -36,10 +36,16 @@ public class StringValue extends FieldReadableValue {
                 }),
                 "codeAt", Value.of(args -> {
                     if (args.size() != 1 || !(args.get(0) instanceof IntegerValue)) {
-                        throw new InterpretException("charAt method require 1 integer argument");
+                        throw new InterpretException("codeAt method require 1 integer argument");
                     }
                     int index = ((IntegerValue) args.get(0)).getValue();
                     return Value.of(value.charAt(index));
+                }),
+                "compareTo", Value.of(args -> {
+                    if (args.size() != 1 || !(args.get(0) instanceof StringValue)) {
+                        throw new InterpretException("method compareTo require 1 string argument");
+                    }
+                    return Value.of(value.compareTo(((StringValue) args.get(0)).getValue()));
                 }),
                 "toInt", Value.of(args -> Value.of(Integer.parseInt(value))),
                 "toDouble", Value.of(args -> Value.of(Double.parseDouble(value))),

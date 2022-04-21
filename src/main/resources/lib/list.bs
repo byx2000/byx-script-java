@@ -1,0 +1,65 @@
+/**
+ * 列表工具类
+ */
+var List = (() => {
+    // 交换两个列表元素
+    function swap(list, i, j) {
+        var t = list[i]
+        list[i] = list[j]
+        list[j] = t
+    }
+
+    return {
+        /**
+         * 反转列表
+         * list: 待反转的列表
+         */
+        reverse: list => {
+            var i = 0
+            var j = list.length() - 1
+            while (i < j) {
+                swap(list, i, j)
+                i++
+                j--
+            }
+        },
+        /**
+         * 使用快速排序算法对列表排序
+         * list: 待排序的列表
+         * cmp: 比较函数，含义如下：
+         *     cmp(a, b) < 0  表示 a 小于 b
+         *     cmp(a, b) == 0 表示 a 等于 b
+         *     cmp(a, b) > 0  表示 a 大于 b
+         */
+        sort: (list, cmp) => {
+            if (cmp == undefined) {
+                cmp = (a, b) => a - b
+            }
+
+            function partition(left, right) {
+                var i = left + 1
+                var j = right
+                while (i <= j) {
+                    while (i <= j && cmp(list[i], list[left]) <= 0) ++i
+                    while (i <= j && cmp(list[j], list[left]) > 0) --j
+                    if (i < j) {
+                        swap(list, i, j)
+                    }
+                }
+                swap(list, left, j)
+                return j
+            }
+
+            function qsort(left, right) {
+                if (left >= right) {
+                    return
+                }
+                var mid = partition(left, right)
+                qsort(left, mid - 1)
+                qsort(mid + 1, right)
+            }
+
+            qsort(0, list.length() - 1)
+        }
+    }
+})()

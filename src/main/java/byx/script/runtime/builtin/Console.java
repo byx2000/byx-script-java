@@ -59,7 +59,6 @@ public class Console extends FieldReadableValue {
             }
             Map<String, Value> fields = ((ObjectValue) value).getFields();
             return "{" + fields.entrySet().stream()
-                    .filter(e -> !(e.getValue() instanceof CallableValue))
                     .map(e -> e.getKey() + ": " + valueToString(e.getValue(), false))
                     .collect(Collectors.joining(", ")) + "}";
         } else {

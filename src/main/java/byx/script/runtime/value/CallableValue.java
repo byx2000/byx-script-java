@@ -11,6 +11,14 @@ public class CallableValue implements Value {
     }
 
     @Override
+    public Value equal(Value rhs) {
+        if (rhs instanceof UndefinedValue) {
+            return Value.of(false);
+        }
+        return Value.super.equal(rhs);
+    }
+
+    @Override
     public Value call(List<Value> args) {
         return callable.apply(args);
     }

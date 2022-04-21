@@ -1,11 +1,20 @@
+/**
+ * 队列
+ */
 function Queue() {
     var elems = []
     return {
+        // 入队
         enQueue: e => elems.addLast(e),
-        deQueue: () => return elems.removeFirst(),
+        // 出队
+        deQueue: () => elems.removeFirst(),
+        // 获取队首元素
         front: () => elems[0],
+        // 获取队尾元素
         tail: () => elems[elems.length() - 1],
+        // 获取队列中的元素个数
         size: () => elems.length(),
+        // 判断当前队列是否为空
         isEmpty: () => elems.isEmpty()
     }
 }

@@ -1,8 +1,6 @@
 package byx.script;
 
-import byx.script.ast.expr.Expr;
 import byx.script.ast.Program;
-import byx.script.ast.stmt.Statement;
 import byx.script.ast.expr.*;
 import byx.script.ast.stmt.*;
 import byx.script.parserc.Pair;
@@ -11,6 +9,7 @@ import byx.script.parserc.Parser;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static byx.script.parserc.Parsers.*;
@@ -22,13 +21,16 @@ public class ByxScriptParser {
     // 词法元素
 
     // 空白字符
-    private static final Parser<String> w = chs(' ', '\t', '\r', '\n').map(Objects::toString);
+    private static final Parser<?> w = chs(' ', '\t', '\r', '\n').map(Objects::toString);
 
-    // 注释
-    private static final Parser<String> comment = string("//").skip(not('\n').many()).skip(ch('\n'));
+    // 行注释
+    private static final Parser<?> lineComment = string("//").skip(not('\n').many()).skip(ch('\n'));
+
+    // 块注释
+    private static final Parser<?> blockComment = string("/*").and(any().manyUntil(string("*/"))).and(string("*/"));
 
     // 可忽略元素
-    private static final Parser<?> ignorable = w.or(comment).many();
+    private static final Parser<?> ignorable = oneOf(w, lineComment, blockComment).many();
 
     // 字母
     private static final Parser<Character> alpha = range('a', 'z').or(range('A', 'Z'));
@@ -103,16 +105,17 @@ public class ByxScriptParser {
     private static final Parser<String> return_ = string("return").surroundBy(ignorable);
     private static final Parser<String> function_ = string("function").surroundBy(ignorable);
     private static final Parser<String> undefined_ = string("undefined").surroundBy(ignorable);
-    private static final Parser<String> kw = oneOf(import_, var_, if_, else_, for_, while_, break_, continue_, return_, function_, undefined_);
+
+    private static final Set<String> kw = Set.of("import", "var", "if", "else", "for", "while", "break", "continue", "return", "function", "undefined");
 
     // 标识符
-    private static final Parser<String> identifier = peek(kw, fail(),
-            oneOf(alpha, underline)
-                    .and(oneOf(digit, alpha, underline).many())
-                    .map(p -> p.getFirst() + join(p.getSecond())))
+    private static final Parser<String> identifier = oneOf(alpha, underline)
+            .and(oneOf(digit, alpha, underline).many())
+            .map(p -> p.getFirst() + join(p.getSecond()))
+            .then(s -> kw.contains(s) ? fail() : empty(s))
             .surroundBy(ignorable);
 
-    // 打破前向引用
+    // 前向引用
     private static final Parser<Statement> lazyStmt = lazy(ByxScriptParser::getStmt);
     private static final Parser<List<Statement>> stmts = lazyStmt.skip(semi.optional()).many();
     private static final Parser<Expr> lazyExprElem = lazy(ByxScriptParser::getExprElem);

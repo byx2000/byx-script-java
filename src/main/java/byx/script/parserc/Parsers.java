@@ -25,6 +25,10 @@ public class Parsers {
         return input -> new ParseResult<>(null, input);
     }
 
+    public static <R> Parser<R> empty(R result) {
+        return input -> new ParseResult<>(result, input);
+    }
+
     public static Parser<Character> satisfy(Predicate<Character> predicate) {
         return input -> {
             if (input.end()) {
@@ -36,6 +40,10 @@ public class Parsers {
             }
             return new ParseResult<>(c, input.next());
         };
+    }
+
+    public static Parser<Character> any() {
+        return satisfy(c -> true);
     }
 
     public static Parser<Character> ch(char c) {
@@ -235,7 +243,13 @@ public class Parsers {
     }
 
     public static <R> Parser<List<R>> manyUntil(Parser<R> p, Parser<?> until) {
-        //return p.failedOn(until).many();
         return peek(until, fail(), p).many();
+    }
+
+    public static <R1, R2> Parser<R2> then(Parser<R1> p, Function<R1, Parser<R2>> flatMap) {
+        return input -> {
+            ParseResult<R1> r = p.parse(input);
+            return flatMap.apply(r.getResult()).parse(r.getRemain());
+        };
     }
 }

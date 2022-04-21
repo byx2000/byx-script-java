@@ -1,0 +1,67 @@
+/**
+ * Stream API
+ */
+var Stream = (() => {
+
+    function createStream(first, remain) {
+        var s = {
+            first: first,
+            remain: remain,
+            forEach: consumer => forEach(s, consumer),
+            toList: () => toList(s),
+            map: mapper => map(s, mapper),
+            filter: predicate => filter(s, predicate)
+        }
+        return s
+    }
+
+    function forEach(s, consumer) {
+        while (s != EMPTY_STREAM) {
+            consumer(s.first)
+            s = s.remain
+        }
+    }
+
+    function toList(s) {
+        var list = []
+        while (s != EMPTY_STREAM) {
+            list.addLast(s.first)
+            s = s.remain
+        }
+        return list
+    }
+
+    function map(s, mapper) {
+        if (s == EMPTY_STREAM) {
+            return EMPTY_STREAM
+        }
+        return createStream(mapper(s.first), map(s.remain, mapper))
+    }
+
+    function filter(s, predicate) {
+        if (s == EMPTY_STREAM) {
+            return EMPTY_STREAM
+        }
+        if (predicate(s.first)) {
+            return createStream(s.first, filter(s.remain, predicate))
+        }
+        return filter(s.remain, predicate)
+    }
+
+    var EMPTY_STREAM = createStream(undefined, undefined)
+
+    function fromList(list) {
+        function _fromList(index) {
+            if (index == list.length()) {
+                return EMPTY_STREAM
+            }
+            return createStream(list[index], _fromList(index + 1))
+        }
+        return _fromList(0)
+    }
+
+    return {
+        // 从列表生成流
+        of: list => fromList(list)
+    }
+})()
