@@ -153,7 +153,13 @@ public class ByxScriptParser {
     private static final Parser<Expr> funcLiteral = oneOf(emptyFuncLiteral, exprFuncLiteral, stmtFuncLiteral);
 
     // 对象字面量
-    private static final Parser<Pair<String, Expr>> fieldPair = identifier.skip(colon).and(lazyExpr);
+    private static final Parser<Pair<String, Expr>> fieldPair = oneOf(
+            identifier.skip(colon).and(lazyExpr),
+            identifier.skip(lp).and(idList).skip(rp.and(lb)).and(stmts).skip(rb)
+                    .map(p -> new Pair<>(p.getFirst().getFirst(), new FunctionLiteral(p.getFirst().getSecond(), new Block(p.getSecond())))),
+            identifier.map(id -> new Pair<>(id, new Var(id)))
+
+    );
     private static final Parser<List<Pair<String, Expr>>> fieldList = separateBy(comma, fieldPair).ignoreDelimiter().optional(Collections.emptyList());
     private static final Parser<Expr> objLiteral = skip(lb).and(fieldList).skip(rb)
             .map(ps -> new ObjectLiteral(ps.stream().collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))));

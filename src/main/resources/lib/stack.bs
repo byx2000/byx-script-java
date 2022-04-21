@@ -5,14 +5,24 @@ function Stack() {
     var elems = []
     return {
         // 入栈
-        push: e => elems.addLast(e),
+        push(e) {
+            elems.addLast(e)
+        },
         // 出栈
-        pop: e => elems.removeLast(),
+        pop(e) {
+            return elems.removeLast()
+        },
         // 获取栈顶元素
-        top: () => elems[elems.length() - 1],
+        top() {
+            return elems[elems.length() - 1]
+        },
         // 获取栈中的元素个数
-        size: () => elems.length(),
+        size() {
+            return elems.length()
+        },
         // 判断当前栈是否为空
-        isEmpty: () => elems.isEmpty()
+        isEmpty() {
+            return elems.isEmpty()
+        }
     }
 }

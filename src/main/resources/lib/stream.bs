@@ -2,15 +2,22 @@
  * Stream API
  */
 var Stream = (() => {
-
     function createStream(first, remain) {
         var s = {
-            first: first,
-            remain: remain,
-            forEach: consumer => forEach(s, consumer),
-            toList: () => toList(s),
-            map: mapper => map(s, mapper),
-            filter: predicate => filter(s, predicate)
+            first,
+            remain,
+            forEach(consumer) {
+                forEach(s, consumer)
+            },
+            toList() {
+                return toList(s)
+            },
+            map(mapper) {
+                return map(s, mapper)
+            },
+            filter(predicate) {
+                return filter(s, predicate)
+            }
         }
         return s
     }
@@ -62,6 +69,8 @@ var Stream = (() => {
 
     return {
         // 从列表生成流
-        of: list => fromList(list)
+        of(list) {
+            return fromList(list)
+        }
     }
 })()

@@ -1,10 +1,6 @@
 // 二叉树定义
 function TreeNode(val, left, right) {
-    return {
-        val: val,
-        left: left,
-        right: right
-    }
+    return {val, left, right}
 }
 
 // 前序遍历
