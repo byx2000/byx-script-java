@@ -17,14 +17,4 @@ public class UndefinedValue implements Value {
         }
         return Value.super.add(rhs);
     }
-
-    @Override
-    public Value equal(Value rhs) {
-        return Value.of(rhs instanceof UndefinedValue);
-    }
-
-    @Override
-    public Value notEqual(Value rhs) {
-        return Value.of(!(rhs instanceof UndefinedValue));
-    }
 }

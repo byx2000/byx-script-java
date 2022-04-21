@@ -133,7 +133,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value equal(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator == between %s and %s", this, rhs));
+        return Value.of(this == rhs);
     }
 
     /**
@@ -142,11 +142,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value notEqual(Value rhs) {
-        Value v = equal(rhs);
-        if (v instanceof BoolValue) {
-            return Value.of(!((BoolValue) v).getValue());
-        }
-        throw new InterpretException(String.format("unsupported operator != between %s and %s", this, rhs));
+        return Value.of(this != rhs);
     }
 
     /**

@@ -71,8 +71,8 @@ public class ListValue extends FieldReadableValue {
 
     @Override
     public Value equal(Value rhs) {
-        if (rhs instanceof UndefinedValue) {
-            return Value.of(false);
+        if (rhs instanceof ListValue) {
+            return Value.of(value.equals(((ListValue) rhs).getValue()));
         }
         return super.equal(rhs);
     }

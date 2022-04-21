@@ -1247,4 +1247,60 @@ public class ByxScriptTest {
                 101.5
                 """);
     }
+
+    @Test
+    public void testCallableEqual() {
+        verify("""
+                Console.println((() => {}) == (() => {}))
+                Console.println((a => a + 1) == (a => a + 1))
+                var f1 = (a, b) => a + b
+                var f2 = f1
+                var f3 = (a, b) => a + b
+                Console.println(f1 == f2)
+                Console.println(f2 == f3)
+                """, """
+                false
+                false
+                true
+                false
+                """);
+    }
+
+    @Test
+    public void testListEqual() {
+        verify("""
+                Console.println([] == [])
+                Console.println([1, 2, 3] == [1, 2, 3])
+                Console.println([1, 2, 3] == [1, 2, 3, 4])
+                var a = [1, 2, 3]
+                var b = a
+                var c = [1, 2, 3]
+                Console.println(a == b)
+                Console.println(b == c)
+                """, """
+                true
+                true
+                false
+                true
+                true
+                """);
+    }
+
+    @Test
+    public void testObjectEqual() {
+        verify("""
+                Console.println({} == {})
+                Console.println({a: 123, b: 'hello'} == {a: 123, b: 'hello'})
+                var o1 = {a: 123, b: 'hello'}
+                var o2 = o1
+                var o3 = {a: 123, b: 'hello'}
+                Console.println(o1 == o2)
+                Console.println(o2 == o3)
+                """, """
+                false
+                false
+                true
+                false
+                """);
+    }
 }

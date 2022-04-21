@@ -27,11 +27,6 @@ public class ObjectValue extends FieldWritableValue {
     }
 
     @Override
-    public Value equal(Value rhs) {
-        return Value.of(this == rhs);
-    }
-
-    @Override
     public String toString() {
         return "Object";
     }
