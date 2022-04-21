@@ -1,13 +1,10 @@
 package byx.script.runtime.builtin;
 
-import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.FieldReadableValue;
-import byx.script.runtime.value.UndefinedValue;
 import byx.script.runtime.value.Value;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,30 +14,12 @@ public class SetValue extends FieldReadableValue {
     private final Set<Value> set = new HashSet<>();
 
     public SetValue() {
-        setFields(Map.of(
-                "add", Value.of(args -> {
-                    if (args.size() < 1) {
-                        throw new InterpretException("method add need at least 1 argument");
-                    }
-                    set.addAll(args);
-                    return UndefinedValue.INSTANCE;
-                }),
-                "remove", Value.of(args -> {
-                    if (args.size() != 1) {
-                        throw new InterpretException("method add need 1 argument");
-                    }
-                    return Value.of(set.remove(args.get(0)));
-                }),
-                "contains", Value.of(args -> {
-                    if (args.size() != 1) {
-                        throw new InterpretException("method add need 1 argument");
-                    }
-                    return Value.of(set.contains(args.get(0)));
-                }),
-                "size", Value.of(args -> Value.of(set.size())),
-                "isEmpty", Value.of(args -> Value.of(set.isEmpty())),
-                "toList", Value.of(args -> Value.of(new ArrayList<>(set)))
-        ));
+        setCallableFieldNoReturn("add", Value.class, set::add);
+        setCallableField("remove", Value.class, e -> Value.of(set.remove(e)));
+        setCallableField("contains", Value.class, e -> Value.of(set.contains(e)));
+        setCallableField("size", () -> Value.of(set.size()));
+        setCallableField("isEmpty", () -> Value.of(set.isEmpty()));
+        setCallableField("toList", () -> Value.of(new ArrayList<>(set)));
     }
 
     public Set<Value> getSet() {

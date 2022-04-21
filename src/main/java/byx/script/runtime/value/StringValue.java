@@ -1,8 +1,5 @@
 package byx.script.runtime.value;
 
-import byx.script.runtime.exception.InterpretException;
-
-import java.util.Map;
 import java.util.Objects;
 
 public class StringValue extends FieldReadableValue {
@@ -10,47 +7,15 @@ public class StringValue extends FieldReadableValue {
 
     public StringValue(String value) {
         this.value = value;
-        setFields(Map.of(
-                "length", Value.of(args -> Value.of(value.length())),
-                "substring", Value.of(args -> {
-                    if (args.size() != 2 || !(args.get(0) instanceof IntegerValue) || !(args.get(1) instanceof IntegerValue)) {
-                        throw new InterpretException("substring method require 2 integer arguments");
-                    }
-                    int begin = ((IntegerValue) args.get(0)).getValue();
-                    int end = ((IntegerValue) args.get(1)).getValue();
-                    return Value.of(value.substring(begin, end));
-                }),
-                "concat", Value.of(args -> {
-                    if (args.size() != 1 || !(args.get(0) instanceof StringValue)) {
-                        throw new InterpretException("concat method require 1 string argument");
-                    }
-                    String s = ((StringValue) args.get(0)).getValue();
-                    return Value.of(value.concat(s));
-                }),
-                "charAt", Value.of(args -> {
-                    if (args.size() != 1 || !(args.get(0) instanceof IntegerValue)) {
-                        throw new InterpretException("charAt method require 1 integer argument");
-                    }
-                    int index = ((IntegerValue) args.get(0)).getValue();
-                    return Value.of(String.valueOf(value.charAt(index)));
-                }),
-                "codeAt", Value.of(args -> {
-                    if (args.size() != 1 || !(args.get(0) instanceof IntegerValue)) {
-                        throw new InterpretException("codeAt method require 1 integer argument");
-                    }
-                    int index = ((IntegerValue) args.get(0)).getValue();
-                    return Value.of(value.charAt(index));
-                }),
-                "compareTo", Value.of(args -> {
-                    if (args.size() != 1 || !(args.get(0) instanceof StringValue)) {
-                        throw new InterpretException("method compareTo require 1 string argument");
-                    }
-                    return Value.of(value.compareTo(((StringValue) args.get(0)).getValue()));
-                }),
-                "toInt", Value.of(args -> Value.of(Integer.parseInt(value))),
-                "toDouble", Value.of(args -> Value.of(Double.parseDouble(value))),
-                "toBool", Value.of(args -> Value.of(Boolean.parseBoolean(value)))
-        ));
+        setCallableField("length", () -> Value.of(value.length()));
+        setCallableField("substring", IntegerValue.class, IntegerValue.class, (start, end) -> Value.of(value.substring(start.getValue(), end.getValue())));
+        setCallableField("concat", StringValue.class, s -> Value.of(value.concat(s.getValue())));
+        setCallableField("charAt", IntegerValue.class, index -> Value.of(String.valueOf(value.charAt(index.getValue()))));
+        setCallableField("codeAt", IntegerValue.class, index -> Value.of(value.charAt(index.getValue())));
+        setCallableField("compareTo", StringValue.class, s -> Value.of(value.compareTo(s.getValue())));
+        setCallableField("toInt", () -> Value.of(Integer.parseInt(value)));
+        setCallableField("toDouble", () -> Value.of(Double.parseDouble(value)));
+        setCallableField("toBool", () -> Value.of(Boolean.parseBoolean(value)));
     }
 
     public String getValue() {

@@ -123,7 +123,9 @@ public class BuiltinTest {
                 """);
         verify("""
                 var set = Set()
-                set.add(1, 2, 3)
+                set.add(1)
+                set.add(2)
+                set.add(3)
                 var list = set.toList()
                 Console.println(list)
                 """, """

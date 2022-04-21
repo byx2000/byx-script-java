@@ -9,42 +9,15 @@ public class ListValue extends FieldReadableValue {
 
     public ListValue(List<Value> value) {
         this.value = new LinkedList<>(value);
-        setFields(Map.of(
-                "addLast", Value.of(args -> {
-                    if (args.size() != 1) {
-                        throw new InterpretException("addLast method require 1 argument");
-                    }
-                    this.value.addLast(args.get(0));
-                    return UndefinedValue.INSTANCE;
-                }),
-                "removeLast", Value.of(args -> this.value.removeLast()),
-                "addFirst", Value.of(args -> {
-                    if (args.size() != 1) {
-                        throw new InterpretException("addFirst method require 1 argument");
-                    }
-                    this.value.addFirst(args.get(0));
-                    return UndefinedValue.INSTANCE;
-                }),
-                "removeFirst", Value.of(args -> this.value.removeFirst()),
-                "remove", Value.of(args -> {
-                    if (args.size() != 1 || !(args.get(0) instanceof IntegerValue)) {
-                        throw new InterpretException("remove method require 1 integer argument");
-                    }
-                    int index = ((IntegerValue) args.get(0)).getValue();
-                    return this.value.remove(index);
-                }),
-                "insert", Value.of(args -> {
-                    if (args.size() != 2 || !(args.get(0) instanceof IntegerValue)) {
-                        throw new InterpretException("substring method require 2 arguments");
-                    }
-                    int index = ((IntegerValue) args.get(0)).getValue();
-                    this.value.add(index, args.get(1));
-                    return UndefinedValue.INSTANCE;
-                }),
-                "length", Value.of(args -> Value.of(this.value.size())),
-                "isEmpty", Value.of(args -> Value.of(this.value.isEmpty())),
-                "copy", Value.of(args -> Value.of(new ArrayList<>(this.value)))
-        ));
+        setCallableFieldNoReturn("addLast", Value.class, this.value::addLast);
+        setCallableField("removeLast", this.value::removeLast);
+        setCallableFieldNoReturn("addFirst", Value.class, this.value::addFirst);
+        setCallableField("removeFirst", this.value::removeFirst);
+        setCallableField("remove", IntegerValue.class, index -> this.value.remove(index.getValue()));
+        setCallableFieldNoReturn("insert", IntegerValue.class, Value.class, (index, e) -> this.value.add(index.getValue(), e));
+        setCallableField("length", () -> Value.of(this.value.size()));
+        setCallableField("isEmpty", () -> Value.of(this.value.isEmpty()));
+        setCallableField("copy", () -> Value.of(new ArrayList<>(this.value)));
     }
 
     public List<Value> getValue() {

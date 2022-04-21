@@ -15,21 +15,13 @@ public class Console extends FieldReadableValue {
     private static final Scanner scanner = new Scanner(System.in);
 
     private Console() {
-        setFields(Map.of(
-                "println", Value.of(args -> {
-                    System.out.println(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" ")));
-                    return UndefinedValue.INSTANCE;
-                }),
-                "print", Value.of(args -> {
-                    System.out.print(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" ")));
-                    return UndefinedValue.INSTANCE;
-                }),
-                "readLine", Value.of(args -> Value.of(scanner.nextLine())),
-                "readInt", Value.of(args -> Value.of(scanner.nextInt())),
-                "readDouble", Value.of(args -> Value.of(scanner.nextDouble())),
-                "readBool", Value.of(args -> Value.of(scanner.nextBoolean())),
-                "hasNext", Value.of(args -> Value.of(scanner.hasNext()))
-        ));
+        setCallableFieldNoReturn("println", args -> System.out.println(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" "))));
+        setCallableFieldNoReturn("print", args -> System.out.print(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" "))));
+        setCallableField("readLine", () -> Value.of(scanner.nextLine()));
+        setCallableField("readInt", () -> Value.of(scanner.nextInt()));
+        setCallableField("readDouble", () -> Value.of(scanner.nextDouble()));
+        setCallableField("readBool", () -> Value.of(scanner.nextBoolean()));
+        setCallableField("hasNext", () -> Value.of(scanner.hasNext()));
     }
 
     @Override

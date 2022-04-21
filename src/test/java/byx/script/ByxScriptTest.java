@@ -1215,40 +1215,6 @@ public class ByxScriptTest {
     }
 
     @Test
-    public void testObjectGetField() {
-        verify("""
-                var obj = {a: 123, b: 3.14, str: 'hello', c: {x: 100, y: 200}}
-                Console.println(obj.getField('a'))
-                Console.println(obj.getField('b'))
-                Console.println(obj.getField('str'))
-                """, """
-                123
-                3.14
-                hello
-                """);
-    }
-
-    @Test
-    public void testObjectSetField() {
-        verify("""
-                var obj = {a: 123, b: 3.14, str: 'hello', c: {x: 100, y: 200}}
-                obj.setField('a', 12345)
-                obj.setField('b', 'hi')
-                obj.setField('x', [1, 2, 3])
-                obj.c.setField('y', 101.5)
-                Console.println(obj.a)
-                Console.println(obj.b)
-                Console.println(obj.x)
-                Console.println(obj.c.y)
-                """, """
-                12345
-                hi
-                [1, 2, 3]
-                101.5
-                """);
-    }
-
-    @Test
     public void testCallableEqual() {
         verify("""
                 Console.println((() => {}) == (() => {}))
