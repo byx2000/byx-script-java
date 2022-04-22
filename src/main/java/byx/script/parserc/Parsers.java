@@ -25,7 +25,7 @@ public class Parsers {
         return input -> new ParseResult<>(null, input);
     }
 
-    public static <R> Parser<R> empty(R result) {
+    public static <R> Parser<R> success(R result) {
         return input -> new ParseResult<>(result, input);
     }
 

@@ -205,4 +205,126 @@ public class StandardLibraryTest {
                 [3, 5]
                 """);
     }
+
+    @Test
+    public void testSet() {
+        verify("""
+                import set
+                
+                var set = Set()
+                set.add(1)
+                set.add(2)
+                set.add(3)
+                set.add(2)
+                Console.println(set.toList())
+                Console.println(set.size())
+                Console.println(set.contains(1))
+                Console.println(set.contains(2))
+                Console.println(set.contains(3))
+                Console.println(set.contains(4))
+                Console.println(set.remove(1))
+                Console.println(set.remove(5))
+                Console.println(set.size())
+                Console.println(set.contains(1))
+                Console.println(set.contains(2))
+                Console.println(set.contains(3))
+                Console.println(set.contains(4))
+                Console.println(set.isEmpty())
+                set.remove(2)
+                set.remove(3)
+                Console.println(set.isEmpty())
+                """, """
+                [1, 2, 3]
+                3
+                true
+                true
+                true
+                false
+                true
+                false
+                2
+                false
+                true
+                true
+                false
+                false
+                true
+                """);
+        verify("""
+                import set
+                
+                var s = Set()
+                for (var i = 0; i < 100; ++i) {
+                    s.add(i % 10)
+                }
+                Console.println(s.size())
+                """, """
+                10
+                """);
+    }
+
+    @Test
+    public void testMap() {
+        verify("""
+                import map
+                
+                var map = Map()
+                map.put('k1', 123)
+                map.put('k2', 456)
+                map.put('k3', 789)
+                Console.println(map.size())
+                Console.println(map.get('k1'))
+                Console.println(map.get('k2'))
+                Console.println(map.get('k3'))
+                Console.println(map.get('k4'))
+                Console.println(map.containsKey('k1'))
+                Console.println(map.containsKey('k2'))
+                Console.println(map.containsKey('k3'))
+                Console.println(map.containsKey('k4'))
+                Console.println(map.put('k2', 12345))
+                Console.println(map.get('k2'))
+                Console.println(map.remove('k4'))
+                Console.println(map.remove('k1'))
+                Console.println(map.size())
+                """, """
+                3
+                123
+                456
+                789
+                undefined
+                true
+                true
+                true
+                false
+                456
+                12345
+                undefined
+                123
+                2
+                """);
+        verify("""
+                import map
+                
+                function twoSum(nums, target) {
+                    var map = Map()
+                    for (var i = 0; i < nums.length(); ++i) {
+                        if (map.containsKey(target - nums[i])) {
+                            return [map.get(target - nums[i]), i]
+                        }
+                        map.put(nums[i], i)
+                    }
+                    return undefined
+                }
+                
+                Console.println(twoSum([2, 7, 11, 15], 9))
+                Console.println(twoSum([3, 2, 4], 6))
+                Console.println(twoSum([3, 3], 6))
+                Console.println(twoSum([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))
+                """, """
+                [0, 1]
+                [1, 2]
+                [0, 1]
+                [7, 9]
+                """);
+    }
 }

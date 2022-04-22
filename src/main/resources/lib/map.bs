@@ -1,0 +1,82 @@
+/**
+ * 哈希表
+ * capacity: 哈希桶数量
+ */
+function Map(capacity) {
+    if (capacity == undefined) {
+        capacity = 10
+    }
+
+    var elems = []
+    for (var i = 0; i < capacity; ++i) {
+        elems.addLast([])
+    }
+
+    var size = 0
+
+    function Pair(key, value) {
+        return {key, value}
+    }
+
+    function getHashCode(obj) {
+        var hashCode = Reflect.hashCode(obj)
+        if (hashCode < 0) {
+            return -hashCode
+        }
+        return hashCode
+    }
+
+    return {
+        put(key, value) {
+            var hashCode = getHashCode(key)
+            var index = hashCode % capacity
+            for (var i = 0; i < elems[index].length(); ++i) {
+                if (getHashCode(elems[index][i].key) == hashCode) {
+                    var previous = elems[index][i].value
+                    elems[index][i].value = value
+                    return previous
+                }
+            }
+            elems[index].addLast(Pair(key, value))
+            size++
+            return undefined
+        },
+        get(key) {
+            var hashCode = getHashCode(key)
+            var index = hashCode % capacity
+            for (var i = 0; i < elems[index].length(); ++i) {
+                if (getHashCode(elems[index][i].key) == hashCode) {
+                    return elems[index][i].value
+                }
+            }
+            return undefined
+        },
+        remove(key) {
+            var hashCode = getHashCode(key)
+            var index = hashCode % capacity
+            for (var i = 0; i < elems[index].length(); ++i) {
+                if (getHashCode(elems[index][i].key) == hashCode) {
+                    size--
+                    return elems[index].remove(i).value
+                }
+            }
+            return undefined
+        },
+        containsKey(key) {
+            var hashCode = getHashCode(key)
+            var index = hashCode % capacity
+            for (var i = 0; i < elems[index].length(); ++i) {
+                if (getHashCode(elems[index][i].key) == hashCode) {
+                    return true
+                }
+            }
+            return false
+        },
+        size() {
+            return size
+        },
+        isEmpty() {
+            return size == 0
+        }
+    }
+}

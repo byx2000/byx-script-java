@@ -112,7 +112,7 @@ public class ByxScriptParser {
     private static final Parser<String> identifier = oneOf(alpha, underline)
             .and(oneOf(digit, alpha, underline).many())
             .map(p -> p.getFirst() + join(p.getSecond()))
-            .then(s -> kw.contains(s) ? fail() : empty(s))
+            .then(s -> kw.contains(s) ? fail() : success(s))
             .surroundBy(ignorable);
 
     // 前向引用
@@ -179,10 +179,14 @@ public class ByxScriptParser {
     // 字段访问
     private static final Parser<String> fieldAccess = skip(dot).and(identifier);
 
-    // 实参列表
-    private static final Parser<List<Expr>> argList = skip(lp).and(exprList).skip(rp);
+    // 调用列表
+    private static final Parser<List<Expr>> callList = skip(lp).and(exprList).skip(rp);
 
     // 表达式
+
+    private static final Parser<Expr> bracketExpr = skip(lp).and(lazyExpr).skip(rp);
+    private static final Parser<Expr> negExpr = skip(sub).and(lazyExprElem).map(Neg::new);
+    private static final Parser<Expr> notExpr = skip(not).and(lazyExprElem).map(Not::new);
 
     private static final Parser<Expr> exprElem = oneOf(
             doubleLiteral,
@@ -194,10 +198,10 @@ public class ByxScriptParser {
             var,
             objLiteral,
             listLiteral,
-            skip(lp).and(lazyExpr).skip(rp), // 括号
-            skip(sub).and(lazyExprElem).map(Neg::new), // 负号（-）
-            skip(not).and(lazyExprElem).map(Not::new) // 非（!）
-    ).and(oneOf(argList, fieldAccess, subscript).many()).map(ByxScriptParser::buildExprElem);
+            bracketExpr,
+            negExpr,
+            notExpr
+    ).and(oneOf(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildExprElem);
     private static final Parser<Expr> e1 = separateBy(mul.or(div).or(rem), exprElem).map(ByxScriptParser::buildExpr);
     private static final Parser<Expr> e2 = separateBy(add.or(sub), e1).map(ByxScriptParser::buildExpr);
     private static final Parser<Expr> e3 = separateBy(let.or(lt).or(get).or(gt).or(equ).or(neq), e2).map(ByxScriptParser::buildExpr);
@@ -258,8 +262,13 @@ public class ByxScriptParser {
     // return语句
     private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional()).map(Return::new);
 
-    // 表达式语句
-    private static final Parser<Statement> exprStmt = expr.map(ExprStatement::new);
+    // 函数调用语句
+    private static final Parser<Statement> callStmt = oneOf(var, bracketExpr)
+            .and(oneOf(callList, subscript, fieldAccess).many())
+            .then(p -> {
+                Statement s = buildCallStatement(p);
+                return s == null ? fail() : success(s);
+            });
 
     private static final Parser<Statement> stmt = oneOf(
             varDeclare,
@@ -274,7 +283,7 @@ public class ByxScriptParser {
             breakStmt,
             continueStmt,
             returnStmt,
-            exprStmt
+            callStmt
     );
 
     // 导入声明
@@ -306,11 +315,11 @@ public class ByxScriptParser {
     private static Expr buildExprElem(Pair<Expr, List<Object>> p) {
         Expr e = p.getFirst();
         for (Object o : p.getSecond()) {
-            if (o instanceof List) { // 函数调用
+            if (o instanceof List) {
                 e = new Call(e, (List<Expr>) o);
-            } else if (o instanceof String) { // 属性访问
+            } else if (o instanceof String) {
                 e = new FieldAccess(e, (String) o);
-            } else if (o instanceof Expr) { // 下标访问
+            } else if (o instanceof Expr) {
                 e = new Subscript(e, (Expr) o);
             }
         }
@@ -368,6 +377,28 @@ public class ByxScriptParser {
                 return new AssignStatement(lhs, new Div(lhs, rhs));
         }
         throw new RuntimeException("invalid assign expression: " + op);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Statement buildCallStatement(Pair<Expr, List<Object>> p) {
+        List<Object> objs = p.getSecond();
+        if (objs.size() == 0 || !(objs.get(objs.size() - 1) instanceof List)) {
+            return null;
+        }
+
+        Expr e = p.getFirst();
+        for (int i = 0; i < objs.size() - 1; ++i) {
+            Object o = objs.get(i);
+            if (o instanceof List) {
+                e = new Call(e, (List<Expr>) o);
+            } else if (o instanceof String) {
+                e = new FieldAccess(e, (String) o);
+            } else if (o instanceof Expr) {
+                e = new Subscript(e, (Expr) o);
+            }
+        }
+
+        return new CallStatement(e, (List<Expr>) objs.get(objs.size() - 1));
     }
 
     /**

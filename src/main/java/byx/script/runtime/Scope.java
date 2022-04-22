@@ -1,9 +1,7 @@
 package byx.script.runtime;
 
 import byx.script.runtime.builtin.Console;
-import byx.script.runtime.builtin.MapValue;
 import byx.script.runtime.builtin.Reflect;
-import byx.script.runtime.builtin.SetValue;
 import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.Value;
 
@@ -22,8 +20,6 @@ public class Scope {
         // 添加内建变量
         vars.put("Console", Console.INSTANCE);
         vars.put("Reflect", Reflect.INSTANCE);
-        vars.put("Set", Value.of(args -> new SetValue()));
-        vars.put("Map", Value.of(args -> new MapValue()));
     }
 
     public Scope(Scope next) {
