@@ -1,8 +1,13 @@
 package byx.script;
 
 import byx.script.ast.Program;
+import byx.script.runtime.builtin.Console;
+import byx.script.runtime.builtin.Native;
+import byx.script.runtime.host.Reflect;
 import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.Scope;
+import byx.script.runtime.host.Reader;
+import byx.script.runtime.value.Value;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,11 +15,61 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * ByxScript执行器
+ */
 public class ByxScriptRunner {
     private static final String SCRIPT_SUFFIX = ".bs";
+    private final List<Path> importPaths = new ArrayList<>();
+    private final Map<String, Value> builtins = new HashMap<>();
+    private final Native natives = new Native();
+
+    public ByxScriptRunner() {
+        addImportPath(Path.of("").toAbsolutePath());
+
+        addBuiltin("Console", Console.INSTANCE);
+        addBuiltin("Native", natives);
+
+        addNative("Reader", Value.of(args -> new Reader()));
+        addNative("Reflect", Reflect.INSTANCE);
+    }
+
+    /**
+     * 添加导入路径
+     * @param path 路径
+     */
+    void addImportPath(Path path) {
+        importPaths.add(path);
+    }
+
+    /**
+     * 添加多个导入路径
+     * @param paths 路径集合
+     */
+    void addImportPaths(Collection<Path> paths) {
+        importPaths.addAll(paths);
+    }
+
+    /**
+     * 添加内建变量
+     * @param name 变量名
+     * @param value 变量值
+     */
+    void addBuiltin(String name, Value value) {
+        builtins.put(name, value);
+    }
+
+    /**
+     * 添加本地变量
+     * @param name 变量名
+     * @param value 变量值
+     */
+    void addNative(String name, Value value) {
+        natives.addNative(name, value);
+    }
 
     // 读取并解析导入名称
-    private static Program parseImportName(List<Path> importPaths, String importName) {
+    private Program parseImportName(String importName) {
         for (Path p : importPaths) {
             try {
                 String script = Files.readString(p.resolve(importName + SCRIPT_SUFFIX));
@@ -25,9 +80,30 @@ public class ByxScriptRunner {
         throw new InterpretException("cannot resolve import name: " + importName);
     }
 
-    private static List<String> getLoadOrder(Map<String, Program> dependencies) {
+    // 解析所有导入
+    private Map<String, Program> parseImports(List<String> imports) {
+        Map<String, Program> result = new HashMap<>();
+        Queue<String> namesToParse = new LinkedList<>(imports);
+        while (!namesToParse.isEmpty()) {
+            int cnt = namesToParse.size();
+            for (int i = 0; i < cnt; ++i) {
+                String importName = namesToParse.remove();
+                Program p = parseImportName(importName);
+                result.put(importName, p);
+                for (String name : p.getImports()) {
+                    if (!result.containsKey(name)) {
+                        namesToParse.add(name);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    // 计算导入的加载顺序
+    private List<String> getLoadOrder(Map<String, Program> imports) {
         // 计算依赖关系
-        Map<String, Set<String>> dependOn = dependencies.entrySet().stream()
+        Map<String, Set<String>> dependOn = imports.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new HashSet<>(e.getValue().getImports())));
 
         // 计算反向依赖关系
@@ -70,7 +146,8 @@ public class ByxScriptRunner {
             }
         }
 
-        if (loadOrder.size() != dependencies.size()) {
+        // 检测循环依赖
+        if (loadOrder.size() != imports.size()) {
             throw new InterpretException("circular dependency");
         }
 
@@ -80,40 +157,26 @@ public class ByxScriptRunner {
     /**
      * 运行脚本
      * @param script 脚本字符串
-     * @param importPaths 导入路径
      */
-    public static void run(String script, List<Path> importPaths) {
+    public void run(String script) {
+        // 解析脚本
         Program program = ByxScriptParser.parse(script);
 
-        // 解析所有导入名称
-        Map<String, Program> dependencies = new HashMap<>();
-        Queue<String> namesToParse = new LinkedList<>(program.getImports());
-        while (!namesToParse.isEmpty()) {
-            int cnt = namesToParse.size();
-            for (int i = 0; i < cnt; ++i) {
-                String importName = namesToParse.remove();
-                Program p = parseImportName(importPaths, importName);
-                dependencies.put(importName, p);
-                for (String name : p.getImports()) {
-                    if (!dependencies.containsKey(name)) {
-                        namesToParse.add(name);
-                    }
-                }
-            }
-        }
+        // 解析所有导入
+        Map<String, Program> imports = parseImports(program.getImports());
 
         // 计算加载顺序
-        List<String> loadOrder = getLoadOrder(dependencies);
+        List<String> loadOrder = getLoadOrder(imports);
 
-        Scope scope = new Scope();
+        // 初始化作用域
+        Scope scope = new Scope(builtins);
+
         // 按顺序加载依赖项
         for (String n : loadOrder) {
-            dependencies.get(n).run(scope);
+            imports.get(n).run(scope);
         }
-        program.run(scope);
-    }
 
-    public static void run(String script) {
-        run(script, List.of(Path.of("").toAbsolutePath()));
+        // 执行脚本
+        program.run(scope);
     }
 }

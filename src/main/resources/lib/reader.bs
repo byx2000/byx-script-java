@@ -1,0 +1,13 @@
+/**
+ * 读取用户输入
+ */
+function Reader() {
+    var reader = Native.Reader()
+    return {
+        hasNext: reader.hasNext,
+        nextLine: reader.nextLine,
+        nextInt: reader.nextInt,
+        nextDouble: reader.nextDouble,
+        nextBool: reader.nextBool
+    }
+}

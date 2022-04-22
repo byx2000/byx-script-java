@@ -1,0 +1,10 @@
+var Reflect = {
+    isInt: Native.Reflect.isInt,
+    isDouble: Native.Reflect.isDouble,
+    isBool: Native.Reflect.isBool,
+    isString: Native.Reflect.isString,
+    isList: Native.Reflect.isList,
+    isObject: Native.Reflect.isObject,
+    isUndefined: Native.Reflect.isUndefined,
+    hashCode: Native.Reflect.hashCode
+}

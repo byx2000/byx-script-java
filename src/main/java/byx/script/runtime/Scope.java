@@ -1,7 +1,5 @@
 package byx.script.runtime;
 
-import byx.script.runtime.builtin.Console;
-import byx.script.runtime.builtin.Reflect;
 import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.Value;
 
@@ -15,17 +13,20 @@ public class Scope {
     private final Map<String, Value> vars = new HashMap<>();
     private final Scope next;
 
-    public Scope() {
-        this(null);
-        // 添加内建变量
-        vars.put("Console", Console.INSTANCE);
-        vars.put("Reflect", Reflect.INSTANCE);
+    public Scope(Map<String, Value> builtins) {
+        next = null;
+        vars.putAll(builtins);
     }
 
     public Scope(Scope next) {
         this.next = next;
     }
 
+    /**
+     * 定义变量
+     * @param varName 变量名
+     * @param value 变量值
+     */
     public void declareVar(String varName, Value value) {
         if (vars.containsKey(varName)) {
             throw new InterpretException("var already exist: " + varName);
@@ -33,6 +34,11 @@ public class Scope {
         vars.put(varName, value);
     }
 
+    /**
+     * 设置变量的值
+     * @param varName 变量名
+     * @param value 变量值
+     */
     public void setVar(String varName, Value value) {
         if (vars.containsKey(varName)) {
             vars.put(varName, value);
@@ -44,6 +50,11 @@ public class Scope {
         next.setVar(varName, value);
     }
 
+    /**
+     * 获取变量的值
+     * @param varName 变量名
+     * @return 变量值
+     */
     public Value getVar(String varName) {
         if (vars.containsKey(varName)) {
             return vars.get(varName);

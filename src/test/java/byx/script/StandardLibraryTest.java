@@ -22,6 +22,81 @@ public class StandardLibraryTest {
         TestUtils.verify(List.of(LIB_PATH), script, expectedOutput);
     }
 
+    private void verify(String script, String input, String expectedOutput) {
+        TestUtils.verify(List.of(LIB_PATH), script, input, expectedOutput);
+    }
+
+    @Test
+    public void testReflect() {
+        verify("""
+                import reflect
+                
+                var objs = [123, 3.14, true, 'hello', [1, 2, 3], {a: 100, b: 'hi'}, undefined]
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isInt(objs[i]) + ' ')
+                }
+                Console.println()
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isDouble(objs[i]) + ' ')
+                }
+                Console.println()
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isBool(objs[i]) + ' ')
+                }
+                Console.println()
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isString(objs[i]) + ' ')
+                }
+                Console.println()
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isList(objs[i]) + ' ')
+                }
+                Console.println()
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isObject(objs[i]) + ' ')
+                }
+                Console.println()
+                
+                for (var i = 0; i < objs.length(); ++i) {
+                    Console.print(Reflect.isUndefined(objs[i]) + ' ')
+                }
+                Console.println()
+                """, """
+                true false false false false false false
+                false true false false false false false
+                false false true false false false false
+                false false false true false false false
+                false false false false true false false
+                false false false false false true false
+                false false false false false false true
+                """);
+        verify("""
+                import reflect
+                
+                var objs = [123, 3.14, true, 'hello', [1, 2, 3], {a: 100, b: 'hi'}, undefined]
+                for (var i = 0; i < objs.length(); ++i) {
+                    for (var j = 0; j < objs.length(); ++j) {
+                        Console.print((Reflect.hashCode(objs[i]) == Reflect.hashCode(objs[j])) + ' ')
+                    }
+                    Console.println()
+                }
+                """, """
+                true false false false false false false
+                false true false false false false false
+                false false true false false false false
+                false false false true false false false
+                false false false false true false false
+                false false false false false true false
+                false false false false false false true
+                """);
+    }
+
     @Test
     public void testStack() {
         verify("""
@@ -325,6 +400,65 @@ public class StandardLibraryTest {
                 [1, 2]
                 [0, 1]
                 [7, 9]
+                """);
+    }
+
+    @Test
+    public void testReader() {
+        verify("""
+                import reader
+                
+                var reader = Reader()
+                while (reader.hasNext()) {
+                    var line = reader.nextLine()
+                    Console.println(line)
+                }
+                """, """
+                hello
+                world!
+                this is the example
+                """, """
+                hello
+                world!
+                this is the example
+                """);
+        verify("""
+                import reader
+                
+                var reader = Reader()
+                while (reader.hasNext()) {
+                    var a = reader.nextInt()
+                    var b = reader.nextInt()
+                    Console.println(a + b)
+                }
+                """, """
+                1 2 45 77
+                400
+                500
+                """, """
+                3
+                122
+                900
+                """);
+        verify("""
+                import reader
+                
+                var nums = []
+                var reader = Reader()
+                while (reader.hasNext()) {
+                    nums.addLast(reader.nextInt())
+                }
+                
+                var sum = 0
+                for (var i = 0; i < nums.length(); ++i) {
+                    sum += nums[i]
+                }
+                
+                Console.println(sum)
+                """, """
+                23 17 56 124 4 85
+                """, """
+                309
                 """);
     }
 }

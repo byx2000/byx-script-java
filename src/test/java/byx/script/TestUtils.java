@@ -2,9 +2,13 @@ package byx.script;
 
 import org.junit.jupiter.api.function.Executable;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,41 +18,54 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class TestUtils {
     public static void verify(String script, String expectedOutput) {
-        String output = getScriptOutput(script);
-        assertEquals(replaceBlank(expectedOutput), replaceBlank(output), "实际输出与期望输出不符");
+        verify(Collections.emptyList(), script, "", expectedOutput);
     }
 
     public static void verify(List<Path> importPaths, String script, String expectedOutput) {
-        String output = getScriptOutput(script, importPaths);
+        verify(importPaths, script, "", expectedOutput);
+    }
+
+    public static void verify(List<Path> importPaths, String script, String input, String expectedOutput) {
+        String output = getScriptOutput(importPaths, script, input);
         assertEquals(replaceBlank(expectedOutput), replaceBlank(output), "实际输出与期望输出不符");
     }
 
-    public static void verifyException(Class<? extends Exception> type, String script) {
-        assertThrows(type, () -> ByxScriptRunner.run(script));
-    }
-
     public static void verifyException(Class<? extends Exception> type, List<Path> importPaths, String script) {
-        assertThrows(type, () -> ByxScriptRunner.run(script, importPaths));
+        assertThrows(type, () -> {
+            ByxScriptRunner runner = new ByxScriptRunner();
+            runner.addImportPaths(importPaths);
+            runner.run(script);
+        });
     }
 
     public static String getOutput(Executable executable) {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+        return getOutput("", executable);
+    }
+
+    public static String getOutput(String input, Executable executable) {
+        try (
+                ByteArrayInputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+                ByteArrayOutputStream os = new ByteArrayOutputStream()
+        ) {
+            InputStream in = System.in;
             PrintStream out = System.out;
+            System.setIn(is);
             System.setOut(new PrintStream(os));
             executable.execute();
-            System.setOut(new PrintStream(out));
+            System.setOut(out);
+            System.setIn(in);
             return os.toString();
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static String getScriptOutput(String script) {
-        return getOutput(() -> ByxScriptRunner.run(script));
-    }
-
-    private static String getScriptOutput(String script, List<Path> importPaths) {
-        return getOutput(() -> ByxScriptRunner.run(script, importPaths));
+    private static String getScriptOutput(List<Path> importPaths, String script, String input) {
+        return getOutput(input, () -> {
+            ByxScriptRunner runner = new ByxScriptRunner();
+            runner.addImportPaths(importPaths);
+            runner.run(script);
+        });
     }
 
     private static String replaceBlank(String s) {
