@@ -233,11 +233,11 @@ public class ByxScriptParser {
 
     // 自增语句
     private static final Parser<Statement> incStmt = assignable.skip(inc).or(skip(inc).and(assignable))
-            .map(e -> new AssignStatement(e, new Add(e, new IntegerLiteral(1))));
+            .map(e -> new Assign(e, new Add(e, new IntegerLiteral(1))));
 
     // 自减语句
     private static final Parser<Statement> decStmt = assignable.skip(dec).or(skip(dec).and(assignable))
-            .map(e -> new AssignStatement(e, new Sub(e, new IntegerLiteral(1))));
+            .map(e -> new Assign(e, new Sub(e, new IntegerLiteral(1))));
 
     // 代码块
     private static final Parser<Statement> block = skip(lb).and(stmts).skip(rb).map(Block::new);
@@ -367,15 +367,15 @@ public class ByxScriptParser {
         String op = p.getFirst().getSecond();
         switch (op) {
             case "=":
-                return new AssignStatement(lhs, rhs);
+                return new Assign(lhs, rhs);
             case "+=":
-                return new AssignStatement(lhs, new Add(lhs, rhs));
+                return new Assign(lhs, new Add(lhs, rhs));
             case "-=":
-                return new AssignStatement(lhs, new Sub(lhs, rhs));
+                return new Assign(lhs, new Sub(lhs, rhs));
             case "*=":
-                return new AssignStatement(lhs, new Mul(lhs, rhs));
+                return new Assign(lhs, new Mul(lhs, rhs));
             case "/=":
-                return new AssignStatement(lhs, new Div(lhs, rhs));
+                return new Assign(lhs, new Div(lhs, rhs));
         }
         throw new RuntimeException("invalid assign expression: " + op);
     }
