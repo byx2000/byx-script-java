@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
+import static byx.script.TestUtils.getOutput;
+
 public class StandardLibraryTest {
     private static final Path LIB_PATH;
 
@@ -94,6 +96,29 @@ public class StandardLibraryTest {
                 false false false false true false false
                 false false false false false true false
                 false false false false false false true
+                """);
+        verify("""
+                import reflect
+                
+                var obj = {a: 123, b: 'hello'}
+                var fields = Reflect.fields(obj)
+                Console.println(fields == ['a', 'b'] || fields == ['b', 'a'])
+                
+                Reflect.setField(obj, 'a', 456)
+                Console.println(obj.a)
+                
+                Console.println(Reflect.getField(obj, 'b'))
+                
+                Console.println(Reflect.hasField(obj, 'a'))
+                Console.println(Reflect.hasField(obj, 'b'))
+                Console.println(Reflect.hasField(obj, 'c'))
+                """, """
+                true
+                456
+                hello
+                true
+                true
+                false
                 """);
     }
 
@@ -460,5 +485,72 @@ public class StandardLibraryTest {
                 """, """
                 309
                 """);
+    }
+
+    @Test
+    public void testMath() {
+        verify("""
+                import math
+                
+                Console.println(Math.abs(15))
+                Console.println(Math.abs(-3.14))
+                Console.println(Math.sin(10))
+                Console.println(Math.sin(12.34))
+                Console.println(Math.cos(10))
+                Console.println(Math.cos(12.34))
+                Console.println(Math.tan(10))
+                Console.println(Math.tan(12.34))
+                Console.println(Math.pow(2, 3))
+                Console.println(Math.pow(2, 3.5))
+                Console.println(Math.pow(2.5, 3))
+                Console.println(Math.pow(2.5, 3.5))
+                Console.println(Math.exp(2))
+                Console.println(Math.exp(3.14))
+                Console.println(Math.ln(25))
+                Console.println(Math.ln(12.56))
+                Console.println(Math.log10(25))
+                Console.println(Math.log10(12.56))
+                Console.println(Math.sqrt(2))
+                Console.println(Math.sqrt(31.5))
+                Console.println(Math.round(7))
+                Console.println(Math.round(8.3))
+                Console.println(Math.round(12.9))
+                Console.println(Math.ceil(7))
+                Console.println(Math.ceil(8.3))
+                Console.println(Math.ceil(12.9))
+                Console.println(Math.floor(7))
+                Console.println(Math.floor(8.3))
+                Console.println(Math.floor(12.9))
+                """, getOutput(() -> {
+                System.out.println(Math.abs(15));
+                System.out.println(Math.abs(-3.14));
+                System.out.println(Math.sin(10));
+                System.out.println(Math.sin(12.34));
+                System.out.println(Math.cos(10));
+                System.out.println(Math.cos(12.34));
+                System.out.println(Math.tan(10));
+                System.out.println(Math.tan(12.34));
+                System.out.println(Math.pow(2, 3));
+                System.out.println(Math.pow(2, 3.5));
+                System.out.println(Math.pow(2.5, 3));
+                System.out.println(Math.pow(2.5, 3.5));
+                System.out.println(Math.exp(2));
+                System.out.println(Math.exp(3.14));
+                System.out.println(Math.log(25));
+                System.out.println(Math.log(12.56));
+                System.out.println(Math.log10(25));
+                System.out.println(Math.log10(12.56));
+                System.out.println(Math.sqrt(2));
+                System.out.println(Math.sqrt(31.5));
+                System.out.println(Math.round(7));
+                System.out.println((int) Math.round(8.3));
+                System.out.println((int) Math.round(12.9));
+                System.out.println((int) Math.ceil(7));
+                System.out.println((int) Math.ceil(8.3));
+                System.out.println((int) Math.ceil(12.9));
+                System.out.println((int) Math.floor(7));
+                System.out.println((int) Math.floor(8.3));
+                System.out.println((int) Math.floor(12.9));
+        }));
     }
 }

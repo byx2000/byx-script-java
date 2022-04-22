@@ -14,6 +14,10 @@ public abstract class FieldReadableValue implements Value {
         return fields;
     }
 
+    public boolean hasField(String field) {
+        return fields.containsKey(field);
+    }
+
     protected void setField(String field, Value value) {
         fields.put(field, value);
     }
@@ -40,7 +44,7 @@ public abstract class FieldReadableValue implements Value {
             }
             Value p = args.get(0);
             if (!t.isAssignableFrom(p.getClass())) {
-                throw new InterpretException(String.format("function %s need 1 argument with type %s", field, t));
+                throw new InterpretException(String.format("function %s need 1 argument with type %s", field, t.getSimpleName()));
             }
             return func.apply(t.cast(p));
         });
@@ -61,7 +65,8 @@ public abstract class FieldReadableValue implements Value {
             Value p1 = args.get(0);
             Value p2 = args.get(1);
             if (!(t1.isAssignableFrom(p1.getClass()) && t2.isAssignableFrom(p2.getClass()))) {
-                throw new InterpretException(String.format("function %s need 2 arguments with type %s and %s", field, t1, t2));
+                throw new InterpretException(String.format("function %s need 2 arguments with type %s and %s",
+                        field, t1.getSimpleName(), t2.getSimpleName()));
             }
             return func.apply(t1.cast(p1), t2.cast(p2));
         });
@@ -70,6 +75,36 @@ public abstract class FieldReadableValue implements Value {
     protected <T1 extends Value, T2 extends Value> void setCallableFieldNoReturn(String field, Class<T1> t1, Class<T2> t2, BiConsumer<T1, T2> func) {
         setCallableField(field, t1, t2, (p1, p2) -> {
             func.accept(p1, p2);
+            return UndefinedValue.INSTANCE;
+        });
+    }
+
+    public interface Function3<T1, T2, T3, R> {
+        R apply(T1 t1, T2 t2, T3 t3);
+    }
+    protected <T1 extends Value, T2 extends Value, T3 extends Value> void setCallableField(String field, Class<T1> t1, Class<T2> t2, Class<T3> t3, Function3<T1, T2, T3, Value> func) {
+        setCallableField(field, args -> {
+            if (args.size() != 3) {
+                throw new InterpretException(String.format("function %s need 3 arguments", field));
+            }
+            Value p1 = args.get(0);
+            Value p2 = args.get(1);
+            Value p3 = args.get(2);
+            if (!(t1.isAssignableFrom(p1.getClass()) && t2.isAssignableFrom(p2.getClass()) && t3.isAssignableFrom(p3.getClass()))) {
+                throw new InterpretException(String.format("function %s need 2 arguments with type %s, %s and %s",
+                        field, t1.getSimpleName(), t2.getSimpleName(), t3.getSimpleName()));
+            }
+            return func.apply(t1.cast(p1), t2.cast(p2), t3.cast(p3));
+        });
+    }
+
+    public interface Consumer3<T1, T2, T3> {
+        void accept(T1 t1, T2 t2, T3 t3);
+    }
+
+    protected <T1 extends Value, T2 extends Value, T3 extends Value> void setCallableFieldNoReturn(String field, Class<T1> t1, Class<T2> t2, Class<T3> t3, Consumer3<T1, T2, T3> func) {
+        setCallableField(field, t1, t2, t3, (p1, p2, p3) -> {
+            func.accept(p1, p2, p3);
             return UndefinedValue.INSTANCE;
         });
     }

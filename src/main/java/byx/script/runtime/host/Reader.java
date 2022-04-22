@@ -5,6 +5,9 @@ import byx.script.runtime.value.Value;
 
 import java.util.Scanner;
 
+/**
+ * Native.Reader
+ */
 public class Reader extends FieldReadableValue {
     public final Scanner scanner = new Scanner(System.in);
 

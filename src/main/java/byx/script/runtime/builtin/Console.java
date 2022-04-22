@@ -4,24 +4,17 @@ import byx.script.runtime.value.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * 内建Console对象
+ * 内建对象Console：包含控制台操作
  */
 public class Console extends FieldReadableValue {
     public static final Console INSTANCE = new Console();
-    private static final Scanner scanner = new Scanner(System.in);
 
     private Console() {
         setCallableFieldNoReturn("println", args -> System.out.println(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" "))));
         setCallableFieldNoReturn("print", args -> System.out.print(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" "))));
-        setCallableField("readLine", () -> Value.of(scanner.nextLine()));
-        setCallableField("readInt", () -> Value.of(scanner.nextInt()));
-        setCallableField("readDouble", () -> Value.of(scanner.nextDouble()));
-        setCallableField("readBool", () -> Value.of(scanner.nextBoolean()));
-        setCallableField("hasNext", () -> Value.of(scanner.hasNext()));
     }
 
     @Override

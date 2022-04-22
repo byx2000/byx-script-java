@@ -1,3 +1,6 @@
+/**
+ * 反射工具类
+ */
 var Reflect = {
     isInt: Native.Reflect.isInt,
     isDouble: Native.Reflect.isDouble,
@@ -6,5 +9,9 @@ var Reflect = {
     isList: Native.Reflect.isList,
     isObject: Native.Reflect.isObject,
     isUndefined: Native.Reflect.isUndefined,
-    hashCode: Native.Reflect.hashCode
+    hashCode: Native.Reflect.hashCode,
+    fields: Native.Reflect.fields,
+    setField: Native.Reflect.setField,
+    getField: Native.Reflect.getField,
+    hasField: Native.Reflect.hasField
 }

@@ -16,6 +16,7 @@ import static byx.script.parserc.Parsers.*;
 
 /**
  * ByxParser解析器
+ * 将ByxScript脚本解析成抽象语法树
  */
 public class ByxScriptParser {
     // 词法元素
@@ -404,7 +405,7 @@ public class ByxScriptParser {
     /**
      * 解析脚本
      * @param script 脚本字符串
-     * @return Program对象
+     * @return 抽象语法树
      */
     public static Program parse(String script) {
         return program.parse(script);

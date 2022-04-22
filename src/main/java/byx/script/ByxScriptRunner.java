@@ -3,6 +3,7 @@ package byx.script;
 import byx.script.ast.Program;
 import byx.script.runtime.builtin.Console;
 import byx.script.runtime.builtin.Native;
+import byx.script.runtime.host.Math;
 import byx.script.runtime.host.Reflect;
 import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.Scope;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * ByxScript执行器
+ * 执行ByxScript脚本
  */
 public class ByxScriptRunner {
     private static final String SCRIPT_SUFFIX = ".bs";
@@ -25,13 +27,16 @@ public class ByxScriptRunner {
     private final Native natives = new Native();
 
     public ByxScriptRunner() {
+        // 添加默认导入路径（当前路径）
         addImportPath(Path.of("").toAbsolutePath());
 
+        // 添加内建对象
         addBuiltin("Console", Console.INSTANCE);
         addBuiltin("Native", natives);
 
         addNative("Reader", Value.of(args -> new Reader()));
         addNative("Reflect", Reflect.INSTANCE);
+        addNative("Math", Math.INSTANCE);
     }
 
     /**
