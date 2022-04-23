@@ -6,10 +6,7 @@ import byx.script.ast.stmt.*;
 import byx.script.parserc.Pair;
 import byx.script.parserc.Parser;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static byx.script.parserc.Parsers.*;
@@ -261,12 +258,22 @@ public class ByxScriptParser {
             .map(Block::new);
 
     // if-else语句
-    private static final Parser<Statement> ifelse = skip(if_.and(lp.fatal()))
+    private static final Parser<Statement> ifStmt = skip(if_.and(lp.fatal()))
             .and(expr)
-            .skip(rp.fatal())
-            .and(lazyStmt)
-            .and(skip(else_).and(lazyStmt).optional(EmptyStatement.INSTANCE))
-            .map(p -> new IfElse(p.getFirst().getFirst(), p.getFirst().getSecond(), p.getSecond()));
+            .skip(rp.fatal().and(lb.fatal()))
+            .and(stmts)
+            .skip(rb.fatal())
+            .and(skip(else_.and(if_).and(lp.fatal())).and(expr).skip(rp.fatal().and(lb.fatal())).and(stmts).skip(rb.fatal()).many())
+            .and(skip(else_.and(lb.fatal())).and(stmts).skip(rb.fatal()).optional(Collections.emptyList()))
+            .map(p -> {
+                List<Pair<Expr, Statement>> cases = new ArrayList<>();
+                cases.add(new Pair<>(p.getFirst().getFirst().getFirst(), new Block(p.getFirst().getFirst().getSecond())));
+                for (Pair<Expr, List<Statement>> pp : p.getFirst().getSecond()) {
+                    cases.add(new Pair<>(pp.getFirst(), new Block(pp.getSecond())));
+                }
+                Statement elseBranch = new Block(p.getSecond());
+                return new If(cases, elseBranch);
+            });
 
     // for循环
     private static final Parser<Statement> forLoop = skip(for_.and(lp))
@@ -306,7 +313,7 @@ public class ByxScriptParser {
     private static final Parser<Statement> stmt = oneOf(
             varDeclare,
             funcDeclare,
-            ifelse,
+            ifStmt,
             forLoop,
             whileLoop,
             breakStmt,
@@ -329,7 +336,7 @@ public class ByxScriptParser {
     private static final Parser<List<String>> imports = skip(import_).and(importName).many();
 
     // 程序
-    private static final Parser<Program> program = imports.and(lazyStmt.skip(semi.optional()).many())
+    private static final Parser<Program> program = imports.and(stmts)
             .map(p -> new Program(p.getFirst(), p.getSecond()));
 
     private static Parser<Expr> getExpr() {

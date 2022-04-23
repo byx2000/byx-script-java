@@ -27,7 +27,9 @@ function MergeSort(nums) {
     }
     
     function sort(left, right) {
-        if (left >= right) return
+        if (left >= right) {
+            return
+        }
         var mid = left + (right - left) / 2
         sort(left, mid);
         sort(mid + 1, right)

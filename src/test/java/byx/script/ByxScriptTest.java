@@ -778,15 +778,17 @@ public class ByxScriptTest {
     public void testIf() {
         verify("""
                 var i = 123
-                if (i > 200)
+                if (i > 200) {
                     i = 456
+                }
                 Console.println(i)""", """
                 123
                 """);
         verify("""
                 var i = 123
-                if (200 > i)
+                if (200 > i) {
                     i = 456
+                }
                 Console.println(i)""", """
                 456
                 """);
@@ -824,6 +826,29 @@ public class ByxScriptTest {
                 Console.println(i, j)""", """
                 1003 1004
                 """);
+        verify("""
+                function getLevel(score) {
+                    if (85 < score && score <= 100) {
+                        return 'excellent'
+                    } else if (75 < score && score <= 85) {
+                        return 'good'
+                    } else if (60 < score && score <= 75) {
+                        return 'pass'
+                    } else {
+                        return 'failed'
+                    }
+                }
+                
+                Console.println(getLevel(92))
+                Console.println(getLevel(73))
+                Console.println(getLevel(81))
+                Console.println(getLevel(50))
+                """, """
+                excellent
+                pass
+                good
+                failed
+                """);
     }
 
     @Test
@@ -839,10 +864,11 @@ public class ByxScriptTest {
                 var s1 = 0
                 var s2 = 0
                 for (var i = 1; i <= 100; i++) {
-                    if (i % 2 == 0)
+                    if (i % 2 == 0) {
                         s1 = s1 + i
-                    else
+                    } else {
                         s2 = s2 + i
+                    }
                 }
                 Console.println(s1, s2)""", """
                 2550 2500
@@ -850,16 +876,18 @@ public class ByxScriptTest {
         verify("""
                 var s = 0
                 for (var i = 0; i < 1000; i = i + 1)
-                    if (i % 6 == 1 && (i % 7 == 2 || i % 8 == 3))
+                    if (i % 6 == 1 && (i % 7 == 2 || i % 8 == 3)) {
                         s = s + i
+                    }
                 Console.println(s)""", """
                 29441
                 """);
         verify("""
                 var s = 0
                 for (var i = 0; i < 1000; ++i)
-                    if (i % 6 == 1 && i % 7 == 2 || i % 8 == 3)
+                    if (i % 6 == 1 && i % 7 == 2 || i % 8 == 3) {
                         s += i
+                    }
                 Console.println(s)""", """
                 71357
                 """);
@@ -882,10 +910,11 @@ public class ByxScriptTest {
                 var s2 = 0
                 var i = 1
                 while (i <= 100) {
-                    if (i % 2 == 0)
+                    if (i % 2 == 0) {
                         s1 += i
-                    else
+                    } else {
                         s2 += i
+                    }
                     i = i + 1
                 }
                 Console.println(s1, s2, i)""", """
@@ -898,8 +927,9 @@ public class ByxScriptTest {
         verify("""
                 var s = 0
                 for (var i = 0; i < 10000; i += 1) {
-                    if (i % 3242 == 837)
+                    if (i % 3242 == 837) {
                         break
+                    }
                     s += i
                 }
                 Console.println(s)""", """
@@ -909,8 +939,9 @@ public class ByxScriptTest {
                 var s = 0
                 var i = 0
                 while (i < 10000) {
-                    if (i % 3242 == 837)
+                    if (i % 3242 == 837) {
                         break
+                    }
                     s = s + i
                     i = i + 1
                 }
@@ -953,10 +984,11 @@ public class ByxScriptTest {
         verify("""
                 var s = ''
                 for (var i = 1; i <= 10; i = i + 1) {
-                    if (i != 10)
+                    if (i != 10) {
                         s = s + i + ' '
-                    else
+                    } else {
                         s = s + i
+                    }
                 }
                 Console.println(s)""", """
                 1 2 3 4 5 6 7 8 9 10

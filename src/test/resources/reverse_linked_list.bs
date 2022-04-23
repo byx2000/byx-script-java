@@ -10,7 +10,9 @@ function LinkedList(val, next) {
 function toList(head) {
     var result = []
     function traverse(head) {
-        if (head == undefined) return;
+        if (head == undefined) {
+            return
+        }
         result.addLast(head.val)
         traverse(head.next)
     }
