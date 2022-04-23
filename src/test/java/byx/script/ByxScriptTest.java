@@ -255,8 +255,9 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var observer = callback => {
-                    for (var i = 1; i <= 10; i = i + 1)
+                    for (var i = 1; i <= 10; i = i + 1) {
                         callback(i)
+                    }
                 }
                 var s = 0
                 observer(n => {s = s + n})
@@ -266,8 +267,9 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var observer = callback => {
-                    for (var i = 1; i <= 10; i = i + 1)
+                    for (var i = 1; i <= 10; i = i + 1) {
                         callback(i)
+                    }
                 }
                 var s = 0
                 observer(() => {s += 1})
@@ -777,6 +779,12 @@ public class ByxScriptTest {
     @Test
     public void testIf() {
         verify("""
+                if (true) {}
+                if (true) {} else {}
+                if (true) {} else if(false) {} else if(true) {} else {}
+                """, """
+                """);
+        verify("""
                 var i = 123
                 if (i > 200) {
                     i = 456
@@ -854,9 +862,14 @@ public class ByxScriptTest {
     @Test
     public void testFor() {
         verify("""
+                for (var i = 1; i <= 100; i++) {}
+                """, """
+                """);
+        verify("""
                 var s = 0
-                for (var i = 1; i <= 100; i++)
+                for (var i = 1; i <= 100; i++) {
                     s += i
+                }
                 Console.println(s)""", """
                 5050
                 """);
@@ -875,19 +888,21 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var s = 0
-                for (var i = 0; i < 1000; i = i + 1)
+                for (var i = 0; i < 1000; i = i + 1) {
                     if (i % 6 == 1 && (i % 7 == 2 || i % 8 == 3)) {
                         s = s + i
                     }
+                }
                 Console.println(s)""", """
                 29441
                 """);
         verify("""
                 var s = 0
-                for (var i = 0; i < 1000; ++i)
+                for (var i = 0; i < 1000; ++i) {
                     if (i % 6 == 1 && i % 7 == 2 || i % 8 == 3) {
                         s += i
                     }
+                }
                 Console.println(s)""", """
                 71357
                 """);
@@ -995,8 +1010,9 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var s = ''
-                for (var i = 0; i < 100; i = i + 1)
+                for (var i = 0; i < 100; i = i + 1) {
                     s = s + 'hello'
+                }
                 Console.println(s)""", "hello".repeat(100));
     }
 
@@ -1158,11 +1174,13 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var nums = []
-                for (var i = 1; i <= 100; i = i + 1)
+                for (var i = 1; i <= 100; i = i + 1) {
                     nums.addLast(i * i)
+                }
                 var s = 0
-                for (var i = 0; i < nums.length(); i = i + 1)
+                for (var i = 0; i < nums.length(); i = i + 1) {
                     s = s + nums[i]
+                }
                 Console.println(s)
                 """, """
                 338350

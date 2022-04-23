@@ -8,13 +8,13 @@ import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.BoolValue;
 import byx.script.runtime.value.Value;
 
-public class ForLoop implements Statement {
+public class For implements Statement {
     private final Statement init;
     private final Expr cond;
     private final Statement update;
     private final Statement body;
 
-    public ForLoop(Statement init, Expr cond, Statement update, Statement body) {
+    public For(Statement init, Expr cond, Statement update, Statement body) {
         this.init = init;
         this.cond = cond;
         this.update = update;

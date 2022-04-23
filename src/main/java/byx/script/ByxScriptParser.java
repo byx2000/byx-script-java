@@ -257,7 +257,7 @@ public class ByxScriptParser {
             .skip(rb.fatal())
             .map(Block::new);
 
-    // if-else语句
+    // if语句
     private static final Parser<Statement> ifStmt = skip(if_.and(lp.fatal()))
             .and(expr)
             .skip(rp.fatal().and(lb.fatal()))
@@ -275,16 +275,23 @@ public class ByxScriptParser {
                 return new If(cases, elseBranch);
             });
 
-    // for循环
-    private static final Parser<Statement> forLoop = skip(for_.and(lp))
+    // for语句
+    private static final Parser<Statement> forStmt = skip(for_.and(lp))
             .and(lazyStmt)
             .skip(semi.fatal())
             .and(expr)
             .skip(semi.fatal())
             .and(lazyStmt)
-            .skip(rp.fatal())
-            .and(lazyStmt)
-            .map(p -> new ForLoop(p.getFirst().getFirst().getFirst(), p.getFirst().getFirst().getSecond(), p.getFirst().getSecond(), p.getSecond()));
+            .skip(rp.fatal().and(lb.fatal()))
+            .and(stmts)
+            .skip(rb.fatal())
+            .map(p -> {
+                Statement init = p.getFirst().getFirst().getFirst();
+                Expr cond = p.getFirst().getFirst().getSecond();
+                Statement update = p.getFirst().getSecond();
+                Statement body = new Block(p.getSecond());
+                return new For(init, cond, update, body);
+            });
 
     // while循环
     private static final Parser<Statement> whileLoop = skip(while_.and(lp.fatal()))
@@ -314,7 +321,7 @@ public class ByxScriptParser {
             varDeclare,
             funcDeclare,
             ifStmt,
-            forLoop,
+            forStmt,
             whileLoop,
             breakStmt,
             continueStmt,
