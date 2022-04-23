@@ -40,8 +40,8 @@ var List = (() => {
                 var i = left + 1
                 var j = right
                 while (i <= j) {
-                    while (i <= j && cmp(list[i], list[left]) <= 0) ++i
-                    while (i <= j && cmp(list[j], list[left]) > 0) --j
+                    while (i <= j && cmp(list[i], list[left]) <= 0) { ++i }
+                    while (i <= j && cmp(list[j], list[left]) > 0) { --j }
                     if (i < j) {
                         swap(list, i, j)
                     }

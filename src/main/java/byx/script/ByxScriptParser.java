@@ -293,12 +293,13 @@ public class ByxScriptParser {
                 return new For(init, cond, update, body);
             });
 
-    // while循环
-    private static final Parser<Statement> whileLoop = skip(while_.and(lp.fatal()))
+    // while语句
+    private static final Parser<Statement> whileStmt = skip(while_.and(lp.fatal()))
             .and(expr)
-            .skip(rp.fatal())
-            .and(lazyStmt)
-            .map(p -> new WhileLoop(p.getFirst(), p.getSecond()));
+            .skip(rp.fatal().and(lb.fatal()))
+            .and(stmts)
+            .skip(rb.fatal())
+            .map(p -> new While(p.getFirst(), new Block(p.getSecond())));
 
     // break语句
     private static final Parser<Statement> breakStmt = break_.map(Break::new);
@@ -322,7 +323,7 @@ public class ByxScriptParser {
             funcDeclare,
             ifStmt,
             forStmt,
-            whileLoop,
+            whileStmt,
             breakStmt,
             continueStmt,
             returnStmt,

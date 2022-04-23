@@ -8,11 +8,11 @@ import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.BoolValue;
 import byx.script.runtime.value.Value;
 
-public class WhileLoop implements Statement {
+public class While implements Statement {
     private final Expr cond;
     private final Statement body;
 
-    public WhileLoop(Expr cond, Statement body) {
+    public While(Expr cond, Statement body) {
         this.cond = cond;
         this.body = body;
     }
