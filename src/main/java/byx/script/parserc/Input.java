@@ -6,14 +6,27 @@ package byx.script.parserc;
 public class Input {
     private final String s;
     private final int index;
+    private final int row, col;
 
     public Input(String s, int index) {
+        this(s, index, 1, 1);
+    }
+
+    private Input(String s, int index, int row, int col) {
         this.s = s;
         this.index = index;
+        this.row = row;
+        this.col = col;
     }
 
     public Input next() {
-        return new Input(s, index + 1);
+        int row = this.row;
+        int col = this.col + 1;
+        if (s.charAt(index) == '\n') {
+            row++;
+            col = 1;
+        }
+        return new Input(s, index + 1, row, col);
     }
 
     public boolean end() {
@@ -26,6 +39,14 @@ public class Input {
 
     public int index() {
         return index;
+    }
+
+    public int row() {
+        return row;
+    }
+
+    public int col() {
+        return col;
     }
 
     @Override

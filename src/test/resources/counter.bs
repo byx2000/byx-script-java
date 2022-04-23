@@ -27,9 +27,9 @@ function Counter(init) {
         // 获取当前计数值
         current: () => cnt,
         // 计数值+1
-        inc: () => cnt++,
+        inc: () => {cnt++},
         // 计数值-1
-        dec: () => cnt--
+        dec: () => {cnt--}
     }
 }
 

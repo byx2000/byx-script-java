@@ -1,7 +1,5 @@
 package byx.script.parserc;
 
-import byx.script.parserc.exception.ParseException;
-
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,7 +26,7 @@ public interface Parser<R> {
     default R parse(String s) throws ParseException {
         ParseResult<R> r = parse(new Input(s, 0));
         if (!r.getRemain().end()) {
-            throw new ParseException(r.getRemain());
+            throw new ParseException(r.getRemain(), "end of file not reached");
         }
         return r.getResult();
     }
@@ -81,15 +79,15 @@ public interface Parser<R> {
         return Parsers.optional(this, defaultResult);
     }
 
-    default Parser<R> failIf(Parser<?> predicate) {
-        return Parsers.failIf(this, predicate);
-    }
-
     default Parser<List<R>> manyUntil(Parser<?> until) {
         return Parsers.manyUntil(this, until);
     }
 
     default <R2> Parser<R2> then(Function<R, Parser<R2>> flatMap) {
         return Parsers.then(this, flatMap);
+    }
+
+    default Parser<R> fatal() {
+        return Parsers.fatal(this);
     }
 }

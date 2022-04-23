@@ -1,1 +1,3 @@
 import y
+
+Console.println('x')

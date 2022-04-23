@@ -1,1 +1,3 @@
 import x
+
+Console.println('z')

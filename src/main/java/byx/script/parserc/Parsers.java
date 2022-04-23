@@ -1,11 +1,6 @@
 package byx.script.parserc;
 
-import byx.script.parserc.exception.ParseException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -16,12 +11,16 @@ import java.util.stream.Collectors;
  */
 public class Parsers {
     public static <R> Parser<R> fail() {
+        return fail("no error message");
+    }
+
+    public static <R> Parser<R> fail(String msg) {
         return input -> {
-            throw new ParseException(input);
+            throw new ParseException(input, msg);
         };
     }
 
-    public static <R> Parser<R> empty() {
+    public static <R> Parser<R> success() {
         return input -> new ParseResult<>(null, input);
     }
 
@@ -29,17 +28,21 @@ public class Parsers {
         return input -> new ParseResult<>(result, input);
     }
 
-    public static Parser<Character> satisfy(Predicate<Character> predicate) {
+    public static Parser<Character> satisfy(Predicate<Character> predicate, Function<Character, String> errMsg) {
         return input -> {
             if (input.end()) {
-                throw new ParseException(input);
+                throw new ParseException(input, errMsg.apply(null));
             }
             char c = input.current();
             if (!predicate.test(c)) {
-                throw new ParseException(input);
+                throw new ParseException(input, errMsg.apply(c));
             }
             return new ParseResult<>(c, input.next());
         };
+    }
+
+    public static Parser<Character> satisfy(Predicate<Character> predicate) {
+        return satisfy(predicate, c -> "no error message");
     }
 
     public static Parser<Character> any() {
@@ -47,30 +50,31 @@ public class Parsers {
     }
 
     public static Parser<Character> ch(char c) {
-        return satisfy(ch -> ch == c);
+        return satisfy(ch -> c == ch, ch -> String.format("expected %c", c));
     }
 
     public static Parser<Character> range(char c1, char c2) {
-        return satisfy(c -> (c - c1) * (c - c2) <= 0);
+        return satisfy(c -> (c - c1) * (c - c2) <= 0, c -> String.format("expected character in range [%c, %c]", c1, c2));
     }
 
     public static Parser<Character> chs(Character... chs) {
         Set<Character> set = Arrays.stream(chs).collect(Collectors.toSet());
-        return satisfy(set::contains);
+        return satisfy(set::contains, c -> String.format("expected character in set %s", set));
     }
 
     public static Parser<Character> not(char c) {
-        return satisfy(ch -> ch != c);
+        return satisfy(ch -> ch != c, ch -> String.format("unexpected character %c", ch));
     }
 
     public static Parser<String> string(String s) {
         return input -> {
+            Input oldInput = input;
             for (int i = 0; i < s.length(); ++i) {
                 if (input.end()) {
-                    throw new ParseException(input);
+                    throw new ParseException(input, String.format("expected %s", s));
                 }
                 if (input.current() != s.charAt(i)) {
-                    throw new ParseException(input);
+                    throw new ParseException(oldInput, String.format("expected %s", s));
                 }
                 input = input.next();
             }
@@ -112,7 +116,7 @@ public class Parsers {
                     return p.mapTo(Object.class).parse(input);
                 } catch (ParseException ignored) {}
             }
-            throw new ParseException(input);
+            throw new ParseException(input, "no parser available");
         };
 
     }
@@ -227,10 +231,6 @@ public class Parsers {
         return new SkipWrapper<>(lhs);
     }
 
-    public static <R> Parser<R> failIf(Parser<R> p, Parser<?> probe) {
-        return p.skip(peek(probe, fail(), empty()));
-    }
-
     public static <R> Parser<R> peek(Parser<?> probe, Parser<R> success, Parser<R> failed) {
         return input -> {
             try {
@@ -250,6 +250,16 @@ public class Parsers {
         return input -> {
             ParseResult<R1> r = p.parse(input);
             return flatMap.apply(r.getResult()).parse(r.getRemain());
+        };
+    }
+
+    public static <R> Parser<R> fatal(Parser<R> p) {
+        return input -> {
+            try {
+                return p.parse(input);
+            } catch (ParseException e) {
+                throw new FatalParseException(e.getInput(), e.getMsg());
+            }
         };
     }
 }

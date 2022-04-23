@@ -79,72 +79,72 @@ public class ByxScriptTest {
     }
 
     @Test
-    public void testFunctionExpr() {
+    public void testFunctionLiteral() {
         verify("""
                 var f1 = () => 123
                 Console.println(f1())
-                
-                var f2 = () => return 123
+                var f2 = () => 12.34
                 Console.println(f2())
-                
-                var f3 = () => {return 123}
+                var f3 = () => 'hello'
                 Console.println(f3())
-                
-                var f4 = (a) => a + 1
-                Console.println(f4(100))
-                
-                var f5 = (a) => return a + 1
-                Console.println(f5(100))
-                
-                var f6 = (a) => {return a + 1}
-                Console.println(f6(100))
-                
-                var f7 = a => a * 2
-                Console.println(f7(200))
-                
-                var f8 = a => return a * 2
-                Console.println(f8(200))
-                
-                var f9 = a => {return a * 2}
-                Console.println(f9(200))
-                
-                var f10 = (a, b) => a + b
-                Console.println(f10(12, 13))
-                
-                var f11 = (a, b) => return a + b
-                Console.println(f11(12, 13))
-                
-                var f12 = (a, b) => {return a + b}
-                Console.println(f12(12, 13))
-                                
-                var x = 10
-                
-                var f13 = () => x += 1
-                f13()
-                Console.println(x)
-                
-                var f14 = () => {x += 1}
-                f14()
-                Console.println(x)
-                
-                var f15 = () => {}
-                Console.println(f15())
+                var f4 = () => [100, 200, 300]
+                Console.println(f4())
+                var f5 = () => (1 + 2) * 3
+                Console.println(f5())
+                var f6 = () => 456
+                var f7 = () => f6()
+                Console.println(f7())
+                var f8 = () => {}
+                Console.println(f8())
                 """, """
                 123
-                123
-                123
-                101
-                101
-                101
-                400
-                400
-                400
-                25
-                25
-                25
-                11
-                12
+                12.34
+                hello
+                [100, 200, 300]
+                9
+                456
                 undefined
+                """);
+        verify("""
+                var f1 = a => a + 1
+                Console.println(f1(10))
+                var f2 = (a) => a + 1
+                Console.println(f2(20))
+                var f3 = (a, b) => a + b
+                Console.println(f3(3, 5))
+                var f4 = (a, b, c) => a * b * c
+                Console.println(f4(2, 4, 6))
+                """, """
+                11
+                21
+                8
+                48
+                """);
+        verify("""
+                var f1 = () => {return 100}
+                Console.println(f1())
+                var f2 = () => {
+                    var a = 10
+                    var b = 20
+                    return a + b
+                }
+                Console.println(f2())
+                var f3 = () => {
+                    Console.println('hello')
+                }
+                Console.println(f3())
+                
+                var x = 1000
+                var f4 = () => {x += 1}
+                Console.println(f4())
+                Console.println(x)
+                """, """
+                100
+                30
+                hello
+                undefined
+                undefined
+                1001
                 """);
     }
 
@@ -156,7 +156,7 @@ public class ByxScriptTest {
                 Console.println(((a, b) => a - b)(13, 7))
                 
                 var x = 10;
-                ((m, n) => x += m + n)(12, 13)
+                ((m, n) => {x += m + n})(12, 13)
                 Console.println(x)
                 """, """
                 12345
@@ -183,7 +183,7 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var x = 100
-                var fun = () => x = x + 1
+                var fun = () => {x = x + 1}
                 fun()
                 fun()
                 Console.println(x);
@@ -192,7 +192,7 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var x = 1000;
-                (() => x += 2)()
+                (() => {x += 2})()
                 Console.println(x)
                 """, """
                 1002
@@ -259,7 +259,7 @@ public class ByxScriptTest {
                         callback(i)
                 }
                 var s = 0
-                observer(n => s = s + n)
+                observer(n => {s = s + n})
                 Console.println(s)
                 """, """
                 55
@@ -270,7 +270,7 @@ public class ByxScriptTest {
                         callback(i)
                 }
                 var s = 0
-                observer(() => s += 1)
+                observer(() => {s += 1})
                 Console.println(s)
                 """, """
                 10
@@ -279,11 +279,11 @@ public class ByxScriptTest {
                 var Student = (name, age, score) => {
                     return {
                         getName: () => name,
-                        setName: _name => name = _name,
+                        setName: _name => {name = _name},
                         getAge: () => age,
-                        setAge: _age => age = _age,
+                        setAge: _age => {age = _age},
                         getScore: () => score,
-                        setScore: _score => score = _score,
+                        setScore: _score => {score = _score},
                         getDescription: () => '(' + name + ' ' + age + ' ' + score + ')'
                     }
                 }
@@ -1267,6 +1267,56 @@ public class ByxScriptTest {
                 false
                 true
                 false
+                """);
+    }
+
+    @Test
+    public void testInc() {
+        verify("""
+                var i = 100
+                var obj = {a: 1, b: {x: 20}, c: [1, 2, 3]}
+                
+                i++
+                ++i
+                obj.a++
+                ++obj.a
+                obj.c[0]++
+                ++obj.c[1]
+                
+                Console.println(i)
+                Console.println(obj.a)
+                Console.println(obj.c[0])
+                Console.println(obj.c[1])
+                """, """
+                102
+                3
+                2
+                3
+                """);
+    }
+
+    @Test
+    public void testDec() {
+        verify("""
+                var i = 100
+                var obj = {a: 1, b: {x: 20}, c: [1, 2, 3]}
+                
+                i--
+                --i
+                obj.a--
+                --obj.a
+                obj.c[0]--
+                --obj.c[1]
+                
+                Console.println(i)
+                Console.println(obj.a)
+                Console.println(obj.c[0])
+                Console.println(obj.c[1])
+                """, """
+                98
+                -1
+                0
+                1
                 """);
     }
 }
