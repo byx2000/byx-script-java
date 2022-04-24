@@ -317,7 +317,7 @@ public class ByxScriptParser {
     private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional()).map(Return::new);
 
     // 函数调用语句
-    private static final Parser<Statement> callStmt = expr.map(e -> e::eval);
+    private static final Parser<Statement> exprStmt = expr.map(ExprStatement::new);
 
     private static final Parser<Statement> stmt = oneOf(
             varDeclare,
@@ -334,7 +334,7 @@ public class ByxScriptParser {
             assignStmt,
             postInc,
             postDec,
-            callStmt
+            exprStmt
     );
 
 

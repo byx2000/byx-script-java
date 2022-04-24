@@ -1,6 +1,6 @@
 package byx.script.ast.expr;
 
-import byx.script.runtime.Scope;
+import byx.script.ast.ASTVisitor;
 import byx.script.runtime.value.Value;
 
 /**
@@ -13,8 +13,12 @@ public class Literal implements Expr {
         this.value = value;
     }
 
-    @Override
-    public Value eval(Scope scope) {
+    public Value getValue() {
         return value;
+    }
+
+    @Override
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

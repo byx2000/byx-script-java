@@ -1,9 +1,7 @@
 package byx.script.ast.stmt;
 
+import byx.script.ast.ASTVisitor;
 import byx.script.ast.expr.Expr;
-import byx.script.runtime.Scope;
-import byx.script.runtime.control.ReturnException;
-import byx.script.runtime.value.Value;
 
 /**
  * 函数返回语句
@@ -15,11 +13,12 @@ public class Return implements Statement {
         this.retVal = retVal;
     }
 
+    public Expr getRetVal() {
+        return retVal;
+    }
+
     @Override
-    public void execute(Scope scope) {
-        if (retVal != null) {
-            throw new ReturnException(retVal.eval(scope));
-        }
-        throw new ReturnException(Value.undefined());
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

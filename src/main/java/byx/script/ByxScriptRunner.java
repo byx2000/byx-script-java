@@ -1,5 +1,6 @@
 package byx.script;
 
+import byx.script.ast.EvaluatorVisitor;
 import byx.script.ast.Program;
 import byx.script.runtime.builtin.Console;
 import byx.script.runtime.builtin.Native;
@@ -173,15 +174,18 @@ public class ByxScriptRunner {
         // 计算加载顺序
         List<String> loadOrder = getLoadOrder(imports);
 
+        // 创建求值器
+        EvaluatorVisitor evaluator = new EvaluatorVisitor();
+
         // 初始化作用域
         Scope scope = new Scope(builtins);
 
         // 按顺序加载依赖项
         for (String n : loadOrder) {
-            imports.get(n).run(scope);
+            evaluator.eval(imports.get(n), scope);
         }
 
         // 执行脚本
-        program.run(scope);
+        evaluator.eval(program, scope);
     }
 }

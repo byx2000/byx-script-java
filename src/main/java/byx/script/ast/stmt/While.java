@@ -1,12 +1,7 @@
 package byx.script.ast.stmt;
 
+import byx.script.ast.ASTVisitor;
 import byx.script.ast.expr.Expr;
-import byx.script.runtime.*;
-import byx.script.runtime.control.BreakException;
-import byx.script.runtime.control.ContinueException;
-import byx.script.runtime.exception.InterpretException;
-import byx.script.runtime.value.BoolValue;
-import byx.script.runtime.value.Value;
 
 /**
  * while语句
@@ -22,21 +17,16 @@ public class While implements Statement {
         this.body = body;
     }
 
-    private boolean getCondition(Value v) {
-        if (v instanceof BoolValue) {
-            return ((BoolValue) v).getValue();
-        }
-        throw new InterpretException("condition of while statement must be bool value");
+    public Expr getCond() {
+        return cond;
+    }
+
+    public Statement getBody() {
+        return body;
     }
 
     @Override
-    public void execute(Scope scope) {
-        while (getCondition(cond.eval(scope))) {
-            try {
-                body.execute(scope);
-            } catch (BreakException e) {
-                break;
-            } catch (ContinueException ignored) {}
-        }
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

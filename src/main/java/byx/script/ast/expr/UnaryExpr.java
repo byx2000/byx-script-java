@@ -1,7 +1,6 @@
 package byx.script.ast.expr;
 
-import byx.script.runtime.Scope;
-import byx.script.runtime.value.Value;
+import byx.script.ast.ASTVisitor;
 
 /**
  * 一元表达式
@@ -15,11 +14,16 @@ public class UnaryExpr implements Expr {
         this.e = e;
     }
 
+    public UnaryOp getOp() {
+        return op;
+    }
+
+    public Expr getExpr() {
+        return e;
+    }
+
     @Override
-    public Value eval(Scope scope) {
-        return switch (op) {
-            case Not -> e.eval(scope).not();
-            case Neg -> e.eval(scope).neg();
-        };
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

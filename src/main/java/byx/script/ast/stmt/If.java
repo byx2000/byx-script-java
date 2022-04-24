@@ -1,11 +1,8 @@
 package byx.script.ast.stmt;
 
+import byx.script.ast.ASTVisitor;
 import byx.script.ast.expr.Expr;
 import byx.script.parserc.Pair;
-import byx.script.runtime.Scope;
-import byx.script.runtime.exception.InterpretException;
-import byx.script.runtime.value.BoolValue;
-import byx.script.runtime.value.Value;
 
 import java.util.List;
 
@@ -25,21 +22,16 @@ public class If implements Statement {
         this.elseBranch = elseBranch;
     }
 
-    private boolean getCondition(Value v) {
-        if (v instanceof BoolValue) {
-            return ((BoolValue) v).getValue();
-        }
-        throw new InterpretException("condition of if statement must be bool value");
+    public List<Pair<Expr, Statement>> getCases() {
+        return cases;
+    }
+
+    public Statement getElseBranch() {
+        return elseBranch;
     }
 
     @Override
-    public void execute(Scope scope) {
-        for (Pair<Expr, Statement> p : cases) {
-            if (getCondition(p.getFirst().eval(scope))) {
-                p.getSecond().execute(scope);
-                return;
-            }
-        }
-        elseBranch.execute(scope);
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

@@ -1,14 +1,9 @@
 package byx.script.ast.stmt;
 
-import byx.script.runtime.Scope;
+import byx.script.ast.ASTNode;
 
 /**
  * 语句节点基类
  */
-public interface Statement {
-    /**
-     * 执行语句
-     * @param scope 当前作用域
-     */
-    void execute(Scope scope);
+public interface Statement extends ASTNode {
 }

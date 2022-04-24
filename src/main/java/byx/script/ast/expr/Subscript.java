@@ -1,7 +1,6 @@
 package byx.script.ast.expr;
 
-import byx.script.runtime.Scope;
-import byx.script.runtime.value.Value;
+import byx.script.ast.ASTVisitor;
 
 /**
  * 下标访问
@@ -24,7 +23,7 @@ public class Subscript implements Expr {
     }
 
     @Override
-    public Value eval(Scope scope) {
-        return expr.eval(scope).subscript(subscript.eval(scope));
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

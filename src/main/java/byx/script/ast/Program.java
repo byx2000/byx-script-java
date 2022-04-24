@@ -1,14 +1,13 @@
 package byx.script.ast;
 
 import byx.script.ast.stmt.Statement;
-import byx.script.runtime.Scope;
 
 import java.util.List;
 
 /**
  * 封装解析后的程序
  */
-public class Program {
+public class Program implements ASTNode {
     private final List<String> imports;
     private final List<Statement> stmts;
 
@@ -21,9 +20,12 @@ public class Program {
         return imports;
     }
 
-    public void run(Scope scope) {
-        for (Statement s : stmts) {
-            s.execute(scope);
-        }
+    public List<Statement> getStmts() {
+        return stmts;
+    }
+
+    @Override
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

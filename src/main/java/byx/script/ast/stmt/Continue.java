@@ -1,16 +1,13 @@
 package byx.script.ast.stmt;
 
-import byx.script.runtime.control.ContinueException;
-import byx.script.runtime.Scope;
+import byx.script.ast.ASTVisitor;
 
 /**
  * 继续循环
  */
 public class Continue implements Statement {
-    private static final ContinueException CONTINUE_EXCEPTION = new ContinueException();
-
     @Override
-    public void execute(Scope scope) {
-        throw CONTINUE_EXCEPTION;
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

@@ -1,10 +1,8 @@
 package byx.script.ast.expr;
 
-import byx.script.runtime.Scope;
-import byx.script.runtime.value.Value;
+import byx.script.ast.ASTVisitor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 函数调用
@@ -18,8 +16,16 @@ public class Call implements Expr {
         this.args = expr;
     }
 
+    public Expr getExpr() {
+        return expr;
+    }
+
+    public List<Expr> getArgs() {
+        return args;
+    }
+
     @Override
-    public Value eval(Scope scope) {
-        return expr.eval(scope).call(args.stream().map(p -> p.eval(scope)).collect(Collectors.toList()));
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

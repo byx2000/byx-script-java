@@ -1,6 +1,6 @@
 package byx.script.ast.stmt;
 
-import byx.script.runtime.Scope;
+import byx.script.ast.ASTVisitor;
 
 import java.util.List;
 
@@ -14,11 +14,12 @@ public class Block implements Statement {
         this.stmts = stmts;
     }
 
+    public List<Statement> getStmts() {
+        return stmts;
+    }
+
     @Override
-    public void execute(Scope scope) {
-        scope = new Scope(scope);
-        for (Statement s : stmts) {
-            s.execute(scope);
-        }
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

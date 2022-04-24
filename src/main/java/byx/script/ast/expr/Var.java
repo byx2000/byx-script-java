@@ -1,7 +1,6 @@
 package byx.script.ast.expr;
 
-import byx.script.runtime.Scope;
-import byx.script.runtime.value.Value;
+import byx.script.ast.ASTVisitor;
 
 /**
  * 变量引用
@@ -18,7 +17,7 @@ public class Var implements Expr {
     }
 
     @Override
-    public Value eval(Scope scope) {
-        return scope.getVar(varName);
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }

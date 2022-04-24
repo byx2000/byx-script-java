@@ -1,24 +1,25 @@
 package byx.script.ast.expr;
 
-import byx.script.runtime.Scope;
-import byx.script.runtime.value.Value;
+import byx.script.ast.ASTVisitor;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 对象字面量
  */
 public class ObjectLiteral implements Expr {
-    private final Map<String, Expr> props;
+    private final Map<String, Expr> fields;
 
-    public ObjectLiteral(Map<String, Expr> props) {
-        this.props = props;
+    public ObjectLiteral(Map<String, Expr> fields) {
+        this.fields = fields;
+    }
+
+    public Map<String, Expr> getFields() {
+        return fields;
     }
 
     @Override
-    public Value eval(Scope scope) {
-        return Value.of(props.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().eval(scope))));
+    public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
+        return visitor.visit(ctx, this);
     }
 }
