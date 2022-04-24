@@ -1,10 +1,12 @@
 package byx.script;
 
-import byx.script.ast.Program;
+import byx.script.ast.*;
 import byx.script.ast.expr.*;
 import byx.script.ast.stmt.*;
 import byx.script.parserc.Pair;
 import byx.script.parserc.Parser;
+import byx.script.runtime.exception.InterpretException;
+import byx.script.runtime.value.Value;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -122,19 +124,19 @@ public class ByxScriptParser {
     // 表达式
 
     // 整数字面量
-    private static final Parser<Expr> integerLiteral = integer.map(s -> new IntegerLiteral(Integer.parseInt(s)));
+    private static final Parser<Expr> integerLiteral = integer.map(s -> new Literal(Value.of(Integer.parseInt(s))));
 
     // 浮点数字面量
-    private static final Parser<Expr> doubleLiteral = decimal.map(s -> new DoubleLiteral(Double.parseDouble(s)));
+    private static final Parser<Expr> doubleLiteral = decimal.map(s -> new Literal(Value.of(Double.parseDouble(s))));
 
     // 字符串字面量
-    private static final Parser<Expr> stringLiteral = string.map(StringLiteral::new);
+    private static final Parser<Expr> stringLiteral = string.map(s -> new Literal(Value.of(s)));
 
     // 布尔值字面量
-    private static final Parser<Expr> boolLiteral = bool.map(s -> new BoolLiteral(Boolean.parseBoolean(s)));
+    private static final Parser<Expr> boolLiteral = bool.map(s -> new Literal(Value.of(Boolean.parseBoolean(s))));
 
     // undefined字面量
-    private static final Parser<Expr> undefinedLiteral = undefined_.map(UndefinedLiteral::new);
+    private static final Parser<Expr> undefinedLiteral = undefined_.map(() -> new Literal(Value.undefined()));
 
     private static final Parser<List<String>> idList = separateBy(comma, identifier).ignoreDelimiter().optional(Collections.emptyList());
 
@@ -189,8 +191,8 @@ public class ByxScriptParser {
     // 表达式
 
     private static final Parser<Expr> bracketExpr = skip(lp).and(lazyExpr).skip(rp);
-    private static final Parser<Expr> negExpr = skip(sub).and(lazyPrimaryExpr).map(Neg::new);
-    private static final Parser<Expr> notExpr = skip(not).and(lazyPrimaryExpr).map(Not::new);
+    private static final Parser<Expr> negExpr = skip(sub).and(lazyPrimaryExpr).map(e -> new UnaryExpr(UnaryOp.Neg, e));
+    private static final Parser<Expr> notExpr = skip(not).and(lazyPrimaryExpr).map(e -> new UnaryExpr(UnaryOp.Not, e));
 
     private static final Parser<Expr> primaryExpr = oneOf(
             doubleLiteral,
@@ -244,12 +246,16 @@ public class ByxScriptParser {
             .map(ByxScriptParser::buildAssignStatement);
 
     // 自增语句
-    private static final Parser<Statement> preInc = skip(inc).and(assignable).map(e -> new Assign(e, new Add(e, new IntegerLiteral(1))));
-    private static final Parser<Statement> postInc = assignable.skip(inc).map(e -> new Assign(e, new Add(e, new IntegerLiteral(1))));
+    private static final Parser<Statement> preInc = skip(inc).and(assignable)
+            .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Add, e, new Literal(Value.of(1)))));
+    private static final Parser<Statement> postInc = assignable.skip(inc)
+            .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Add, e, new Literal(Value.of(1)))));
 
     // 自减语句
-    private static final Parser<Statement> preDec = skip(dec).and(assignable).map(e -> new Assign(e, new Sub(e, new IntegerLiteral(1))));
-    private static final Parser<Statement> postDec = assignable.skip(dec).map(e -> new Assign(e, new Sub(e, new IntegerLiteral(1))));
+    private static final Parser<Statement> preDec = skip(dec).and(assignable)
+            .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Sub, e, new Literal(Value.of(1)))));
+    private static final Parser<Statement> postDec = assignable.skip(dec)
+            .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Sub, e, new Literal(Value.of(1)))));
 
     // 代码块
     private static final Parser<Statement> block = skip(lb)
@@ -376,20 +382,22 @@ public class ByxScriptParser {
     private static Expr buildExpr(Pair<Expr, List<Pair<String, Expr>>> r) {
         Expr expr = r.getFirst();
         for (Pair<String, Expr> p : r.getSecond()) {
-            switch (p.getFirst()) {
-                case "+" -> expr = new Add(expr, p.getSecond());
-                case "-" -> expr = new Sub(expr, p.getSecond());
-                case "*" -> expr = new Mul(expr, p.getSecond());
-                case "/" -> expr = new Div(expr, p.getSecond());
-                case "%" -> expr = new Rem(expr, p.getSecond());
-                case ">" -> expr = new GreaterThan(expr, p.getSecond());
-                case ">=" -> expr = new GreaterEqualThan(expr, p.getSecond());
-                case "<" -> expr = new LessThan(expr, p.getSecond());
-                case "<=" -> expr = new LessEqualThan(expr, p.getSecond());
-                case "==" -> expr = new Equal(expr, p.getSecond());
-                case "!=" -> expr = new NotEqual(expr, p.getSecond());
-                case "&&" -> expr = new And(expr, p.getSecond());
-                case "||" -> expr = new Or(expr, p.getSecond());
+            String op = p.getFirst();
+            switch (op) {
+                case "+" -> expr = new BinaryExpr(BinaryOp.Add, expr, p.getSecond());
+                case "-" -> expr = new BinaryExpr(BinaryOp.Sub, expr, p.getSecond());
+                case "*" -> expr = new BinaryExpr(BinaryOp.Mul, expr, p.getSecond());
+                case "/" -> expr = new BinaryExpr(BinaryOp.Div, expr, p.getSecond());
+                case "%" -> expr = new BinaryExpr(BinaryOp.Rem, expr, p.getSecond());
+                case ">" -> expr = new BinaryExpr(BinaryOp.GreaterThan, expr, p.getSecond());
+                case ">=" -> expr = new BinaryExpr(BinaryOp.GreaterEqualThan, expr, p.getSecond());
+                case "<" -> expr = new BinaryExpr(BinaryOp.LessThan, expr, p.getSecond());
+                case "<=" -> expr = new BinaryExpr(BinaryOp.LessEqualThan, expr, p.getSecond());
+                case "==" -> expr = new BinaryExpr(BinaryOp.Equal, expr, p.getSecond());
+                case "!=" -> expr = new BinaryExpr(BinaryOp.NotEqual, expr, p.getSecond());
+                case "&&" -> expr = new BinaryExpr(BinaryOp.And, expr, p.getSecond());
+                case "||" -> expr = new BinaryExpr(BinaryOp.Or, expr, p.getSecond());
+                default -> throw new InterpretException("unknown binary operator: " + op);
             }
         }
         return expr;
@@ -415,13 +423,13 @@ public class ByxScriptParser {
             case "=":
                 return new Assign(lhs, rhs);
             case "+=":
-                return new Assign(lhs, new Add(lhs, rhs));
+                return new Assign(lhs, new BinaryExpr(BinaryOp.Add, lhs, rhs));
             case "-=":
-                return new Assign(lhs, new Sub(lhs, rhs));
+                return new Assign(lhs, new BinaryExpr(BinaryOp.Sub, lhs, rhs));
             case "*=":
-                return new Assign(lhs, new Mul(lhs, rhs));
+                return new Assign(lhs, new BinaryExpr(BinaryOp.Mul, lhs, rhs));
             case "/=":
-                return new Assign(lhs, new Div(lhs, rhs));
+                return new Assign(lhs, new BinaryExpr(BinaryOp.Div, lhs, rhs));
         }
         throw new RuntimeException("invalid assign expression: " + op);
     }

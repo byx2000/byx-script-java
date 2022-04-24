@@ -9,6 +9,13 @@ import byx.script.runtime.value.Value;
 
 import java.util.List;
 
+/**
+ * if语句
+ * if (expr) stmt
+ * else if (expr) stmt
+ * ...
+ * else stmt
+ */
 public class If implements Statement {
     private final List<Pair<Expr, Statement>> cases;
     private final Statement elseBranch;

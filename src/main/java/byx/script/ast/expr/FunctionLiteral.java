@@ -1,13 +1,15 @@
 package byx.script.ast.expr;
 
 import byx.script.ast.stmt.Statement;
-import byx.script.runtime.control.ReturnException;
 import byx.script.runtime.Scope;
-import byx.script.runtime.value.UndefinedValue;
+import byx.script.runtime.control.ReturnException;
 import byx.script.runtime.value.Value;
 
 import java.util.List;
 
+/**
+ * 函数字面量
+ */
 public class FunctionLiteral implements Expr {
     private final List<String> params;
     private final Statement body;
@@ -26,7 +28,7 @@ public class FunctionLiteral implements Expr {
                 if (i < args.size()) {
                     newScope.declareVar(params.get(i), args.get(i));
                 } else {
-                    newScope.declareVar(params.get(i), UndefinedValue.INSTANCE);
+                    newScope.declareVar(params.get(i), Value.undefined());
                 }
             }
 
@@ -36,7 +38,7 @@ public class FunctionLiteral implements Expr {
             } catch (ReturnException e) {
                 return e.getRetVal();
             }
-            return UndefinedValue.INSTANCE;
+            return Value.undefined();
         });
     }
 }

@@ -3,15 +3,18 @@ package byx.script.ast.expr;
 import byx.script.runtime.Scope;
 import byx.script.runtime.value.Value;
 
-public class DoubleLiteral implements Expr {
-    private final double value;
+/**
+ * 字面量
+ */
+public class Literal implements Expr {
+    private final Value value;
 
-    public DoubleLiteral(double value) {
+    public Literal(Value value) {
         this.value = value;
     }
 
     @Override
     public Value eval(Scope scope) {
-        return Value.of(value);
+        return value;
     }
 }

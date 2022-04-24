@@ -38,6 +38,10 @@ public interface Value {
         return new ListValue(val);
     }
 
+    static Value undefined() {
+        return UndefinedValue.INSTANCE;
+    }
+
     /**
      * 加（+）
      * @param rhs rhs

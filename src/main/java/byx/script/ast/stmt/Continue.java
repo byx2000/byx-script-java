@@ -3,6 +3,9 @@ package byx.script.ast.stmt;
 import byx.script.runtime.control.ContinueException;
 import byx.script.runtime.Scope;
 
+/**
+ * 继续循环
+ */
 public class Continue implements Statement {
     private static final ContinueException CONTINUE_EXCEPTION = new ContinueException();
 

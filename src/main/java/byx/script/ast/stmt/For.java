@@ -8,6 +8,11 @@ import byx.script.runtime.exception.InterpretException;
 import byx.script.runtime.value.BoolValue;
 import byx.script.runtime.value.Value;
 
+/**
+ * for语句
+ * for (init; cond; update)
+ *     body
+ */
 public class For implements Statement {
     private final Statement init;
     private final Expr cond;

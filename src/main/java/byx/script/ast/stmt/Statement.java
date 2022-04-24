@@ -3,7 +3,7 @@ package byx.script.ast.stmt;
 import byx.script.runtime.Scope;
 
 /**
- * 语句基类
+ * 语句节点基类
  */
 public interface Statement {
     /**

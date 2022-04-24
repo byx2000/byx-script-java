@@ -4,6 +4,9 @@ import byx.script.runtime.Scope;
 
 import java.util.List;
 
+/**
+ * 语句块
+ */
 public class Block implements Statement {
     private final List<Statement> stmts;
 

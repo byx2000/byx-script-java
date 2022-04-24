@@ -6,6 +6,9 @@ import byx.script.runtime.value.Value;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 列表字面量
+ */
 public class ListLiteral implements Expr {
     private final List<Expr> elems;
 

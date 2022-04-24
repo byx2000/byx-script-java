@@ -3,6 +3,10 @@ package byx.script.ast.stmt;
 import byx.script.ast.expr.Expr;
 import byx.script.runtime.Scope;
 
+/**
+ * 变量声明
+ * var varName = expr
+ */
 public class VarDeclaration implements Statement {
     private final String varName;
     private final Expr expr;

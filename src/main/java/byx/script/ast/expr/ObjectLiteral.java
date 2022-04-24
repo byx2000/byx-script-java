@@ -6,6 +6,9 @@ import byx.script.runtime.value.Value;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 对象字面量
+ */
 public class ObjectLiteral implements Expr {
     private final Map<String, Expr> props;
 

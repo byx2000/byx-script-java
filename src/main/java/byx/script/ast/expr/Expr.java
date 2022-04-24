@@ -4,7 +4,7 @@ import byx.script.runtime.Scope;
 import byx.script.runtime.value.Value;
 
 /**
- * 表达式基类
+ * 表达式节点基类
  */
 public interface Expr {
     /**
