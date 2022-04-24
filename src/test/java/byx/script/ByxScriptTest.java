@@ -1369,4 +1369,9 @@ public class ByxScriptTest {
                 1
                 """);
     }
+
+    @Test
+    public void testReturn() {
+        
+    }
 }

@@ -1,4 +1,6 @@
-package byx.script.parserc;
+package byx.script.parserc.exception;
+
+import byx.script.parserc.Input;
 
 public class FatalParseException extends RuntimeException {
     private final Input input;

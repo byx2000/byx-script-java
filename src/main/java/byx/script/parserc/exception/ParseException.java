@@ -1,4 +1,6 @@
-package byx.script.parserc;
+package byx.script.parserc.exception;
+
+import byx.script.parserc.Input;
 
 /**
  * 解析异常

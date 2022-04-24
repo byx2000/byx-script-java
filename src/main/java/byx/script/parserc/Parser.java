@@ -1,5 +1,7 @@
 package byx.script.parserc;
 
+import byx.script.parserc.exception.ParseException;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;

@@ -19,7 +19,7 @@ public class ByxScriptParser {
     // 词法元素
 
     // 空白字符
-    private static final Parser<?> w = chs(' ', '\t', '\r', '\n').map(Objects::toString);
+    private static final Parser<?> ws = chs(' ', '\t', '\r', '\n').map(Objects::toString);
 
     // 行注释
     private static final Parser<?> lineComment = string("//").skip(not('\n').many()).skip(ch('\n'));
@@ -28,7 +28,7 @@ public class ByxScriptParser {
     private static final Parser<?> blockComment = string("/*").and(any().manyUntil(string("*/"))).and(string("*/"));
 
     // 可忽略元素
-    private static final Parser<?> ignorable = oneOf(w, lineComment, blockComment).many();
+    private static final Parser<?> ignorable = oneOf(ws, lineComment, blockComment).many();
 
     // 字母
     private static final Parser<Character> alpha = range('a', 'z').or(range('A', 'Z'));
@@ -116,7 +116,7 @@ public class ByxScriptParser {
     // 前向引用
     private static final Parser<Statement> lazyStmt = lazy(ByxScriptParser::getStmt);
     private static final Parser<List<Statement>> stmts = lazyStmt.skip(semi.optional()).many();
-    private static final Parser<Expr> lazyExprElem = lazy(ByxScriptParser::getExprElem);
+    private static final Parser<Expr> lazyPrimaryExpr = lazy(ByxScriptParser::getPrimaryExpr);
     private static final Parser<Expr> lazyExpr = lazy(ByxScriptParser::getExpr);
 
     // 表达式
@@ -189,10 +189,10 @@ public class ByxScriptParser {
     // 表达式
 
     private static final Parser<Expr> bracketExpr = skip(lp).and(lazyExpr).skip(rp);
-    private static final Parser<Expr> negExpr = skip(sub).and(lazyExprElem).map(Neg::new);
-    private static final Parser<Expr> notExpr = skip(not).and(lazyExprElem).map(Not::new);
+    private static final Parser<Expr> negExpr = skip(sub).and(lazyPrimaryExpr).map(Neg::new);
+    private static final Parser<Expr> notExpr = skip(not).and(lazyPrimaryExpr).map(Not::new);
 
-    private static final Parser<Expr> exprElem = oneOf(
+    private static final Parser<Expr> primaryExpr = oneOf(
             doubleLiteral,
             integerLiteral,
             stringLiteral,
@@ -206,11 +206,11 @@ public class ByxScriptParser {
             negExpr,
             notExpr
     ).and(oneOf(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildExprElem);
-    private static final Parser<Expr> e1 = separateBy(mul.or(div).or(rem), exprElem).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> e2 = separateBy(add.or(sub), e1).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> e3 = separateBy(let.or(lt).or(get).or(gt).or(equ).or(neq), e2).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> e4 = separateBy(and, e3).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> expr = separateBy(or, e4).map(ByxScriptParser::buildExpr);
+    private static final Parser<Expr> multiplicativeExpr = separateBy(mul.or(div).or(rem), primaryExpr).map(ByxScriptParser::buildExpr);
+    private static final Parser<Expr> additiveExpr = separateBy(add.or(sub), multiplicativeExpr).map(ByxScriptParser::buildExpr);
+    private static final Parser<Expr> relationalExpr = separateBy(let.or(lt).or(get).or(gt).or(equ).or(neq), additiveExpr).map(ByxScriptParser::buildExpr);
+    private static final Parser<Expr> andExpr = separateBy(and, relationalExpr).map(ByxScriptParser::buildExpr);
+    private static final Parser<Expr> expr = separateBy(or, andExpr).map(ByxScriptParser::buildExpr);
 
     // 语句
 
@@ -236,7 +236,7 @@ public class ByxScriptParser {
                 return new VarDeclaration(functionName, new FunctionLiteral(params, body));
             });
 
-    private static final Parser<Expr> assignable = identifier.and(oneOf(subscript, fieldAccess).manyUntil(assignOp))
+    private static final Parser<Expr> assignable = identifier.and(oneOf(subscript, fieldAccess).many())
             .map(ByxScriptParser::buildAssignable);
 
     // 赋值语句
@@ -311,12 +311,7 @@ public class ByxScriptParser {
     private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional()).map(Return::new);
 
     // 函数调用语句
-    private static final Parser<Statement> callStmt = oneOf(var, bracketExpr)
-            .and(oneOf(callList, subscript, fieldAccess).many())
-            .then(p -> {
-                Statement s = buildCallStatement(p);
-                return s == null ? fail("invalid call statement") : success(s);
-            });
+    private static final Parser<Statement> callStmt = expr.map(e -> e::eval);
 
     private static final Parser<Statement> stmt = oneOf(
             varDeclare,
@@ -351,8 +346,8 @@ public class ByxScriptParser {
         return expr;
     }
 
-    private static Parser<Expr> getExprElem() {
-        return exprElem;
+    private static Parser<Expr> getPrimaryExpr() {
+        return primaryExpr;
     }
 
     private static Parser<Statement> getStmt() {
@@ -429,28 +424,6 @@ public class ByxScriptParser {
                 return new Assign(lhs, new Div(lhs, rhs));
         }
         throw new RuntimeException("invalid assign expression: " + op);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Statement buildCallStatement(Pair<Expr, List<Object>> p) {
-        List<Object> objs = p.getSecond();
-        if (objs.size() == 0 || !(objs.get(objs.size() - 1) instanceof List)) {
-            return null;
-        }
-
-        Expr e = p.getFirst();
-        for (int i = 0; i < objs.size() - 1; ++i) {
-            Object o = objs.get(i);
-            if (o instanceof List) {
-                e = new Call(e, (List<Expr>) o);
-            } else if (o instanceof String) {
-                e = new FieldAccess(e, (String) o);
-            } else if (o instanceof Expr) {
-                e = new Subscript(e, (Expr) o);
-            }
-        }
-
-        return new CallStatement(e, (List<Expr>) objs.get(objs.size() - 1));
     }
 
     /**
