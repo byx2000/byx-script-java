@@ -178,7 +178,10 @@ public class ByxScriptRunner {
         EvaluatorVisitor evaluator = new EvaluatorVisitor();
 
         // 初始化作用域
-        Scope scope = new Scope(builtins);
+        Scope scope = new Scope();
+
+        // 添加内建变量
+        builtins.forEach(scope::declareVar);
 
         // 按顺序加载依赖项
         for (String n : loadOrder) {

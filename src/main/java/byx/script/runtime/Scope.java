@@ -13,11 +13,17 @@ public class Scope {
     private final Map<String, Value> vars = new HashMap<>();
     private final Scope next;
 
-    public Scope(Map<String, Value> builtins) {
+    /**
+     * 创建空作用域
+     */
+    public Scope() {
         next = null;
-        vars.putAll(builtins);
     }
 
+    /**
+     * 创建作用域并指定父级
+     * @param next 父级作用域
+     */
     public Scope(Scope next) {
         this.next = next;
     }
@@ -40,14 +46,15 @@ public class Scope {
      * @param value 变量值
      */
     public void setVar(String varName, Value value) {
-        if (vars.containsKey(varName)) {
-            vars.put(varName, value);
-            return;
+        Scope cur = this;
+        while (cur != null) {
+            if (cur.vars.containsKey(varName)) {
+                cur.vars.put(varName, value);
+                return;
+            }
+            cur = cur.next;
         }
-        if (next == null) {
-            throw new InterpretException("var not exist: " + varName);
-        }
-        next.setVar(varName, value);
+        throw new InterpretException("var not exist: " + varName);
     }
 
     /**
@@ -56,12 +63,13 @@ public class Scope {
      * @return 变量值
      */
     public Value getVar(String varName) {
-        if (vars.containsKey(varName)) {
-            return vars.get(varName);
+        Scope cur = this;
+        while (cur != null) {
+            if (cur.vars.containsKey(varName)) {
+                return cur.vars.get(varName);
+            }
+            cur = cur.next;
         }
-        if (next == null) {
-            throw new InterpretException("var not exist: " + varName);
-        }
-        return next.getVar(varName);
+        throw new InterpretException("var not exist: " + varName);
     }
 }

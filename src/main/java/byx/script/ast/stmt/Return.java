@@ -19,6 +19,6 @@ public class Return implements Statement {
 
     @Override
     public <R, C> R visit(ASTVisitor<R, C> visitor, C ctx) {
-        return visitor.visit(ctx, this);
+        return visitor.visit(this, ctx);
     }
 }

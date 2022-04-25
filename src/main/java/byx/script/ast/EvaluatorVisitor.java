@@ -32,19 +32,19 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, Program node) {
+    public Value visit(Program node, Scope scope) {
         node.getStmts().forEach(s -> s.visit(this, scope));
         return null;
     }
 
     @Override
-    public Value visit(Scope scope, VarDeclaration node) {
+    public Value visit(VarDeclaration node, Scope scope) {
         scope.declareVar(node.getVarName(), node.getValue().visit(this, scope));
         return null;
     }
 
     @Override
-    public Value visit(Scope scope, Assign node) {
+    public Value visit(Assign node, Scope scope) {
         Expr lhs = node.getLhs();
         Expr rhs = node.getRhs();
         if (lhs instanceof Var e) {
@@ -68,7 +68,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, If node) {
+    public Value visit(If node, Scope scope) {
         List<Pair<Expr, Statement>> cases = node.getCases();
         Statement elseBranch = node.getElseBranch();
         for (Pair<Expr, Statement> p : cases) {
@@ -82,7 +82,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, For node) {
+    public Value visit(For node, Scope scope) {
         Statement init = node.getInit();
         Expr cond = node.getCond();
         Statement update = node.getUpdate();
@@ -99,7 +99,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, While node) {
+    public Value visit(While node, Scope scope) {
         Expr cond = node.getCond();
         Statement body = node.getBody();
         while (getCondition(cond.visit(this, scope))) {
@@ -113,7 +113,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, Block node) {
+    public Value visit(Block node, Scope scope) {
         List<Statement> stmts = node.getStmts();
         scope = new Scope(scope);
         for (Statement s : stmts) {
@@ -123,17 +123,17 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, Break node) {
+    public Value visit(Break node, Scope scope) {
         throw BREAK_EXCEPTION;
     }
 
     @Override
-    public Value visit(Scope scope, Continue node) {
+    public Value visit(Continue node, Scope scope) {
         throw CONTINUE_EXCEPTION;
     }
 
     @Override
-    public Value visit(Scope scope, Return node) {
+    public Value visit(Return node, Scope scope) {
         Expr retVal = node.getRetVal();
         if (retVal != null) {
             throw new ReturnException(retVal.visit(this, scope));
@@ -142,29 +142,29 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, ExprStatement node) {
+    public Value visit(ExprStatement node, Scope scope) {
         node.getExpr().visit(this, scope);
         return null;
     }
 
     @Override
-    public Value visit(Scope scope, Literal node) {
+    public Value visit(Literal node, Scope scope) {
         return node.getValue();
     }
 
     @Override
-    public Value visit(Scope scope, ListLiteral node) {
+    public Value visit(ListLiteral node, Scope scope) {
         return Value.of(node.getElems().stream().map(e -> e.visit(this, scope)).collect(Collectors.toList()));
     }
 
     @Override
-    public Value visit(Scope scope, ObjectLiteral node) {
+    public Value visit(ObjectLiteral node, Scope scope) {
         return Value.of(node.getFields().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().visit(this, scope))));
     }
 
     @Override
-    public Value visit(Scope scope, FunctionLiteral node) {
+    public Value visit(FunctionLiteral node, Scope scope) {
         List<String> params = node.getParams();
         Statement body = node.getBody();
         return Value.of(args -> {
@@ -189,12 +189,12 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, Var node) {
+    public Value visit(Var node, Scope scope) {
         return scope.getVar(node.getVarName());
     }
 
     @Override
-    public Value visit(Scope scope, UnaryExpr node) {
+    public Value visit(UnaryExpr node, Scope scope) {
         Expr e = node.getExpr();
         return switch (node.getOp()) {
             case Not -> e.visit(this, scope).not();
@@ -221,7 +221,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, BinaryExpr node) {
+    public Value visit(BinaryExpr node, Scope scope) {
         Expr lhs = node.getLhs();
         Expr rhs = node.getRhs();
         return switch (node.getOp()) {
@@ -242,17 +242,17 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(Scope scope, FieldAccess node) {
+    public Value visit(FieldAccess node, Scope scope) {
         return node.getExpr().visit(this, scope).getField(node.getField());
     }
 
     @Override
-    public Value visit(Scope scope, Subscript node) {
+    public Value visit(Subscript node, Scope scope) {
         return node.getExpr().visit(this, scope).subscript(node.getSubscript().visit(this, scope));
     }
 
     @Override
-    public Value visit(Scope scope, Call node) {
+    public Value visit(Call node, Scope scope) {
         return node.getExpr().visit(this, scope).call(node.getArgs().stream()
                 .map(p -> p.visit(this, scope))
                 .collect(Collectors.toList()));
