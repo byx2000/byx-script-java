@@ -1,15 +1,16 @@
 package byx.script;
 
-import byx.script.ast.EvaluatorVisitor;
-import byx.script.ast.Program;
-import byx.script.runtime.builtin.Console;
-import byx.script.runtime.builtin.Native;
-import byx.script.runtime.host.Math;
-import byx.script.runtime.host.Reflect;
-import byx.script.runtime.exception.InterpretException;
-import byx.script.runtime.Scope;
-import byx.script.runtime.host.Reader;
-import byx.script.runtime.value.Value;
+import byx.script.interpreter.Evaluator;
+import byx.script.parser.ByxScriptParser;
+import byx.script.parser.ast.Program;
+import byx.script.interpreter.builtin.Console;
+import byx.script.interpreter.builtin.Native;
+import byx.script.interpreter.builtin.Math;
+import byx.script.interpreter.builtin.Reflect;
+import byx.script.interpreter.InterpretException;
+import byx.script.interpreter.Scope;
+import byx.script.interpreter.builtin.Reader;
+import byx.script.interpreter.value.Value;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -175,7 +176,7 @@ public class ByxScriptRunner {
         List<String> loadOrder = getLoadOrder(imports);
 
         // 创建求值器
-        EvaluatorVisitor evaluator = new EvaluatorVisitor();
+        Evaluator evaluator = new Evaluator();
 
         // 初始化作用域
         Scope scope = new Scope();
