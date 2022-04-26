@@ -8,11 +8,11 @@ import java.util.List;
 /**
  * 函数字面量
  */
-public class FunctionLiteral implements Expr {
+public class CallableLiteral implements Expr {
     private final List<String> params;
     private final Statement body;
 
-    public FunctionLiteral(List<String> params, Statement body) {
+    public CallableLiteral(List<String> params, Statement body) {
         this.params = params;
         this.body = body;
     }

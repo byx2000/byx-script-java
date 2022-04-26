@@ -7,11 +7,11 @@ import byx.script.ast.expr.Expr;
  * 变量声明
  * var varName = expr
  */
-public class VarDeclaration implements Statement {
+public class VarDeclare implements Statement {
     private final String varName;
     private final Expr value;
 
-    public VarDeclaration(String varName, Expr value) {
+    public VarDeclare(String varName, Expr value) {
         this.varName = varName;
         this.value = value;
     }

@@ -10,7 +10,7 @@ import byx.script.ast.stmt.*;
  */
 public interface ASTVisitor<R, C> {
     R visit(Program node, C ctx);
-    R visit(VarDeclaration node, C ctx);
+    R visit(VarDeclare node, C ctx);
     R visit(Assign node, C ctx);
     R visit(If node, C ctx);
     R visit(For node, C ctx);
@@ -24,7 +24,7 @@ public interface ASTVisitor<R, C> {
     R visit(Literal node, C ctx);
     R visit(ListLiteral node, C ctx);
     R visit(ObjectLiteral node, C ctx);
-    R visit(FunctionLiteral node, C ctx);
+    R visit(CallableLiteral node, C ctx);
     R visit(Var node, C ctx);
     R visit(UnaryExpr node, C ctx);
     R visit(BinaryExpr node, C ctx);

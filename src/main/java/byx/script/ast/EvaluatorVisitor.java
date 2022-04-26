@@ -38,7 +38,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(VarDeclaration node, Scope scope) {
+    public Value visit(VarDeclare node, Scope scope) {
         scope.declareVar(node.getVarName(), node.getValue().visit(this, scope));
         return null;
     }
@@ -164,7 +164,7 @@ public class EvaluatorVisitor implements ASTVisitor<Value, Scope> {
     }
 
     @Override
-    public Value visit(FunctionLiteral node, Scope scope) {
+    public Value visit(CallableLiteral node, Scope scope) {
         List<String> params = node.getParams();
         Statement body = node.getBody();
         return Value.of(args -> {

@@ -963,6 +963,25 @@ public class ByxScriptTest {
                 Console.println(s, i)""", """
                 349866 837
                 """);
+        verify("""
+                for (var i = 0; i < 100; ++i) {
+                    for (var j = 0; j < 100; ++j) {
+                        if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                            Console.println(i, j)
+                            break;
+                        }
+                    }
+                }
+                """, getOutput(() -> {
+                for (int i = 0; i < 100; ++i) {
+                    for (int j = 0; j < 100; ++j) {
+                        if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                            System.out.println(i + " " + j);
+                            break;
+                        }
+                    }
+                }
+        }));
     }
 
     @Test

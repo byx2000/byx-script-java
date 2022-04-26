@@ -144,16 +144,16 @@ public class ByxScriptParser {
     private static final Parser<List<String>> singleParamList = identifier.map(s -> List.of(s));
     private static final Parser<List<String>> multiParamList = skip(lp).and(idList).skip(rp);
     private static final Parser<List<String>> paramList = singleParamList.or(multiParamList);
-    private static final Parser<Expr> funcLiteral = paramList.skip(arrow).and(oneOf(
+    private static final Parser<Expr> callableLiteral = paramList.skip(arrow).and(oneOf(
             skip(lb).and(stmts).skip(rb.fatal()).map(Block::new),
             lazyExpr.map(Return::new)
-    )).map(p -> new FunctionLiteral(p.getFirst(), p.getSecond()));
+    )).map(p -> new CallableLiteral(p.getFirst(), p.getSecond()));
 
     // 对象字面量
     private static final Parser<Pair<String, Expr>> fieldPair = oneOf(
             identifier.skip(colon).and(lazyExpr),
             identifier.skip(lp).and(idList).skip(rp.and(lb)).and(stmts).skip(rb)
-                    .map(p -> new Pair<>(p.getFirst().getFirst(), new FunctionLiteral(p.getFirst().getSecond(), new Block(p.getSecond())))),
+                    .map(p -> new Pair<>(p.getFirst().getFirst(), new CallableLiteral(p.getFirst().getSecond(), new Block(p.getSecond())))),
             identifier.map(id -> new Pair<>(id, new Var(id)))
 
     );
@@ -200,7 +200,7 @@ public class ByxScriptParser {
             stringLiteral,
             boolLiteral,
             undefinedLiteral,
-            funcLiteral,
+            callableLiteral,
             var,
             objLiteral,
             listLiteral,
@@ -221,7 +221,7 @@ public class ByxScriptParser {
             .and(identifier.fatal())
             .skip(assign.fatal())
             .and(expr)
-            .map(p -> new VarDeclaration(p.getFirst(), p.getSecond()));
+            .map(p -> new VarDeclare(p.getFirst(), p.getSecond()));
 
     // 函数声明
     private static final Parser<Statement> funcDeclare = skip(function_)
@@ -235,7 +235,7 @@ public class ByxScriptParser {
                 String functionName = p.getFirst().getFirst();
                 List<String> params = p.getFirst().getSecond();
                 Statement body = new Block(p.getSecond());
-                return new VarDeclaration(functionName, new FunctionLiteral(params, body));
+                return new VarDeclare(functionName, new CallableLiteral(params, body));
             });
 
     private static final Parser<Expr> assignable = identifier.and(oneOf(subscript, fieldAccess).many())
