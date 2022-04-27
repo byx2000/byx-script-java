@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * 常用解析器的静态工厂
+ * 解析器组合子的静态工厂
  */
 public class Parsers {
     public static <R> Parser<R> fail() {
@@ -184,29 +184,13 @@ public class Parsers {
         return input -> supplier.get().parse(input);
     }
 
-    public interface SeparateParser<D, R> extends Parser<Pair<R, List<Pair<D, R>>>> {
-        Parser<List<R>> ignoreDelimiter();
-    }
-
-    public static <D, R> SeparateParser<D, R> separateBy(Parser<D> delimiter, Parser<R> parser) {
-        Parser<Pair<R, List<Pair<D, R>>>> p1 = parser.and(delimiter.and(parser).many());
-        Parser<List<R>> p2 = parser.and(skip(delimiter).and(parser).many()).map(p -> {
+    public static <R> Parser<List<R>> separateBy(Parser<?> delimiter, Parser<R> parser) {
+        return parser.and(skip(delimiter).and(parser).many()).map(p -> {
             List<R> result = new ArrayList<>();
             result.add(p.getFirst());
             result.addAll(p.getSecond());
             return result;
         });
-        return new SeparateParser<>() {
-            @Override
-            public Parser<List<R>> ignoreDelimiter() {
-                return p2;
-            }
-
-            @Override
-            public ParseResult<Pair<R, List<Pair<D, R>>>> parse(Input input) throws ParseException {
-                return p1.parse(input);
-            }
-        };
     }
 
     public static <R1, R2> Parser<R2> skipFirst(Parser<R1> lhs, Parser<R2> rhs) {

@@ -138,7 +138,7 @@ public class ByxScriptParser {
     // undefined字面量
     private static final Parser<Expr> undefinedLiteral = undefined_.map(() -> new Literal(Value.undefined()));
 
-    private static final Parser<List<String>> idList = separateBy(comma, identifier).ignoreDelimiter().optional(Collections.emptyList());
+    private static final Parser<List<String>> idList = separateBy(comma, identifier).optional(Collections.emptyList());
 
     // 函数字面量
     private static final Parser<List<String>> singleParamList = identifier.map(s -> List.of(s));
@@ -157,13 +157,13 @@ public class ByxScriptParser {
             identifier.map(id -> new Pair<>(id, new Var(id)))
 
     );
-    private static final Parser<List<Pair<String, Expr>>> fieldList = separateBy(comma, fieldPair).ignoreDelimiter().optional(Collections.emptyList());
+    private static final Parser<List<Pair<String, Expr>>> fieldList = separateBy(comma, fieldPair).optional(Collections.emptyList());
     private static final Parser<Expr> objLiteral = skip(lb)
             .and(fieldList)
             .skip(rb.fatal())
             .map(ps -> new ObjectLiteral(ps.stream().collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))));
 
-    private static final Parser<List<Expr>> exprList = separateBy(comma, lazyExpr).ignoreDelimiter().optional(Collections.emptyList());
+    private static final Parser<List<Expr>> exprList = separateBy(comma, lazyExpr).optional(Collections.emptyList());
 
     // 列表字面量
     private static final Parser<Expr> listLiteral = skip(ls)
@@ -208,11 +208,16 @@ public class ByxScriptParser {
             negExpr,
             notExpr
     ).and(oneOf(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildExprElem);
-    private static final Parser<Expr> multiplicativeExpr = separateBy(mul.or(div).or(rem), primaryExpr).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> additiveExpr = separateBy(add.or(sub), multiplicativeExpr).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> relationalExpr = separateBy(let.or(lt).or(get).or(gt).or(equ).or(neq), additiveExpr).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> andExpr = separateBy(and, relationalExpr).map(ByxScriptParser::buildExpr);
-    private static final Parser<Expr> expr = separateBy(or, andExpr).map(ByxScriptParser::buildExpr);
+    private static final Parser<Expr> multiplicativeExpr = primaryExpr.and(oneOf(mul, div, rem).and(primaryExpr).many())
+            .map(ByxScriptParser::buildBinaryExpr);
+    private static final Parser<Expr> additiveExpr = multiplicativeExpr.and(oneOf(add, sub).and(multiplicativeExpr).many())
+            .map(ByxScriptParser::buildBinaryExpr);
+    private static final Parser<Expr> relationalExpr = additiveExpr.and(oneOf(let, lt, get, gt, equ, neq).and(additiveExpr).many())
+            .map(ByxScriptParser::buildBinaryExpr);
+    private static final Parser<Expr> andExpr = relationalExpr.and(and.and(relationalExpr).many())
+            .map(ByxScriptParser::buildBinaryExpr);
+    private static final Parser<Expr> expr = andExpr.and(or.and(andExpr).many())
+            .map(ByxScriptParser::buildBinaryExpr);
 
     // 语句
 
@@ -379,7 +384,7 @@ public class ByxScriptParser {
         return e;
     }
 
-    private static Expr buildExpr(Pair<Expr, List<Pair<String, Expr>>> r) {
+    private static Expr buildBinaryExpr(Pair<Expr, List<Pair<String, Expr>>> r) {
         Expr expr = r.getFirst();
         for (Pair<String, Expr> p : r.getSecond()) {
             String op = p.getFirst();
