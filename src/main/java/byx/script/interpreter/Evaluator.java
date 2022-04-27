@@ -145,6 +145,25 @@ public class Evaluator implements ASTVisitor<Value, Scope> {
     }
 
     @Override
+    public Value visit(Try node, Scope scope) {
+        try {
+            node.getTryBranch().visit(this, scope);
+        } catch (ThrowException e) {
+            Scope newScope = new Scope(scope);
+            newScope.declareVar(node.getCatchVar(), e.getValue());
+            node.getCatchBranch().visit(this, newScope);
+        } finally {
+            node.getFinallyBranch().visit(this, scope);
+        }
+        return null;
+    }
+
+    @Override
+    public Value visit(Throw node, Scope scope) {
+        throw new ThrowException(node.getExpr().visit(this, scope));
+    }
+
+    @Override
     public Value visit(Literal node, Scope scope) {
         return node.getValue();
     }

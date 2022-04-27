@@ -1485,4 +1485,71 @@ public class ByxScriptTest {
                 1.5 2.5
                 """);
     }
+
+    @Test
+    public void testTry() {
+        verify("""
+                function testException(f) {
+                    try {
+                        f()
+                    } catch (e) {
+                        Console.println('catch', e)
+                    } finally {
+                        Console.println('finally')
+                    }
+                }
+                
+                testException(() => {
+                    Console.println('test1')
+                })
+                
+                testException(() => {
+                    Console.println('test2')
+                    throw 123
+                })
+                
+                testException(() => {
+                    throw 456
+                    Console.println('test3')
+                })
+                """, """
+                test1
+                finally
+                test2
+                catch 123
+                finally
+                catch 456
+                finally
+                """);
+        verify("""
+                try {
+                    Console.println(123)
+                    throw 'hello'
+                    Console.println(456)
+                } catch (err) {
+                    Console.println('catch', err)
+                }
+                """, """
+                123
+                catch hello
+                """);
+        verify("""
+                try {
+                    Console.println(123)
+                    throw 'hello'
+                    Console.println(456)
+                } catch (e) {
+                    Console.println('catch1', e)
+                    try {
+                        throw 'hi'
+                    } catch (e) {
+                        Console.println('catch2', e)
+                    }
+                }
+                """, """
+                123
+                catch1 hello
+                catch2 hi
+                """);
+    }
 }

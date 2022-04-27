@@ -20,6 +20,8 @@ public interface ASTVisitor<R, C> {
     R visit(Continue node, C ctx);
     R visit(Return node, C ctx);
     R visit(ExprStatement node, C ctx);
+    R visit(Try node, C ctx);
+    R visit(Throw node, C ctx);
 
     R visit(Literal node, C ctx);
     R visit(ListLiteral node, C ctx);

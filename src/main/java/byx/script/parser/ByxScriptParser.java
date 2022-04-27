@@ -105,8 +105,12 @@ public class ByxScriptParser {
     private static final Parser<String> return_ = string("return").surroundBy(ignorable);
     private static final Parser<String> function_ = string("function").surroundBy(ignorable);
     private static final Parser<String> undefined_ = string("undefined").surroundBy(ignorable);
+    private static final Parser<String> try_ = string("try").surroundBy(ignorable);
+    private static final Parser<String> catch_ = string("catch").surroundBy(ignorable);
+    private static final Parser<String> finally_ = string("finally").surroundBy(ignorable);
+    private static final Parser<String> throw_ = string("throw").surroundBy(ignorable);
 
-    private static final Set<String> kw = Set.of("import", "var", "if", "else", "for", "while", "break", "continue", "return", "function", "undefined");
+    private static final Set<String> kw = Set.of("import", "var", "if", "else", "for", "while", "break", "continue", "return", "function", "undefined", "try", "catch", "finally", "throw");
 
     // 标识符
     private static final Parser<String> identifier = oneOf(alpha, underline)
@@ -321,7 +325,27 @@ public class ByxScriptParser {
     // return语句
     private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional()).map(Return::new);
 
-    // 函数调用语句
+    // try-catch-finally语句
+    private static final Parser<Statement> tryStmt = skip(try_.and(lb.fatal()))
+            .and(stmts)
+            .skip(rb.fatal().and(catch_.fatal()).and(lp.fatal()))
+            .and(identifier)
+            .skip(rp.fatal().and(lb.fatal()))
+            .and(stmts)
+            .skip(rb.fatal())
+            .and(skip(finally_.and(lb.fatal())).and(stmts).skip(rb.fatal()).optional(Collections.emptyList()))
+            .map(p -> {
+                Statement tryBranch = new Block(p.getFirst().getFirst().getFirst());
+                String catchVar = p.getFirst().getFirst().getSecond();
+                Statement catchBranch = new Block(p.getFirst().getSecond());
+                Statement finallyBranch = new Block(p.getSecond());
+                return new Try(tryBranch, catchVar, catchBranch, finallyBranch);
+            });
+
+    // throw语句
+    private static final Parser<Statement> throwStmt = skip(throw_).and(expr).map(Throw::new);
+
+    // 表达式语句
     private static final Parser<Statement> exprStmt = expr.map(ExprStatement::new);
 
     private static final Parser<Statement> stmt = oneOf(
@@ -334,6 +358,8 @@ public class ByxScriptParser {
             continueStmt,
             returnStmt,
             block,
+            tryStmt,
+            throwStmt,
             preInc,
             preDec,
             assignStmt,
@@ -341,8 +367,6 @@ public class ByxScriptParser {
             postDec,
             exprStmt
     );
-
-
 
     // 导入声明
     private static final Parser<String> importName = oneOf(digit, alpha, underline, ch('/')).many1().surroundBy(ignorable)
