@@ -72,7 +72,7 @@ public class ByxScriptRunner {
      * @param value 变量值
      */
     void addNative(String name, Value value) {
-        natives.addNative(name, value);
+        natives.setField(name, value);
     }
 
     // 读取并解析导入名称

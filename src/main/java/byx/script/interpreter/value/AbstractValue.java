@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.*;
 
-public abstract class FieldReadableValue implements Value {
+public abstract class AbstractValue implements Value {
     private final Map<String, Value> fields = new HashMap<>();
 
     public Map<String, Value> getFields() {
@@ -18,12 +18,8 @@ public abstract class FieldReadableValue implements Value {
         return fields.containsKey(field);
     }
 
-    protected void setField(String field, Value value) {
-        fields.put(field, value);
-    }
-
     protected void setCallableField(String field, Function<List<Value>, Value> callable) {
-        setField(field, Value.of(callable));
+        fields.put(field, Value.of(callable));
     }
 
     protected void setCallableFieldNoReturn(String field, Consumer<List<Value>> callable) {
@@ -113,10 +109,16 @@ public abstract class FieldReadableValue implements Value {
         fields.putAll(fieldsToAdd);
     }
 
+    @Override
     public Value getField(String field) {
         if (fields.containsKey(field)) {
             return fields.get(field);
         }
         return Value.super.getField(field);
+    }
+
+    @Override
+    public void setField(String field, Value rhs) {
+        fields.put(field, rhs);
     }
 }

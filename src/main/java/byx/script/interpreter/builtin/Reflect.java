@@ -5,7 +5,7 @@ import byx.script.interpreter.value.*;
 /**
  * Native.Reflect
  */
-public class Reflect extends FieldReadableValue {
+public class Reflect extends AbstractValue {
     public static final Reflect INSTANCE = new Reflect();
 
     private Reflect() {
@@ -17,9 +17,9 @@ public class Reflect extends FieldReadableValue {
         setCallableField("isObject", Value.class, v -> Value.of(v instanceof ObjectValue));
         setCallableField("isUndefined", Value.class, v -> Value.of(v instanceof UndefinedValue));
         setCallableField("hashCode", Value.class, v -> Value.of(v.hashCode()));
-        setCallableField("fields", FieldReadableValue.class, v -> Value.of(v.getFields().keySet().stream().map(Value::of).toList()));
-        setCallableFieldNoReturn("setField", FieldWritableValue.class, StringValue.class, Value.class, (obj, field, value) -> obj.setField(field.getValue(), value));
-        setCallableField("getField", FieldReadableValue.class, StringValue.class, (obj, field) -> obj.getField(field.getValue()));
-        setCallableField("hasField", FieldReadableValue.class, StringValue.class, (obj, field) -> Value.of(obj.hasField(field.getValue())));
+        setCallableField("fields", AbstractValue.class, v -> Value.of(v.getFields().keySet().stream().map(Value::of).toList()));
+        setCallableFieldNoReturn("setField", AbstractValue.class, StringValue.class, Value.class, (obj, field, value) -> obj.setField(field.getValue(), value));
+        setCallableField("getField", AbstractValue.class, StringValue.class, (obj, field) -> obj.getField(field.getValue()));
+        setCallableField("hasField", AbstractValue.class, StringValue.class, (obj, field) -> Value.of(obj.hasField(field.getValue())));
     }
 }

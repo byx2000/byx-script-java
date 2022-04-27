@@ -3,7 +3,7 @@ package byx.script.interpreter.value;
 import java.util.List;
 import java.util.Map;
 
-public class ObjectValue extends FieldWritableValue {
+public class ObjectValue extends AbstractValue {
     public ObjectValue(Map<String, Value> fields) {
         setFields(fields);
     }

@@ -1,13 +1,13 @@
 package byx.script.interpreter.builtin;
 
 import byx.script.interpreter.value.DoubleValue;
-import byx.script.interpreter.value.FieldReadableValue;
+import byx.script.interpreter.value.AbstractValue;
 import byx.script.interpreter.value.Value;
 
 /**
  * Native.Math
  */
-public class Math extends FieldReadableValue {
+public class Math extends AbstractValue {
     public static final Math INSTANCE = new Math();
 
     private Math() {

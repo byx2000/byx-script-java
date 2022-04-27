@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 /**
  * 内建对象Console：包含控制台操作
  */
-public class Console extends FieldReadableValue {
+public class Console extends AbstractValue {
     public static final Console INSTANCE = new Console();
 
     private Console() {

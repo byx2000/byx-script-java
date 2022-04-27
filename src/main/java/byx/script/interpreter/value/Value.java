@@ -198,7 +198,7 @@ public interface Value {
      * @param field 属性名
      * @param rhs 属性值
      */
-    default void fieldAssign(String field, Value rhs) {
+    default void setField(String field, Value rhs) {
         throw new InterpretException(String.format("unsupported field assign: %s", this));
     }
 
@@ -212,11 +212,11 @@ public interface Value {
     }
 
     /**
-     * 下标赋值（value[sub] = rhs）
+     * 设置下标（value[sub] = rhs）
      * @param subscript 下标值
      * @param rhs rhs
      */
-    default void subscriptAssign(Value subscript, Value rhs) {
+    default void setSubscript(Value subscript, Value rhs) {
         throw new InterpretException(String.format("unsupported subscript assign: %s", this));
     }
 }

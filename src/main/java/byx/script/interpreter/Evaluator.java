@@ -49,10 +49,10 @@ public class Evaluator implements ASTVisitor<Value, Scope> {
             scope.setVar(e.getVarName(), rhs.visit(this, scope));
         } else if (lhs instanceof FieldAccess e) {
             // 字段赋值
-            e.getExpr().visit(this, scope).fieldAssign(e.getField(), rhs.visit(this, scope));
+            e.getExpr().visit(this, scope).setField(e.getField(), rhs.visit(this, scope));
         } else if (lhs instanceof Subscript e) {
             // 数组下标赋值
-            e.getExpr().visit(this, scope).subscriptAssign(e.getSubscript().visit(this, scope), rhs.visit(this, scope));
+            e.getExpr().visit(this, scope).setSubscript(e.getSubscript().visit(this, scope), rhs.visit(this, scope));
         }
         return null;
     }

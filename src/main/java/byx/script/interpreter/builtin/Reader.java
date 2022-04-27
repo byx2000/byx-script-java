@@ -1,6 +1,6 @@
 package byx.script.interpreter.builtin;
 
-import byx.script.interpreter.value.FieldReadableValue;
+import byx.script.interpreter.value.AbstractValue;
 import byx.script.interpreter.value.Value;
 
 import java.util.Scanner;
@@ -8,7 +8,7 @@ import java.util.Scanner;
 /**
  * Native.Reader
  */
-public class Reader extends FieldReadableValue {
+public class Reader extends AbstractValue {
     public final Scanner scanner = new Scanner(System.in);
 
     public Reader() {

@@ -4,7 +4,7 @@ import byx.script.interpreter.InterpretException;
 
 import java.util.*;
 
-public class ListValue extends FieldReadableValue {
+public class ListValue extends AbstractValue {
     private final LinkedList<Value> value;
 
     public ListValue(List<Value> value) {
@@ -60,7 +60,7 @@ public class ListValue extends FieldReadableValue {
     }
 
     @Override
-    public void subscriptAssign(Value subscript, Value rhs) {
+    public void setSubscript(Value subscript, Value rhs) {
         if (!(subscript instanceof IntegerValue)) {
             throw new InterpretException("subscript must be integer");
         }

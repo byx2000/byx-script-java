@@ -2,7 +2,7 @@ package byx.script.interpreter.value;
 
 import java.util.Objects;
 
-public class StringValue extends FieldReadableValue {
+public class StringValue extends AbstractValue {
     private final String value;
 
     public StringValue(String value) {
