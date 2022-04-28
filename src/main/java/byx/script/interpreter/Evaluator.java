@@ -131,11 +131,7 @@ public class Evaluator implements ASTVisitor<Value, Scope> {
 
     @Override
     public Value visit(Return node, Scope scope) {
-        Expr retVal = node.getRetVal();
-        if (retVal != null) {
-            throw new ReturnException(retVal.visit(this, scope));
-        }
-        throw new ReturnException(Value.undefined());
+        throw new ReturnException(node.getRetVal().visit(this, scope));
     }
 
     @Override

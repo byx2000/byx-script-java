@@ -179,13 +179,10 @@ public class ByxScriptParser {
     private static final Parser<Expr> var = identifier.map(Var::new);
 
     // 下标
-    private static final Parser<Expr> subscript = skip(ls)
-            .and(lazyExpr)
-            .skip(rs.fatal());
+    private static final Parser<Expr> subscript = skip(ls).and(lazyExpr).skip(rs.fatal());
 
     // 字段访问
-    private static final Parser<String> fieldAccess = skip(dot)
-            .and(identifier.fatal());
+    private static final Parser<String> fieldAccess = skip(dot).and(identifier.fatal());
 
     // 调用列表
     private static final Parser<List<Expr>> callList = skip(lp)
@@ -211,7 +208,7 @@ public class ByxScriptParser {
             bracketExpr,
             negExpr,
             notExpr
-    ).and(oneOf(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildExprElem);
+    ).and(oneOf(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildPrimaryExpr);
     private static final Parser<Expr> multiplicativeExpr = primaryExpr.and(oneOf(mul, div, rem).and(primaryExpr).many())
             .map(ByxScriptParser::buildBinaryExpr);
     private static final Parser<Expr> additiveExpr = multiplicativeExpr.and(oneOf(add, sub).and(multiplicativeExpr).many())
@@ -323,7 +320,7 @@ public class ByxScriptParser {
     private static final Parser<Statement> continueStmt = continue_.map(Continue::new);
 
     // return语句
-    private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional()).map(Return::new);
+    private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional(new Literal(Value.undefined()))).map(Return::new);
 
     // try-catch-finally语句
     private static final Parser<Statement> tryStmt = skip(try_.and(lb.fatal()))
@@ -394,7 +391,7 @@ public class ByxScriptParser {
     }
 
     @SuppressWarnings("unchecked")
-    private static Expr buildExprElem(Pair<Expr, List<Object>> p) {
+    private static Expr buildPrimaryExpr(Pair<Expr, List<Object>> p) {
         Expr e = p.getFirst();
         for (Object o : p.getSecond()) {
             if (o instanceof List) {
