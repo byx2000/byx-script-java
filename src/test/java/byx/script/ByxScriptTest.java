@@ -1071,6 +1071,16 @@ public class ByxScriptTest {
     }
 
     @Test
+    public void testStringSubstring() {
+        verify("""
+                var s = 'hello';
+                Console.println(s.substring(1, 4))
+                """, """
+                ell
+                """);
+    }
+
+    @Test
     public void testStringConcatMethod() {
         verify("""
                 Console.println('abc'.concat('defg'))
