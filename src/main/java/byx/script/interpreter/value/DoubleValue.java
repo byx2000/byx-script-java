@@ -28,7 +28,12 @@ public class DoubleValue implements Value {
 
     @Override
     public String toString() {
-        return "Double";
+        return String.valueOf(value);
+    }
+
+    @Override
+    public String typeId() {
+        return "double";
     }
 
     @Override

@@ -28,7 +28,12 @@ public class IntegerValue implements Value {
 
     @Override
     public String toString() {
-        return "Integer";
+        return String.valueOf(value);
+    }
+
+    @Override
+    public String typeId() {
+        return "integer";
     }
 
     @Override

@@ -5,7 +5,7 @@ import byx.script.interpreter.value.*;
 /**
  * Native.Reflect
  */
-public class Reflect extends AbstractValue {
+public class Reflect extends ObjectValue {
     public static final Reflect INSTANCE = new Reflect();
 
     private Reflect() {

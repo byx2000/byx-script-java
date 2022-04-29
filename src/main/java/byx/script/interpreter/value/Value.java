@@ -10,6 +10,8 @@ import java.util.function.Function;
  * 封装ByxScript运行时的值类型
  */
 public interface Value {
+    String typeId();
+
     static Value of(int val) {
         return new IntegerValue(val);
     }
@@ -48,7 +50,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value add(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator + between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator + between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -57,7 +59,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value sub(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator - between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator - between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -66,7 +68,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value mul(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator * between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator * between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -75,7 +77,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value div(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator / between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator / between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -84,7 +86,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value rem(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator %% between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator %% between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -92,7 +94,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value neg() {
-        throw new InterpretException(String.format("unsupported operator - on %s", this));
+        throw new InterpretException(String.format("unsupported operator - on %s", typeId()));
     }
 
     /**
@@ -101,7 +103,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value lessThan(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator < between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator < between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -110,7 +112,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value lessEqualThan(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator <= between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator <= between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -119,7 +121,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value greaterThan(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator > between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator > between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -128,7 +130,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value greaterEqualThan(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator >= between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator >= between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -155,7 +157,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value and(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator && between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator && between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -164,7 +166,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value or(Value rhs) {
-        throw new InterpretException(String.format("unsupported operator || between %s and %s", this, rhs));
+        throw new InterpretException(String.format("unsupported operator || between %s and %s", typeId(), rhs.typeId()));
     }
 
     /**
@@ -172,7 +174,7 @@ public interface Value {
      * @return 运算结果
      */
     default Value not() {
-        throw new InterpretException(String.format("unsupported operator ! on %s", this));
+        throw new InterpretException(String.format("unsupported operator ! on %s", this.typeId()));
     }
 
     /**

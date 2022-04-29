@@ -11,6 +11,11 @@ public class UndefinedValue implements Value {
     }
 
     @Override
+    public String typeId() {
+        return "undefined";
+    }
+
+    @Override
     public Value add(Value rhs) {
         if (rhs instanceof StringValue) {
             return new StringValue("undefined" + ((StringValue) rhs).getValue());

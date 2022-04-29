@@ -9,17 +9,12 @@ import java.util.stream.Collectors;
 /**
  * 内建对象Console：包含控制台操作
  */
-public class Console extends AbstractValue {
+public class Console extends ObjectValue {
     public static final Console INSTANCE = new Console();
 
     private Console() {
         setCallableFieldNoReturn("println", args -> System.out.println(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" "))));
         setCallableFieldNoReturn("print", args -> System.out.print(args.stream().map(v -> valueToString(v, true)).collect(Collectors.joining(" "))));
-    }
-
-    @Override
-    public String toString() {
-        return "Console";
     }
 
     // 将Value转换成可打印的字符串
@@ -34,13 +29,15 @@ public class Console extends AbstractValue {
             return ((StringValue) value).getValue();
         } else if (value instanceof ListValue) {
             if (!deep) {
-                return "List";
+                return "[...]";
             }
-            List<Value> values = ((ListValue) value).getValue();
+            List<Value> values = ((ListValue) value).getElems();
             return "[" + values.stream().map(v -> valueToString(v, false)).collect(Collectors.joining(", ")) + "]";
+        } else if (value instanceof CallableValue) {
+            return "f(...)";
         } else if (value instanceof ObjectValue) {
             if (!deep) {
-                return "Object";
+                return "{...}";
             }
             Map<String, Value> fields = ((ObjectValue) value).getFields();
             return "{" + fields.entrySet().stream()

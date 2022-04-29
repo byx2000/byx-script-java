@@ -37,7 +37,12 @@ public class StringValue extends AbstractValue {
 
     @Override
     public String toString() {
-        return "String";
+        return value;
+    }
+
+    @Override
+    public String typeId() {
+        return "string";
     }
 
     @Override

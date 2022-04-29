@@ -12,6 +12,11 @@ public class BoolValue implements Value {
         this.value = value;
     }
 
+    @Override
+    public String typeId() {
+        return String.valueOf(value);
+    }
+
     public static BoolValue of(boolean value) {
         return value ? TRUE : FALSE;
     }

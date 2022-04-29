@@ -1,16 +1,21 @@
 package byx.script.interpreter.value;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class ObjectValue extends AbstractValue {
+    public ObjectValue() {
+        this(Collections.emptyMap());
+    }
+
     public ObjectValue(Map<String, Value> fields) {
         setFields(fields);
     }
 
     @Override
     public String toString() {
-        return "Object";
+        return getFields().toString();
     }
 
     @Override
@@ -19,6 +24,11 @@ public class ObjectValue extends AbstractValue {
             return getField("_equal").call(List.of(rhs));
         }
         return super.equal(rhs);
+    }
+
+    @Override
+    public String typeId() {
+        return "object";
     }
 
     @Override

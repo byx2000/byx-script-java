@@ -11,12 +11,17 @@ public class CallableValue implements Value {
     }
 
     @Override
+    public String typeId() {
+        return "callable";
+    }
+
+    @Override
     public Value call(List<Value> args) {
         return callable.apply(args);
     }
 
     @Override
     public String toString() {
-        return "Callable";
+        return callable.toString();
     }
 }

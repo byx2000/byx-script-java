@@ -5,23 +5,23 @@ import byx.script.interpreter.InterpretException;
 import java.util.*;
 
 public class ListValue extends AbstractValue {
-    private final LinkedList<Value> value;
+    private final LinkedList<Value> elems;
 
-    public ListValue(List<Value> value) {
-        this.value = new LinkedList<>(value);
-        setCallableFieldNoReturn("addLast", Value.class, this.value::addLast);
-        setCallableField("removeLast", this.value::removeLast);
-        setCallableFieldNoReturn("addFirst", Value.class, this.value::addFirst);
-        setCallableField("removeFirst", this.value::removeFirst);
-        setCallableField("remove", IntegerValue.class, index -> this.value.remove(index.getValue()));
-        setCallableFieldNoReturn("insert", IntegerValue.class, Value.class, (index, e) -> this.value.add(index.getValue(), e));
-        setCallableField("length", () -> Value.of(this.value.size()));
-        setCallableField("isEmpty", () -> Value.of(this.value.isEmpty()));
-        setCallableField("copy", () -> Value.of(new ArrayList<>(this.value)));
+    public ListValue(List<Value> elems) {
+        this.elems = new LinkedList<>(elems);
+        setCallableFieldNoReturn("addLast", Value.class, this.elems::addLast);
+        setCallableField("removeLast", this.elems::removeLast);
+        setCallableFieldNoReturn("addFirst", Value.class, this.elems::addFirst);
+        setCallableField("removeFirst", this.elems::removeFirst);
+        setCallableField("remove", IntegerValue.class, index -> this.elems.remove(index.getValue()));
+        setCallableFieldNoReturn("insert", IntegerValue.class, Value.class, (index, e) -> this.elems.add(index.getValue(), e));
+        setCallableField("length", () -> Value.of(this.elems.size()));
+        setCallableField("isEmpty", () -> Value.of(this.elems.isEmpty()));
+        setCallableField("copy", () -> Value.of(new ArrayList<>(this.elems)));
     }
 
-    public List<Value> getValue() {
-        return value;
+    public List<Value> getElems() {
+        return elems;
     }
 
     @Override
@@ -29,23 +29,28 @@ public class ListValue extends AbstractValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ListValue listValue = (ListValue) o;
-        return Objects.equals(value, listValue.value);
+        return Objects.equals(elems, listValue.elems);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hash(elems);
     }
 
     @Override
     public String toString() {
-        return "List";
+        return elems.toString();
+    }
+
+    @Override
+    public String typeId() {
+        return "list";
     }
 
     @Override
     public Value equal(Value rhs) {
         if (rhs instanceof ListValue) {
-            return Value.of(value.equals(((ListValue) rhs).getValue()));
+            return Value.of(elems.equals(((ListValue) rhs).getElems()));
         }
         return super.equal(rhs);
     }
@@ -54,7 +59,7 @@ public class ListValue extends AbstractValue {
     public Value subscript(Value sub) {
         if (sub instanceof IntegerValue) {
             int index = ((IntegerValue) sub).getValue();
-            return value.get(index);
+            return elems.get(index);
         }
         return super.subscript(sub);
     }
@@ -65,6 +70,6 @@ public class ListValue extends AbstractValue {
             throw new InterpretException("subscript must be integer");
         }
         int index = ((IntegerValue) subscript).getValue();
-        this.value.set(index, rhs);
+        this.elems.set(index, rhs);
     }
 }
