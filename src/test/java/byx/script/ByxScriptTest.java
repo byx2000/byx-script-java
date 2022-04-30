@@ -198,11 +198,6 @@ public class ByxScriptTest {
                 1002
                 """);
         verify("""
-                Console.println(((a, b) => a + b)(12, 13))
-                """, """
-                25
-                """);
-        verify("""
                 var compose = (n, f, g) => g(f(n))
                 var f1 = n => n * 2
                 var f2 = n => n + 1
@@ -987,7 +982,7 @@ public class ByxScriptTest {
     @Test
     public void testContinue() {
         verify("""
-                 var s = 0
+                var s = 0
                 for (var i = 0; i < 100; i = i + 1){
                     if (i % 6 == 4) {
                         continue
@@ -1064,9 +1059,11 @@ public class ByxScriptTest {
         verify("""
                 Console.println(''.length())
                 Console.println('abc'.length())
+                Console.println('hello，你好'.length())
                 """, """
                 0
                 3
+                8
                 """);
     }
 
@@ -1075,8 +1072,10 @@ public class ByxScriptTest {
         verify("""
                 var s = 'hello';
                 Console.println(s.substring(1, 4))
+                Console.println('你好世界'.substring(1, 3))
                 """, """
                 ell
+                好世
                 """);
     }
 
@@ -1108,8 +1107,10 @@ public class ByxScriptTest {
                 var s = 'abc'
                 Console.println(s.charAt(0), s.charAt(1), s.charAt(2))
                 Console.println(s.charAt(1) == 'b')
+                Console.println('你好'[0] == '你')
                 """, """
                 a b c
+                true
                 true
                 """);
     }

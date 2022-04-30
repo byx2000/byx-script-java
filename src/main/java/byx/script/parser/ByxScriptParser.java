@@ -162,9 +162,7 @@ public class ByxScriptParser {
 
     );
     private static final Parser<List<Pair<String, Expr>>> fieldList = separateBy(comma, fieldPair).optional(Collections.emptyList());
-    private static final Parser<Expr> objLiteral = skip(lb)
-            .and(fieldList)
-            .skip(rb.fatal())
+    private static final Parser<Expr> objLiteral = skip(lb).and(fieldList).skip(rb.fatal())
             .map(ps -> new ObjectLiteral(ps.stream().collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))));
 
     private static final Parser<List<Expr>> exprList = separateBy(comma, lazyExpr).optional(Collections.emptyList());
@@ -264,10 +262,7 @@ public class ByxScriptParser {
             .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Sub, e, new Literal(Value.of(1)))));
 
     // 代码块
-    private static final Parser<Statement> block = skip(lb)
-            .and(stmts)
-            .skip(rb.fatal())
-            .map(Block::new);
+    private static final Parser<Statement> block = skip(lb).and(stmts).skip(rb.fatal()).map(Block::new);
 
     // if语句
     private static final Parser<Statement> ifStmt = skip(if_.and(lp.fatal()))

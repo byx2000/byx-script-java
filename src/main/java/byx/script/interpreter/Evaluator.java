@@ -1,5 +1,6 @@
 package byx.script.interpreter;
 
+import byx.script.common.FastException;
 import byx.script.parser.ast.ASTVisitor;
 import byx.script.parser.ast.Program;
 import byx.script.common.Pair;
@@ -16,6 +17,33 @@ import java.util.stream.Collectors;
  * 抽象语法树求值器
  */
 public class Evaluator implements ASTVisitor<Value, Scope> {
+    private static class BreakException extends FastException {}
+    private static class ContinueException extends FastException {}
+
+    private static class ReturnException extends FastException {
+        private final Value retVal;
+
+        private ReturnException(Value retVal) {
+            this.retVal = retVal;
+        }
+
+        public Value getRetVal() {
+            return retVal;
+        }
+    }
+
+    private static class ThrowException extends FastException {
+        private final Value value;
+
+        public ThrowException(Value value) {
+            this.value = value;
+        }
+
+        public Value getValue() {
+            return value;
+        }
+    }
+
     private static final BreakException BREAK_EXCEPTION = new BreakException();
     private static final ContinueException CONTINUE_EXCEPTION = new ContinueException();
 
