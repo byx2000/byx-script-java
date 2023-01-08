@@ -120,10 +120,10 @@ public class ByxScriptParser {
             .surroundBy(ignorable);
 
     // 前向引用
-    private static final Parser<Statement> lazyStmt = lazy(ByxScriptParser::getStmt);
+    private static final Parser<Statement> lazyStmt = lazy(() -> ByxScriptParser.stmt);
     private static final Parser<List<Statement>> stmts = lazyStmt.skip(semi.optional()).many();
-    private static final Parser<Expr> lazyPrimaryExpr = lazy(ByxScriptParser::getPrimaryExpr);
-    private static final Parser<Expr> lazyExpr = lazy(ByxScriptParser::getExpr);
+    private static final Parser<Expr> lazyPrimaryExpr = lazy(() -> ByxScriptParser.primaryExpr);
+    private static final Parser<Expr> lazyExpr = lazy(() -> ByxScriptParser.expr);
 
     // 表达式
 
@@ -368,18 +368,6 @@ public class ByxScriptParser {
     // 程序
     private static final Parser<Program> program = imports.and(stmts)
             .map(p -> new Program(p.getFirst(), p.getSecond()));
-
-    private static Parser<Expr> getExpr() {
-        return expr;
-    }
-
-    private static Parser<Expr> getPrimaryExpr() {
-        return primaryExpr;
-    }
-
-    private static Parser<Statement> getStmt() {
-        return stmt;
-    }
 
     private static String join(List<?> list) {
         return list.stream().map(Objects::toString).collect(Collectors.joining());
