@@ -1,6 +1,5 @@
 package byx.script.interpreter;
 
-import byx.script.common.FastException;
 import byx.script.parser.ast.ASTVisitor;
 import byx.script.parser.ast.Program;
 import byx.script.common.Pair;
@@ -8,6 +7,7 @@ import byx.script.parser.ast.expr.*;
 import byx.script.parser.ast.stmt.*;
 import byx.script.interpreter.value.BoolValue;
 import byx.script.interpreter.value.Value;
+import byx.script.parser.parserc.exception.FastException;
 
 import java.util.List;
 import java.util.Map;

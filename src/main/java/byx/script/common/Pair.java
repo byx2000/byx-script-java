@@ -1,9 +1,9 @@
 package byx.script.common;
 
+import java.util.Objects;
+
 /**
- * 模拟两个元素的元组
- * @param <T> 第一个元素的类型
- * @param <U> 第二个元素的类型
+ * 长度为2的元组
  */
 public class Pair<T, U> {
     private final T first;
@@ -25,5 +25,18 @@ public class Pair<T, U> {
     @Override
     public String toString() {
         return String.format("(%s, %s)", first, second);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pair<?, ?> pair = (Pair<?, ?>) o;
+        return Objects.equals(first, pair.first) && Objects.equals(second, pair.second);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second);
     }
 }

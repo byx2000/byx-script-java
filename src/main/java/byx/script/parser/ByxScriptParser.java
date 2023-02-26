@@ -1,12 +1,12 @@
 package byx.script.parser;
 
-import byx.script.common.Pair;
 import byx.script.parser.ast.Program;
 import byx.script.parser.ast.expr.*;
 import byx.script.parser.ast.stmt.*;
-import byx.script.parser.parserc.Parser;
 import byx.script.interpreter.InterpretException;
 import byx.script.interpreter.value.Value;
+import byx.script.common.Pair;
+import byx.script.parser.parserc.Parser;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,19 +18,17 @@ import static byx.script.parser.parserc.Parsers.*;
  * 将ByxScript脚本解析成抽象语法树
  */
 public class ByxScriptParser {
-    // 词法元素
-
     // 空白字符
     private static final Parser<?> ws = chs(' ', '\t', '\r', '\n').map(Objects::toString);
 
     // 行注释
-    private static final Parser<?> lineComment = string("//").skip(not('\n').many()).skip(ch('\n'));
+    private static final Parser<?> lineComment = str("//").and(until(ch('\n')));
 
     // 块注释
-    private static final Parser<?> blockComment = string("/*").and(any().manyUntil(string("*/"))).and(string("*/"));
+    private static final Parser<?> blockComment = str("/*").and(until(str("*/")));
 
     // 可忽略元素
-    private static final Parser<?> ignorable = oneOf(ws, lineComment, blockComment).many();
+    private static final Parser<?> ignorable = alt(ws, lineComment, blockComment).many();
 
     // 字母
     private static final Parser<Character> alpha = range('a', 'z').or(range('A', 'Z'));
@@ -45,70 +43,72 @@ public class ByxScriptParser {
     private static final Parser<Character> underline = ch('_');
 
     // 整数
-    private static final Parser<String> integer = digits.surroundBy(ignorable);
+    private static final Parser<String> integer = digits.surround(ignorable);
 
     // 浮点数
     private static final Parser<String> decimal = seq(digits, ch('.'), digits)
             .map(rs -> "" + rs.get(0) + rs.get(1) + rs.get(2))
-            .surroundBy(ignorable);
+            .surround(ignorable);
 
     // 字符串
-    private static final Parser<String> string = skip(ch('\'')).and(not('\'').many()).skip(ch('\'')).map(ByxScriptParser::join).surroundBy(ignorable);
+    private static final Parser<String> string = seq(ch('\''), not('\'').many(), ch('\''))
+            .map(rs -> join((List<?>) rs.get(1)))
+            .surround(ignorable);
 
     // 布尔值
-    private static final Parser<String> bool = strings("true", "false").surroundBy(ignorable);
+    private static final Parser<String> bool = strs("true", "false").surround(ignorable);
 
     // 符号
-    private static final Parser<String> assign = string("=").surroundBy(ignorable);
-    private static final Parser<String> semi = string(";").surroundBy(ignorable);
-    private static final Parser<String> comma = string(",").surroundBy(ignorable);
-    private static final Parser<String> colon = string(":").surroundBy(ignorable);
-    private static final Parser<String> dot = string(".").surroundBy(ignorable);
-    private static final Parser<String> lp = string("(").surroundBy(ignorable);
-    private static final Parser<String> rp = string(")").surroundBy(ignorable);
-    private static final Parser<String> lb = string("{").surroundBy(ignorable);
-    private static final Parser<String> rb = string("}").surroundBy(ignorable);
-    private static final Parser<String> ls = string("[").surroundBy(ignorable);
-    private static final Parser<String> rs = string("]").surroundBy(ignorable);
-    private static final Parser<String> add = string("+").surroundBy(ignorable);
-    private static final Parser<String> sub = string("-").surroundBy(ignorable);
-    private static final Parser<String> mul = string("*").surroundBy(ignorable);
-    private static final Parser<String> div = string("/").surroundBy(ignorable);
-    private static final Parser<String> rem = string("%").surroundBy(ignorable);
-    private static final Parser<String> gt = string(">").surroundBy(ignorable);
-    private static final Parser<String> get = string(">=").surroundBy(ignorable);
-    private static final Parser<String> lt = string("<").surroundBy(ignorable);
-    private static final Parser<String> let = string("<=").surroundBy(ignorable);
-    private static final Parser<String> equ = string("==").surroundBy(ignorable);
-    private static final Parser<String> neq = string("!=").surroundBy(ignorable);
-    private static final Parser<String> and = string("&&").surroundBy(ignorable);
-    private static final Parser<String> or = string("||").surroundBy(ignorable);
-    private static final Parser<String> not = string("!").surroundBy(ignorable);
-    private static final Parser<String> arrow = string("=>").surroundBy(ignorable);
-    private static final Parser<String> inc = string("++").surroundBy(ignorable);
-    private static final Parser<String> dec = string("--").surroundBy(ignorable);
-    private static final Parser<String> addAssign = string("+=").surroundBy(ignorable);
-    private static final Parser<String> subAssign = string("-=").surroundBy(ignorable);
-    private static final Parser<String> mulAssign = string("*=").surroundBy(ignorable);
-    private static final Parser<String> divAssign = string("/=").surroundBy(ignorable);
+    private static final Parser<String> assign = str("=").surround(ignorable);
+    private static final Parser<String> semi = str(";").surround(ignorable);
+    private static final Parser<String> comma = str(",").surround(ignorable);
+    private static final Parser<String> colon = str(":").surround(ignorable);
+    private static final Parser<String> dot = str(".").surround(ignorable);
+    private static final Parser<String> lp = str("(").surround(ignorable);
+    private static final Parser<String> rp = str(")").surround(ignorable);
+    private static final Parser<String> lb = str("{").surround(ignorable);
+    private static final Parser<String> rb = str("}").surround(ignorable);
+    private static final Parser<String> ls = str("[").surround(ignorable);
+    private static final Parser<String> rs = str("]").surround(ignorable);
+    private static final Parser<String> add = str("+").surround(ignorable);
+    private static final Parser<String> sub = str("-").surround(ignorable);
+    private static final Parser<String> mul = str("*").surround(ignorable);
+    private static final Parser<String> div = str("/").surround(ignorable);
+    private static final Parser<String> rem = str("%").surround(ignorable);
+    private static final Parser<String> gt = str(">").surround(ignorable);
+    private static final Parser<String> get = str(">=").surround(ignorable);
+    private static final Parser<String> lt = str("<").surround(ignorable);
+    private static final Parser<String> let = str("<=").surround(ignorable);
+    private static final Parser<String> equ = str("==").surround(ignorable);
+    private static final Parser<String> neq = str("!=").surround(ignorable);
+    private static final Parser<String> and = str("&&").surround(ignorable);
+    private static final Parser<String> or = str("||").surround(ignorable);
+    private static final Parser<String> not = str("!").surround(ignorable);
+    private static final Parser<String> arrow = str("=>").surround(ignorable);
+    private static final Parser<String> inc = str("++").surround(ignorable);
+    private static final Parser<String> dec = str("--").surround(ignorable);
+    private static final Parser<String> addAssign = str("+=").surround(ignorable);
+    private static final Parser<String> subAssign = str("-=").surround(ignorable);
+    private static final Parser<String> mulAssign = str("*=").surround(ignorable);
+    private static final Parser<String> divAssign = str("/=").surround(ignorable);
     private static final Parser<String> assignOp = oneOf(assign, addAssign, subAssign, mulAssign, divAssign);
 
     // 关键字
-    private static final Parser<String> import_ = string("import").surroundBy(ignorable);
-    private static final Parser<String> var_ = string("var").surroundBy(ignorable);
-    private static final Parser<String> if_ = string("if").surroundBy(ignorable);
-    private static final Parser<String> else_ = string("else").surroundBy(ignorable);
-    private static final Parser<String> for_ = string("for").surroundBy(ignorable);
-    private static final Parser<String> while_ = string("while").surroundBy(ignorable);
-    private static final Parser<String> break_ = string("break").surroundBy(ignorable);
-    private static final Parser<String> continue_ = string("continue").surroundBy(ignorable);
-    private static final Parser<String> return_ = string("return").surroundBy(ignorable);
-    private static final Parser<String> function_ = string("function").surroundBy(ignorable);
-    private static final Parser<String> undefined_ = string("undefined").surroundBy(ignorable);
-    private static final Parser<String> try_ = string("try").surroundBy(ignorable);
-    private static final Parser<String> catch_ = string("catch").surroundBy(ignorable);
-    private static final Parser<String> finally_ = string("finally").surroundBy(ignorable);
-    private static final Parser<String> throw_ = string("throw").surroundBy(ignorable);
+    private static final Parser<String> import_ = str("import").surround(ignorable);
+    private static final Parser<String> var_ = str("var").surround(ignorable);
+    private static final Parser<String> if_ = str("if").surround(ignorable);
+    private static final Parser<String> else_ = str("else").surround(ignorable);
+    private static final Parser<String> for_ = str("for").surround(ignorable);
+    private static final Parser<String> while_ = str("while").surround(ignorable);
+    private static final Parser<String> break_ = str("break").surround(ignorable);
+    private static final Parser<String> continue_ = str("continue").surround(ignorable);
+    private static final Parser<String> return_ = str("return").surround(ignorable);
+    private static final Parser<String> function_ = str("function").surround(ignorable);
+    private static final Parser<String> undefined_ = str("undefined").surround(ignorable);
+    private static final Parser<String> try_ = str("try").surround(ignorable);
+    private static final Parser<String> catch_ = str("catch").surround(ignorable);
+    private static final Parser<String> finally_ = str("finally").surround(ignorable);
+    private static final Parser<String> throw_ = str("throw").surround(ignorable);
 
     private static final Set<String> kw = Set.of("import", "var", "if", "else", "for", "while", "break", "continue", "return", "function", "undefined", "try", "catch", "finally", "throw");
 
@@ -116,12 +116,12 @@ public class ByxScriptParser {
     private static final Parser<String> identifier = oneOf(alpha, underline)
             .and(oneOf(digit, alpha, underline).many())
             .map(p -> p.getFirst() + join(p.getSecond()))
-            .then(s -> kw.contains(s) ? fail("cannot use keyword as identifier") : success(s))
-            .surroundBy(ignorable);
+            .then(r -> kw.contains(r.getResult()) ? fail("cannot use keyword as identifier") : success(r.getResult()))
+            .surround(ignorable);
 
     // 前向引用
     private static final Parser<Statement> lazyStmt = lazy(() -> ByxScriptParser.stmt);
-    private static final Parser<List<Statement>> stmts = lazyStmt.skip(semi.optional()).many();
+    private static final Parser<List<Statement>> stmts = lazyStmt.skip(semi.opt()).many();
     private static final Parser<Expr> lazyPrimaryExpr = lazy(() -> ByxScriptParser.primaryExpr);
     private static final Parser<Expr> lazyExpr = lazy(() -> ByxScriptParser.expr);
 
@@ -140,12 +140,12 @@ public class ByxScriptParser {
     private static final Parser<Expr> boolLiteral = bool.map(s -> new Literal(Value.of(Boolean.parseBoolean(s))));
 
     // undefined字面量
-    private static final Parser<Expr> undefinedLiteral = undefined_.map(() -> new Literal(Value.undefined()));
+    private static final Parser<Expr> undefinedLiteral = undefined_.map(r -> new Literal(Value.undefined()));
 
-    private static final Parser<List<String>> idList = separateBy(comma, identifier).optional(Collections.emptyList());
+    private static final Parser<List<String>> idList = list(comma, identifier).opt(Collections.emptyList());
 
     // 函数字面量
-    private static final Parser<List<String>> singleParamList = identifier.map(s -> List.of(s));
+    private static final Parser<List<String>> singleParamList = identifier.map(List::of);
     private static final Parser<List<String>> multiParamList = skip(lp).and(idList).skip(rp);
     private static final Parser<List<String>> paramList = singleParamList.or(multiParamList);
     private static final Parser<Expr> callableLiteral = paramList.skip(arrow).and(oneOf(
@@ -159,13 +159,12 @@ public class ByxScriptParser {
             identifier.skip(lp).and(idList).skip(rp.and(lb)).and(stmts).skip(rb)
                     .map(p -> new Pair<>(p.getFirst().getFirst(), new CallableLiteral(p.getFirst().getSecond(), new Block(p.getSecond())))),
             identifier.map(id -> new Pair<>(id, new Var(id)))
-
     );
-    private static final Parser<List<Pair<String, Expr>>> fieldList = separateBy(comma, fieldPair).optional(Collections.emptyList());
+    private static final Parser<List<Pair<String, Expr>>> fieldList = list(comma, fieldPair).opt(Collections.emptyList());
     private static final Parser<Expr> objLiteral = skip(lb).and(fieldList).skip(rb.fatal())
             .map(ps -> new ObjectLiteral(ps.stream().collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))));
 
-    private static final Parser<List<Expr>> exprList = separateBy(comma, lazyExpr).optional(Collections.emptyList());
+    private static final Parser<List<Expr>> exprList = list(comma, lazyExpr).opt(Collections.emptyList());
 
     // 列表字面量
     private static final Parser<Expr> listLiteral = skip(ls)
@@ -206,7 +205,7 @@ public class ByxScriptParser {
             bracketExpr,
             negExpr,
             notExpr
-    ).and(oneOf(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildPrimaryExpr);
+    ).and(alt(callList, fieldAccess, subscript).many()).map(ByxScriptParser::buildPrimaryExpr);
     private static final Parser<Expr> multiplicativeExpr = primaryExpr.and(oneOf(mul, div, rem).and(primaryExpr).many())
             .map(ByxScriptParser::buildBinaryExpr);
     private static final Parser<Expr> additiveExpr = multiplicativeExpr.and(oneOf(add, sub).and(multiplicativeExpr).many())
@@ -242,7 +241,7 @@ public class ByxScriptParser {
                 return new VarDeclare(functionName, new CallableLiteral(params, body));
             });
 
-    private static final Parser<Expr> assignable = identifier.and(oneOf(subscript, fieldAccess).many())
+    private static final Parser<Expr> assignable = identifier.and(alt(subscript, fieldAccess).many())
             .map(ByxScriptParser::buildAssignable);
 
     // 赋值语句
@@ -271,7 +270,7 @@ public class ByxScriptParser {
             .and(stmts)
             .skip(rb.fatal())
             .and(skip(else_.and(if_).and(lp.fatal())).and(expr).skip(rp.fatal().and(lb.fatal())).and(stmts).skip(rb.fatal()).many())
-            .and(skip(else_.and(lb.fatal())).and(stmts).skip(rb.fatal()).optional(Collections.emptyList()))
+            .and(skip(else_.and(lb.fatal())).and(stmts).skip(rb.fatal()).opt(Collections.emptyList()))
             .map(p -> {
                 List<Pair<Expr, Statement>> cases = new ArrayList<>();
                 cases.add(new Pair<>(p.getFirst().getFirst().getFirst(), new Block(p.getFirst().getFirst().getSecond())));
@@ -309,13 +308,13 @@ public class ByxScriptParser {
             .map(p -> new While(p.getFirst(), new Block(p.getSecond())));
 
     // break语句
-    private static final Parser<Statement> breakStmt = break_.map(Break::new);
+    private static final Parser<Statement> breakStmt = break_.value(new Break());
 
     // continue语句
-    private static final Parser<Statement> continueStmt = continue_.map(Continue::new);
+    private static final Parser<Statement> continueStmt = continue_.value(new Continue());
 
     // return语句
-    private static final Parser<Statement> returnStmt = skip(return_).and(expr.optional(new Literal(Value.undefined()))).map(Return::new);
+    private static final Parser<Statement> returnStmt = skip(return_).and(expr.opt(new Literal(Value.undefined()))).map(Return::new);
 
     // try-catch-finally语句
     private static final Parser<Statement> tryStmt = skip(try_.and(lb.fatal()))
@@ -325,7 +324,7 @@ public class ByxScriptParser {
             .skip(rp.fatal().and(lb.fatal()))
             .and(stmts)
             .skip(rb.fatal())
-            .and(skip(finally_.and(lb.fatal())).and(stmts).skip(rb.fatal()).optional(Collections.emptyList()))
+            .and(skip(finally_.and(lb.fatal())).and(stmts).skip(rb.fatal()).opt(Collections.emptyList()))
             .map(p -> {
                 Statement tryBranch = new Block(p.getFirst().getFirst().getFirst());
                 String catchVar = p.getFirst().getFirst().getSecond();
@@ -361,7 +360,7 @@ public class ByxScriptParser {
     );
 
     // 导入声明
-    private static final Parser<String> importName = oneOf(digit, alpha, underline, ch('/')).many1().surroundBy(ignorable)
+    private static final Parser<String> importName = oneOf(digit, alpha, underline, ch('/')).many1().surround(ignorable)
             .map(ByxScriptParser::join);
     private static final Parser<List<String>> imports = skip(import_).and(importName).many();
 
