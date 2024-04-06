@@ -1,11 +1,9 @@
-import reflect
-
 /**
  * 哈希表
  * capacity: 哈希桶数量
  */
-function Map(capacity) {
-    if (capacity == undefined) {
+func Map(capacity) {
+    if (capacity == null) {
         capacity = 10
     }
 
@@ -16,11 +14,11 @@ function Map(capacity) {
 
     var size = 0
 
-    function Pair(key, value) {
+    func Pair(key, value) {
         return {key, value}
     }
 
-    function getHashCode(obj) {
+    func getHashCode(obj) {
         var hashCode = Reflect.hashCode(obj)
         if (hashCode < 0) {
             return -hashCode
@@ -41,7 +39,7 @@ function Map(capacity) {
             }
             elems[index].addLast(Pair(key, value))
             size++
-            return undefined
+            return null
         },
         get(key) {
             var hashCode = getHashCode(key)
@@ -51,7 +49,7 @@ function Map(capacity) {
                     return elems[index][i].value
                 }
             }
-            return undefined
+            return null
         },
         remove(key) {
             var hashCode = getHashCode(key)
@@ -62,7 +60,7 @@ function Map(capacity) {
                     return elems[index].remove(i).value
                 }
             }
-            return undefined
+            return null
         },
         containsKey(key) {
             var hashCode = getHashCode(key)

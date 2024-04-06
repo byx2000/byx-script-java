@@ -2,7 +2,7 @@
  * Stream API
  */
 var Stream = (() => {
-    function createStream(first, remain) {
+    func createStream(first, remain) {
         var s = {
             first,
             remain,
@@ -22,14 +22,14 @@ var Stream = (() => {
         return s
     }
 
-    function forEach(s, consumer) {
+    func forEach(s, consumer) {
         while (s != EMPTY_STREAM) {
             consumer(s.first)
             s = s.remain
         }
     }
 
-    function toList(s) {
+    func toList(s) {
         var list = []
         while (s != EMPTY_STREAM) {
             list.addLast(s.first)
@@ -38,14 +38,14 @@ var Stream = (() => {
         return list
     }
 
-    function map(s, mapper) {
+    func map(s, mapper) {
         if (s == EMPTY_STREAM) {
             return EMPTY_STREAM
         }
         return createStream(mapper(s.first), map(s.remain, mapper))
     }
 
-    function filter(s, predicate) {
+    func filter(s, predicate) {
         if (s == EMPTY_STREAM) {
             return EMPTY_STREAM
         }
@@ -55,10 +55,10 @@ var Stream = (() => {
         return filter(s.remain, predicate)
     }
 
-    var EMPTY_STREAM = createStream(undefined, undefined)
+    var EMPTY_STREAM = createStream(null, null)
 
-    function fromList(list) {
-        function _fromList(index) {
+    func fromList(list) {
+        func _fromList(index) {
             if (index == list.length()) {
                 return EMPTY_STREAM
             }

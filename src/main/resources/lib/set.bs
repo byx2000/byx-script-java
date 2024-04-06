@@ -1,11 +1,9 @@
-import reflect
-
 /**
  * 集合
  * capacity: 底层哈希表的初始容量
  */
-function Set(capacity) {
-    if (capacity == undefined) {
+func Set(capacity) {
+    if (capacity == null) {
         capacity = 10
     }
 
@@ -16,7 +14,7 @@ function Set(capacity) {
 
     var size = 0
 
-    function getHashCode(obj) {
+    func getHashCode(obj) {
         var hashCode = Reflect.hashCode(obj)
         if (hashCode < 0) {
             return -hashCode

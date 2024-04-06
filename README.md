@@ -1,23 +1,23 @@
 # ByxScript
 
-ByxScript是一门类似JavaScript的函数式动态类型编程语言，具有以下特点：
+ByxScript是一门类似JavaScript的函数式动态类型编程语言，支持以下特性：
 
-* 支持整数、浮点数、布尔值、字符串、列表、函数、对象、`undefined`八种基本数据类型
+* 支持整数、浮点数、布尔值、字符串、列表、函数、对象、null八种基本数据类型
 * 支持if选择语句、for循环、while循环、异常处理等常用流程控制语句
 * 支持闭包、高阶函数、运算符重载等高级特性
 
 ## 基本数据类型
 
-|数据类型|字面量|
-|---|---|
-|整数|`123`|
-|浮点数|`3.14`|
-|布尔值|`true` `false`|
-|字符串|`'hello world!'`|
-|列表|`[1, 2, 3.14, 'hello']`|
-|函数|`(a, b) => a + b`|
-|对象|`{name: 'byx', age: 21}`|
-|未定义|`undefined`|
+| 数据类型 | 字面量                      |
+|------|--------------------------|
+| 整数   | `123`                    |
+| 浮点数  | `3.14`                   |
+| 布尔值  | `true` `false`           |
+| 字符串  | `'hello world!'`         |
+| 列表   | `[1, 2, 3.14, 'hello']`  |
+| 函数   | `(a, b) => a + b`        |
+| 对象   | `{name: 'byx', age: 21}` |
+| 空    | `null`                   |
 
 ## 变量定义
 
@@ -39,7 +39,7 @@ var obj = {
 ## 函数定义
 
 ```javascript
-function fib(n) {
+func fib(n) {
     if (n == 1 || n == 2) {
         return 1
     }
@@ -100,7 +100,7 @@ try {
 ## 运算符重载
 
 ```javascript
-function Vector2(x, y) {
+func Vector2(x, y) {
     return {
         x, y,
         _add(v) {
@@ -137,7 +137,7 @@ println(v6.x, v6.y) // 1.5 2.5
 ## 闭包应用
 
 ```javascript
-function Counter(init) {
+func Counter(init) {
     var cnt = init
     return {
         current: () => cnt,

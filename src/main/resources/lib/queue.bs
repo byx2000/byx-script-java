@@ -1,7 +1,7 @@
 /**
  * 队列
  */
-function Queue() {
+func Queue() {
     var elems = []
     return {
         // 入队

@@ -1,55 +1,32 @@
-import reflect
+Math.sin = x => Math.sin_d(x * 1.0)
+Math.cos = x => Math.cos_d(x * 1.0)
+Math.tan = x => Math.tan_d(x * 1.0)
+Math.pow = (a, b) => Math.pow_d(a * 1.0, b * 1.0)
+Math.exp = x => Math.exp_d(x * 1.0)
+Math.ln = x => Math.ln_d(x * 1.0)
+Math.log10 = x => Math.log10_d(x * 1.0)
+Math.sqrt = x => Math.sqrt_d(x * 1.0)
+Math.round = x => Math.round_d(x * 1.0)
+Math.ceil = x => Math.ceil_d(x * 1.0)
+Math.floor = x => Math.floor_d(x * 1.0)
 
-var Math = {
-    max(a, b) {
-        if (a > b) {
-            return a
-        }
-        return b
-    },
-    min(a, b) {
-        if (a < b) {
-            return a
-        }
-        return b
-    },
-    abs(x) {
-        if (x < 0) {
-            return -x
-        }
-        return x
-    },
-    sin(x) {
-        return Native.Math.sin(x * 1.0)
-    },
-    cos(x) {
-        return Native.Math.cos(x * 1.0)
-    },
-    tan(x) {
-        return Native.Math.tan(x * 1.0)
-    },
-    pow(x, n) {
-        return Native.Math.pow(x * 1.0, n * 1.0)
-    },
-    exp(x) {
-        return Native.Math.exp(x * 1.0)
-    },
-    ln(x) {
-        return Native.Math.ln(x * 1.0)
-    },
-    log10(x) {
-        return Native.Math.log10(x * 1.0)
-    },
-    sqrt(x) {
-        return Native.Math.sqrt(x * 1.0)
-    },
-    round(x) {
-        return Native.Math.round(x * 1.0)
-    },
-    ceil(x) {
-        return Native.Math.ceil(x * 1.0)
-    },
-    floor(x) {
-        return Native.Math.floor(x * 1.0)
+Math.max = (a, b) => {
+   if (a > b) {
+       return a
+   }
+   return b
+}
+
+Math.min = (a, b) => {
+    if (a < b) {
+        return a
     }
+    return b
+}
+
+Math.abs = x => {
+    if (x < 0) {
+        return -x
+    }
+    return x
 }

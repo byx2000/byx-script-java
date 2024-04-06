@@ -1,7 +1,7 @@
 /**
  * 栈
  */
-function Stack() {
+func Stack() {
     var elems = []
     return {
         // 入栈

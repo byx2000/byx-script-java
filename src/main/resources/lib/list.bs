@@ -3,7 +3,7 @@
  */
 var List = (() => {
     // 交换两个列表元素
-    function swap(list, i, j) {
+    func swap(list, i, j) {
         var t = list[i]
         list[i] = list[j]
         list[j] = t
@@ -32,11 +32,11 @@ var List = (() => {
          *     cmp(a, b) > 0  表示 a 大于 b
          */
         sort: (list, cmp) => {
-            if (cmp == undefined) {
+            if (cmp == null) {
                 cmp = (a, b) => a - b
             }
 
-            function partition(left, right) {
+            func partition(left, right) {
                 var i = left + 1
                 var j = right
                 while (i <= j) {
@@ -50,7 +50,7 @@ var List = (() => {
                 return j
             }
 
-            function qsort(left, right) {
+            func qsort(left, right) {
                 if (left >= right) {
                     return
                 }
