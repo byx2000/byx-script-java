@@ -21,7 +21,7 @@ public class StringValue extends ObjectValue {
         setCallableField("toBool", this::toBool);
     }
 
-    public String getValue() {
+    public String value() {
         return value;
     }
 
@@ -43,79 +43,6 @@ public class StringValue extends ObjectValue {
         return value;
     }
 
-    @Override
-    public Value add(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return new StringValue(value + ((StringValue) rhs).getValue());
-        } else if (rhs instanceof IntegerValue) {
-            return new StringValue(value + ((IntegerValue) rhs).value());
-        } else if (rhs instanceof DoubleValue) {
-            return new StringValue(value + ((DoubleValue) rhs).value());
-        } else if (rhs instanceof BoolValue) {
-            return new StringValue(value + ((BoolValue) rhs).getValue());
-        } else if (rhs instanceof NullValue) {
-            return new StringValue(value + "null");
-        }
-        return super.add(rhs);
-    }
-
-    @Override
-    public Value lessThan(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return BoolValue.of(value.compareTo(((StringValue) rhs).getValue()) < 0);
-        }
-        return super.lessThan(rhs);
-    }
-
-    @Override
-    public Value lessEqualThan(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return BoolValue.of(value.compareTo(((StringValue) rhs).getValue()) <= 0);
-        }
-        return super.lessEqualThan(rhs);
-    }
-
-    @Override
-    public Value greaterThan(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return BoolValue.of(value.compareTo(((StringValue) rhs).getValue()) > 0);
-        }
-        return super.greaterThan(rhs);
-    }
-
-    @Override
-    public Value greaterEqualThan(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return BoolValue.of(value.compareTo(((StringValue) rhs).getValue()) >= 0);
-        }
-        return super.greaterEqualThan(rhs);
-    }
-
-    @Override
-    public Value equal(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return BoolValue.of(value.compareTo(((StringValue) rhs).getValue()) == 0);
-        }
-        return BoolValue.FALSE;
-    }
-
-    @Override
-    public Value notEqual(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return BoolValue.of(value.compareTo(((StringValue) rhs).getValue()) != 0);
-        }
-        return BoolValue.TRUE;
-    }
-
-    @Override
-    public Value subscript(Value sub) {
-        if (sub instanceof IntegerValue) {
-            int index = ((IntegerValue) sub).value();
-            return new StringValue(String.valueOf(value.charAt(index)));
-        }
-        return super.subscript(sub);
-    }
-
     private Value length(List<Value> args) {
         return new IntegerValue(value.length());
     }
@@ -129,7 +56,7 @@ public class StringValue extends ObjectValue {
 
     private Value concat(List<Value> args) {
         checkArgument("concat", args, StringValue.class);
-        String s = ((StringValue) args.get(0)).getValue();
+        String s = ((StringValue) args.get(0)).value();
         return new StringValue(value.concat(s));
     }
 
@@ -147,7 +74,7 @@ public class StringValue extends ObjectValue {
 
     private Value compareTo(List<Value> args) {
         checkArgument("compareTo", args, StringValue.class);
-        String s = ((StringValue) args.get(0)).getValue();
+        String s = ((StringValue) args.get(0)).value();
         return new IntegerValue(value.compareTo(s));
     }
 
@@ -161,5 +88,10 @@ public class StringValue extends ObjectValue {
 
     private Value toBool(List<Value> args) {
         return BoolValue.of(Boolean.parseBoolean(value));
+    }
+
+    @Override
+    public String typeId() {
+        return "string";
     }
 }

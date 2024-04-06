@@ -30,7 +30,9 @@ public class Console extends ObjectValue {
         } else if (value instanceof BoolValue) {
             return String.valueOf(((BoolValue) value).getValue());
         } else if (value instanceof StringValue) {
-            return ((StringValue) value).getValue();
+            return ((StringValue) value).value();
+        } else if (value instanceof NullValue) {
+            return "null";
         } else if (value instanceof ListValue) {
             if (!deep) {
                 return "[...]";

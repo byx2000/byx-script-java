@@ -40,7 +40,7 @@ public class Reflect extends ObjectValue {
     private Value setField(List<Value> args) {
         checkArgument("setField", args, ObjectValue.class, StringValue.class, Value.class);
         ObjectValue obj = (ObjectValue) args.get(0);
-        String field = ((StringValue) args.get(1)).getValue();
+        String field = ((StringValue) args.get(1)).value();
         Value value = args.get(2);
         obj.setField(field, value);
         return NullValue.INSTANCE;
@@ -49,14 +49,14 @@ public class Reflect extends ObjectValue {
     private Value getField(List<Value> args) {
         checkArgument("getField", args, ObjectValue.class, StringValue.class);
         ObjectValue obj = (ObjectValue) args.get(0);
-        String field = ((StringValue) args.get(1)).getValue();
+        String field = ((StringValue) args.get(1)).value();
         return obj.getField(field);
     }
 
     private Value hasField(List<Value> args) {
         checkArgument("hasField", args, ObjectValue.class, StringValue.class);
         ObjectValue obj = (ObjectValue) args.get(0);
-        String field = ((StringValue) args.get(1)).getValue();
+        String field = ((StringValue) args.get(1)).value();
         return BoolValue.of(obj.hasField(field));
     }
 }

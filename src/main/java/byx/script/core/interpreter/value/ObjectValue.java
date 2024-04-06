@@ -1,12 +1,24 @@
 package byx.script.core.interpreter.value;
 
+import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
 import byx.script.core.interpreter.exception.ThrowException;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ObjectValue implements Value {
+    private static final Map<Class<? extends Value>, String> TYPE_ID_MAP = Map.of(
+        Value.class, "any",
+        NullValue.class, "null",
+        IntegerValue.class, "integer",
+        DoubleValue.class, "double",
+        BoolValue.class, "bool",
+        StringValue.class, "string",
+        ListValue.class, "list",
+        CallableValue.class, "callable",
+        ObjectValue.class, "object"
+    );
+
     private final Map<String, Value> fields = new HashMap<>();
 
     public ObjectValue() {
@@ -25,15 +37,13 @@ public class ObjectValue implements Value {
         return fields.containsKey(field);
     }
 
-    @Override
     public Value getField(String field) {
         if (fields.containsKey(field)) {
             return fields.get(field);
         }
-        return Value.super.getField(field);
+        throw new ByxScriptRuntimeException(String.format("field %s not exist", field));
     }
 
-    @Override
     public void setField(String field, Value rhs) {
         fields.put(field, rhs);
     }
@@ -43,48 +53,8 @@ public class ObjectValue implements Value {
         return getFields().toString();
     }
 
-    @Override
-    public Value equal(Value rhs) {
-        if (hasField("_equal")) {
-            return getField("_equal").call(List.of(rhs));
-        }
-        return Value.super.equal(rhs);
-    }
-
-    @Override
-    public Value add(Value rhs) {
-        if (hasField("_add")) {
-            return getField("_add").call(List.of(rhs));
-        }
-        return Value.super.add(rhs);
-    }
-
-    @Override
-    public Value sub(Value rhs) {
-        if (hasField("_sub")) {
-            return getField("_sub").call(List.of(rhs));
-        }
-        return Value.super.add(rhs);
-    }
-
-    @Override
-    public Value mul(Value rhs) {
-        if (hasField("_mul")) {
-            return getField("_mul").call(List.of(rhs));
-        }
-        return Value.super.add(rhs);
-    }
-
-    @Override
-    public Value div(Value rhs) {
-        if (hasField("_div")) {
-            return getField("_div").call(List.of(rhs));
-        }
-        return Value.super.add(rhs);
-    }
-
-    protected void setCallableField(String field, Function<List<Value>, Value> callable) {
-        setField(field, new CallableValue(callable));
+    protected void setCallableField(String field, CallableValue callable) {
+        setField(field, callable);
     }
 
     /**
@@ -118,5 +88,10 @@ public class ObjectValue implements Value {
         String argsTypeList = args.stream().map(Value::typeId).collect(Collectors.joining(", "));
         return String.format("method %s expect parameters (%s) but receive (%s)",
                 method, paramsTypeList, argsTypeList);
+    }
+
+    @Override
+    public String typeId() {
+        return "object";
     }
 }

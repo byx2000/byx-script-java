@@ -6,15 +6,7 @@ public class NullValue implements Value {
     private NullValue() {}
 
     @Override
-    public String toString() {
+    public String typeId() {
         return "null";
-    }
-
-    @Override
-    public Value add(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return new StringValue("null" + ((StringValue) rhs).getValue());
-        }
-        return Value.super.add(rhs);
     }
 }

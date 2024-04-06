@@ -1,13 +1,13 @@
 package byx.script.core;
 
-import byx.script.core.interpreter.ASTEvaluator;
+import byx.script.core.interpreter.ByxScriptEvaluator;
 import byx.script.core.interpreter.Scope;
+import byx.script.core.interpreter.exception.*;
+import byx.script.core.interpreter.value.Value;
 import byx.script.core.interpreter.value.builtin.Console;
 import byx.script.core.interpreter.value.builtin.Math;
 import byx.script.core.interpreter.value.builtin.Reader;
 import byx.script.core.interpreter.value.builtin.Reflect;
-import byx.script.core.interpreter.exception.*;
-import byx.script.core.interpreter.value.Value;
 import byx.script.core.parser.ByxScriptParser;
 import byx.script.core.parser.ast.Program;
 import byx.script.core.parser.exception.ByxScriptParseException;
@@ -96,7 +96,7 @@ public class ByxScriptRunner {
                 String importName = namesToParse.remove();
                 Program p = parseImportName(importName);
                 result.put(importName, p);
-                for (String name : p.getImports()) {
+                for (String name : p.imports()) {
                     if (!result.containsKey(name)) {
                         namesToParse.add(name);
                     }
@@ -110,7 +110,7 @@ public class ByxScriptRunner {
     private List<String> getLoadOrder(Map<String, Program> imports) {
         // 计算依赖关系
         Map<String, Set<String>> dependOn = imports.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new HashSet<>(e.getValue().getImports())));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new HashSet<>(e.getValue().imports())));
 
         // 计算反向依赖关系
         Map<String, Set<String>> dependBy = new HashMap<>();
@@ -169,13 +169,10 @@ public class ByxScriptRunner {
         Program program = ByxScriptParser.parse(script);
 
         // 解析所有导入
-        Map<String, Program> imports = parseImports(program.getImports());
+        Map<String, Program> imports = parseImports(program.imports());
 
         // 计算加载顺序
         List<String> loadOrder = getLoadOrder(imports);
-
-        // 创建求值器
-        ASTEvaluator evaluator = new ASTEvaluator();
 
         // 初始化作用域
         Scope scope = new Scope();
@@ -185,12 +182,16 @@ public class ByxScriptRunner {
 
         // 按顺序加载依赖项
         for (String n : loadOrder) {
-            evaluator.eval(imports.get(n), scope);
+            executeProgram(imports.get(n), scope);
         }
 
         // 执行脚本
+        executeProgram(program, scope);
+    }
+
+    private static void executeProgram(Program program, Scope scope) {
         try {
-            evaluator.eval(program, scope);
+            ByxScriptEvaluator.execute(program, scope);
         } catch (ByxScriptRuntimeException e) {
             throw e;
         } catch (BreakException e) {

@@ -39,47 +39,7 @@ public class BoolValue implements Value {
     }
 
     @Override
-    public Value add(Value rhs) {
-        if (rhs instanceof StringValue) {
-            return new StringValue(value + ((StringValue) rhs).getValue());
-        }
-        return Value.super.add(rhs);
-    }
-
-    @Override
-    public Value and(Value rhs) {
-        if (rhs instanceof BoolValue) {
-            return new BoolValue(value && ((BoolValue) rhs).getValue());
-        }
-        return Value.super.and(rhs);
-    }
-
-    @Override
-    public Value or(Value rhs) {
-        if (rhs instanceof BoolValue) {
-            return new BoolValue(value || ((BoolValue) rhs).getValue());
-        }
-        return Value.super.or(rhs);
-    }
-
-    @Override
-    public Value not() {
-        return new BoolValue(!value);
-    }
-
-    @Override
-    public Value equal(Value rhs) {
-        if (rhs instanceof BoolValue) {
-            return new BoolValue(value == ((BoolValue) rhs).getValue());
-        }
-        return new BoolValue(false);
-    }
-
-    @Override
-    public Value notEqual(Value rhs) {
-        if (rhs instanceof BoolValue) {
-            return new BoolValue(value != ((BoolValue) rhs).getValue());
-        }
-        return new BoolValue(true);
+    public String typeId() {
+        return "bool";
     }
 }

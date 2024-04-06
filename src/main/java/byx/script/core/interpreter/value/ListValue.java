@@ -1,7 +1,5 @@
 package byx.script.core.interpreter.value;
 
-import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,32 +46,6 @@ public class ListValue extends ObjectValue {
         return elems.toString();
     }
 
-    @Override
-    public Value equal(Value rhs) {
-        if (rhs instanceof ListValue) {
-            return BoolValue.of(elems.equals(((ListValue) rhs).getElems()));
-        }
-        return super.equal(rhs);
-    }
-
-    @Override
-    public Value subscript(Value sub) {
-        if (sub instanceof IntegerValue) {
-            int index = ((IntegerValue) sub).value();
-            return elems.get(index);
-        }
-        return super.subscript(sub);
-    }
-
-    @Override
-    public void setSubscript(Value subscript, Value rhs) {
-        if (!(subscript instanceof IntegerValue)) {
-            throw new ByxScriptRuntimeException("subscript must be integer");
-        }
-        int index = ((IntegerValue) subscript).value();
-        this.elems.set(index, rhs);
-    }
-
     private Value length(List<Value> args) {
         return new IntegerValue(elems.size());
     }
@@ -116,5 +88,10 @@ public class ListValue extends ObjectValue {
 
     private Value copy(List<Value> args) {
         return new ListValue(new ArrayList<>(elems));
+    }
+
+    @Override
+    public String typeId() {
+        return "list";
     }
 }

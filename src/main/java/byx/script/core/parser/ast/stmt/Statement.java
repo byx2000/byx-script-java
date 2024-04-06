@@ -5,5 +5,4 @@ import byx.script.core.parser.ast.ASTNode;
 /**
  * 语句节点基类
  */
-public abstract class Statement extends ASTNode {
-}
+public interface Statement extends ASTNode {}

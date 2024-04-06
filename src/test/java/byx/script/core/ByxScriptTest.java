@@ -3,6 +3,8 @@ package byx.script.core;
 import byx.script.core.interpreter.exception.InterruptException;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static byx.script.core.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -1579,10 +1581,12 @@ public class ByxScriptTest {
         Thread t = new Thread(() -> {
             ByxScriptRunner runner = new ByxScriptRunner();
             assertThrows(InterruptException.class, () -> runner.run("while (true) {}"));
+            System.out.println("testInterrupt1 finish");
         });
         t.start();
-        t.join(1000);
+        TimeUnit.SECONDS.sleep(1);
         t.interrupt();
+        t.join();
     }
 
     @Test
@@ -1590,9 +1594,11 @@ public class ByxScriptTest {
         Thread t = new Thread(() -> {
             ByxScriptRunner runner = new ByxScriptRunner();
             assertThrows(InterruptException.class, () -> runner.run("for (var i = 1; i >= 0; i++) {}"));
+            System.out.println("testInterrupt2 finish");
         });
         t.start();
-        t.join(1000);
+        TimeUnit.SECONDS.sleep(1);
         t.interrupt();
+        t.join();
     }
 }
