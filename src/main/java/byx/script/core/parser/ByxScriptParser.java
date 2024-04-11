@@ -351,7 +351,7 @@ public class ByxScriptParser {
     private static final Parser<Statement> returnStmt = skip(return_).and(expr.opt(new Literal(NullValue.INSTANCE)))
             .map(Return::new);
 
-    // try-catch-finally语句
+    // try-catch语句
     private static final Parser<Statement> tryPart = skip(try_).and(block_fatal);
     private static final Parser<Pair<String, Statement>> catchPart =
             skip(catch_fatal.and(lp_fatal))

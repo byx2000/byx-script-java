@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static byx.script.core.TestUtils.*;
+import static byx.script.core.TestUtils.getOutput;
+import static byx.script.core.TestUtils.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ByxScriptTest {
@@ -34,7 +35,7 @@ public class ByxScriptTest {
         verify("""
                 var f1 = (a, b) => 123 * 456
                 Console.println(f1())
-
+                
                 var f2 = (a, b) => a + b
                 Console.println(f2(100, 200, 400))
                 """, """
@@ -338,19 +339,19 @@ public class ByxScriptTest {
                 Console.println(null + ' xyz')
                 Console.println('xyz ' + null)
                 """, getOutput(out -> {
-                out.println(123 + 456);
-                out.println(123 + 3.14);
-                out.println(12.34 + 555);
-                out.println(12.34 + 56.78);
-                out.println("hello " + "world!");
-                out.println("hello " + 123);
-                out.println(123 + " hello");
-                out.println("world " + 3.14);
-                out.println(3.14 + " world");
-                out.println("abc " + true);
-                out.println(false + " abc");
-                out.println("null xyz");
-                out.println("xyz null");
+            out.println(123 + 456);
+            out.println(123 + 3.14);
+            out.println(12.34 + 555);
+            out.println(12.34 + 56.78);
+            out.println("hello " + "world!");
+            out.println("hello " + 123);
+            out.println(123 + " hello");
+            out.println("world " + 3.14);
+            out.println(3.14 + " world");
+            out.println("abc " + true);
+            out.println(false + " abc");
+            out.println("null xyz");
+            out.println("xyz null");
         }));
     }
 
@@ -362,10 +363,10 @@ public class ByxScriptTest {
                 Console.println(12 - 7.78)
                 Console.println(56.78 - 12.34)
                 """, getOutput(out -> {
-                out.println(532 - 34);
-                out.println(3.14 - 12);
-                out.println(12 - 7.78);
-                out.println(56.78 - 12.34);
+            out.println(532 - 34);
+            out.println(3.14 - 12);
+            out.println(12 - 7.78);
+            out.println(56.78 - 12.34);
         }));
     }
 
@@ -377,10 +378,10 @@ public class ByxScriptTest {
                 Console.println(0.12 * 34)
                 Console.println(12.34 * 56.78)
                 """, getOutput(out -> {
-                out.println(12 * 34);
-                out.println(12 * 3.4);
-                out.println(0.12 * 34);
-                out.println(12.34 * 56.78);
+            out.println(12 * 34);
+            out.println(12 * 3.4);
+            out.println(0.12 * 34);
+            out.println(12.34 * 56.78);
         }));
     }
 
@@ -392,10 +393,10 @@ public class ByxScriptTest {
                 Console.println(0.12 / 34)
                 Console.println(56.78 / 12.34)
                 """, getOutput(out -> {
-                out.println(5 / 2);
-                out.println(12 / 3.4);
-                out.println(0.12 / 34);
-                out.println(56.78 / 12.34);
+            out.println(5 / 2);
+            out.println(12 / 3.4);
+            out.println(0.12 / 34);
+            out.println(56.78 / 12.34);
         }));
     }
 
@@ -407,10 +408,10 @@ public class ByxScriptTest {
                 Console.println(3 % 7)
                 Console.println(6 % 3)
                 """, getOutput(out -> {
-                out.println(12 % 3);
-                out.println(12 % 5);
-                out.println(3 % 7);
-                out.println(6 % 3);
+            out.println(12 % 3);
+            out.println(12 % 5);
+            out.println(3 % 7);
+            out.println(6 % 3);
         }));
     }
 
@@ -698,33 +699,33 @@ public class ByxScriptTest {
                 Console.println(true || false || true)
                 Console.println(false || false || false)
                 """, getOutput(out -> {
-                out.println(2 + 3*5);
-                out.println((2+3) * 4 / (9-7));
-                out.println(2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5);
-                out.println(-2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5);
-                out.println(77.58 * (6 / 3.14+55.2234) - 2 * 6.1 / (1.0 + 2 / (4.0 - 3.8*5)));
-                out.println(77.58 * (6 / -3.14+55.2234) - 2 * (-6.1) / (1.0 + 2 / (4.0 - 3.8*5)));
-                out.println(-100);
-                out.println(-5 + 7);
-                out.println(-(5 + 7));
-                out.println(-3.14);
-                out.println(-12.34-67.5);
-                out.println(-(12.34-67.5));
+            out.println(2 + 3*5);
+            out.println((2+3) * 4 / (9-7));
+            out.println(2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5);
+            out.println(-2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5);
+            out.println(77.58 * (6 / 3.14+55.2234) - 2 * 6.1 / (1.0 + 2 / (4.0 - 3.8*5)));
+            out.println(77.58 * (6 / -3.14+55.2234) - 2 * (-6.1) / (1.0 + 2 / (4.0 - 3.8*5)));
+            out.println(-100);
+            out.println(-5 + 7);
+            out.println(-(5 + 7));
+            out.println(-3.14);
+            out.println(-12.34-67.5);
+            out.println(-(12.34-67.5));
 
-                out.println(true);
-                out.println(false);
-                out.println(false);
-                out.println(true);
-                out.println(true);
-                out.println(false);
-                out.println(true);
-                out.println(false);
-                out.println(true);
-                out.println(false);
-                out.println(true);
-                out.println(false);
-                out.println(true);
-                out.println(false);
+            out.println(true);
+            out.println(false);
+            out.println(false);
+            out.println(true);
+            out.println(true);
+            out.println(false);
+            out.println(true);
+            out.println(false);
+            out.println(true);
+            out.println(false);
+            out.println(true);
+            out.println(false);
+            out.println(true);
+            out.println(false);
         }));
     }
 
@@ -970,6 +971,10 @@ public class ByxScriptTest {
                 Console.println(s, i)""", """
                 349866 837
                 """);
+    }
+
+    @Test
+    public void testNestedBreak() {
         verify("""
                 for (var i = 0; i < 100; ++i) {
                     for (var j = 0; j < 100; ++j) {
@@ -980,14 +985,14 @@ public class ByxScriptTest {
                     }
                 }
                 """, getOutput(out -> {
-                for (int i = 0; i < 100; ++i) {
-                    for (int j = 0; j < 100; ++j) {
-                        if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
-                            out.println(i + " " + j);
-                            break;
-                        }
+            for (int i = 0; i < 100; ++i) {
+                for (int j = 0; j < 100; ++j) {
+                    if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                        out.println(i + " " + j);
+                        break;
                     }
                 }
+            }
         }));
     }
 
@@ -1021,6 +1026,85 @@ public class ByxScriptTest {
     }
 
     @Test
+    public void testNestedContinue() {
+        verify("""
+                var s = 0
+                for (var i = 0; i < 100; ++i) {
+                    for (var j = 0; j < 100; ++j) {
+                        if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                            continue;
+                        }
+                        s += i * j
+                    }
+                }
+                Console.println(s)
+                """, getOutput(out -> {
+            int s = 0;
+            for (int i = 0; i < 100; ++i) {
+                for (int j = 0; j < 100; ++j) {
+                    if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                        continue;
+                    }
+                    s += i * j;
+                }
+            }
+            out.println(s);
+        }));
+    }
+
+    @Test
+    public void testContinueAndBreak() {
+        verify("""
+                var i = 1
+                while (i <= 10) {
+                    if (i % 2 == 0) {
+                        i++
+                        continue
+                    }
+                    if (i == 7) {
+                        break
+                    }
+                    Console.println(i)
+                    i++
+                }
+                """, getOutput(out -> {
+            int i = 1;
+            while (i <= 10) {
+                if (i % 2 == 0) {
+                    i++;
+                    continue;
+                }
+                if (i == 7) {
+                    break;
+                }
+                out.println(i);
+                i++;
+            }
+        }));
+        verify("""
+                for (var i = 1; i <= 10; i++) {
+                    if (i % 2 == 0) {
+                        continue
+                    }
+                    if (i == 7) {
+                        break
+                    }
+                    Console.println(i)
+                }
+                """, getOutput(out -> {
+            for (int i = 1; i <= 10; i++) {
+                if (i % 2 == 0) {
+                    continue;
+                }
+                if (i == 7) {
+                    break;
+                }
+                out.println(i);
+            }
+        }));
+    }
+
+    @Test
     public void testStringConcat() {
         verify("""
                 var s = ''
@@ -1050,11 +1134,11 @@ public class ByxScriptTest {
                     s = s + 1.0/i
                 }
                 Console.println(s)""", getOutput(out -> {
-                double s = 0.0;
-                for (int i = 1; i <= 100; ++i) {
-                    s += 1.0 / i;
-                }
-                out.println(s);
+            double s = 0.0;
+            for (int i = 1; i <= 100; ++i) {
+                s += 1.0 / i;
+            }
+            out.println(s);
         }));
     }
 
@@ -1448,13 +1532,15 @@ public class ByxScriptTest {
                 })
                 
                 testException(() => {
+                    Console.println('test3-1')
                     throw 456
-                    Console.println('test3')
+                    Console.println('test3-2')
                 })
                 """, """
                 test1
                 test2
                 catch 123
+                test3-1
                 catch 456
                 """);
         verify("""
@@ -1469,24 +1555,216 @@ public class ByxScriptTest {
                 123
                 catch hello
                 """);
+    }
+
+    @Test
+    public void testNestedTry() {
         verify("""
+            Console.println('begin')
+            try {
+                Console.println('try1-1')
                 try {
-                    Console.println(123)
-                    throw 'hello'
-                    Console.println(456)
+                    Console.println('try2-1')
+                    throw 123
+                    Console.println('try2-2')
                 } catch (e) {
-                    Console.println('catch1', e)
-                    try {
-                        throw 'hi'
-                    } catch (e) {
-                        Console.println('catch2', e)
-                    }
+                    Console.println('catch1-1', e)
+                    throw 456
+                    Console.println('catch1-2', e)
                 }
-                """, """
-                123
-                catch1 hello
-                catch2 hi
-                """);
+                Console.println('try1-2')
+            } catch (e) {
+                Console.println('catch2', e)
+            }
+            Console.println('end')
+            """, """
+            begin
+            try1-1
+            try2-1
+            catch1-1 123
+            catch2 456
+            end
+            """);
+    }
+
+    @Test
+    public void testNestedCatch() {
+        verify("""
+            Console.println('begin')
+            try {
+                Console.println('try1-1')
+                throw 123
+                Console.println('try1-2')
+            } catch (e) {
+                Console.println('catch1-1', e)
+                try {
+                    Console.println('try2-1')
+                    throw 456
+                    Console.println('try2-2')
+                } catch (e) {
+                    Console.println('catch2', e)
+                }
+                Console.println('catch1-2')
+            }
+            Console.println('end')
+            """, """
+            begin
+            try1-1
+            catch1-1 123
+            try2-1
+            catch2 456
+            catch1-2
+            end
+            """);
+    }
+
+    @Test
+    public void testTryAndReturn() {
+        verify("""
+            func f(n) {
+                if (n == 123) {
+                    throw 'error'
+                }
+            }
+            
+            func g() {
+                try {
+                    f(123)
+                    Console.println('success')
+                    return 'ok'
+                } catch (e) {
+                    Console.println('catch')
+                    return 'failed'
+                }
+            }
+            
+            Console.println(g())
+            """, """
+            catch
+            failed
+            """);
+        verify("""
+            func f(n) {
+                if (n == 123) {
+                    throw 'error'
+                }
+            }
+            
+            func g() {
+                try {
+                    f(567)
+                    Console.println('success')
+                    return 'ok'
+                } catch (e) {
+                    Console.println('catch')
+                    return 'failed'
+                }
+            }
+            
+            Console.println(g())
+            """, """
+            success
+            ok
+            """);
+    }
+
+    @Test
+    public void testTryScope() {
+        verify("""
+            var a = 123
+            try {
+                var a = 456
+                throw 'error'
+            } catch (e) {
+                Console.println(a)
+            }
+            """, """
+            123
+            """);
+        verify("""
+            var a = 123
+            try {
+                var a = 456
+                Console.println('hello'.charAt(10))
+            } catch (e) {
+                Console.println(a)
+            }
+            """, """
+            123
+            """);
+    }
+
+    @Test
+    public void testTryAndContinue() {
+        verify("""
+            for (var i = 1; i <= 5; i++) {
+                try {
+                    for (var j = i; j <= 5; j++) {
+                        if (j == 3) {
+                            throw 'error'
+                        }
+                    }
+                } catch (e) {
+                    continue
+                }
+                Console.println(i)
+            }
+            """, """
+            4
+            5
+            """);
+    }
+
+    @Test
+    public void testTryAndBreak() {
+        verify("""
+            for (var i = 1; i <= 5; i++) {
+                Console.println(i)
+                try {
+                    for (var j = 1; j <= i; j++) {
+                        if (j == 3) {
+                            throw 'error'
+                        }
+                    }
+                } catch (e) {
+                    break
+                }
+            }
+            """, """
+            1
+            2
+            3
+            """);
+    }
+
+    @Test
+    public void testBuiltinThrow() {
+        verify("""
+            Console.println('begin')
+            try {
+                Console.println('hello'.charAt(10))
+            } catch (e) {
+                Console.println('catch')
+            }
+            Console.println('end')
+            """, """
+            begin
+            catch
+            end
+            """);
+        verify("""
+            Console.println('begin')
+            try {
+                Console.println('hello'.charAt(1))
+            } catch (e) {
+                Console.println('catch')
+            }
+            Console.println('end')
+            """, """
+            begin
+            e
+            end
+            """);
     }
 
     @Test
@@ -1513,5 +1791,21 @@ public class ByxScriptTest {
         TimeUnit.SECONDS.sleep(1);
         t.interrupt();
         t.join();
+    }
+
+    @Test
+    public void testStackOverflow() {
+        verify("""
+            func sum(n) {
+                if (n == 1) {
+                    return 1
+                }
+                return sum(n - 1) + n
+            }
+            
+            Console.println(sum(10000))
+            """, """
+            50005000
+            """);
     }
 }
