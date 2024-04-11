@@ -1,9 +1,11 @@
 package byx.script.core.interpreter.value;
 
 import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
-import byx.script.core.interpreter.exception.ThrowException;
+import byx.script.core.interpreter.exception.BuiltinFunctionException;
+import byx.script.core.interpreter.exception.JumpException;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ObjectValue implements Value {
@@ -53,8 +55,16 @@ public class ObjectValue implements Value {
         return getFields().toString();
     }
 
-    protected void setCallableField(String field, CallableValue callable) {
-        setField(field, callable);
+    protected void setCallableField(String field, Function<List<Value>, Value> callable) {
+        setField(field, (CallableValue) (args, cont) -> {
+            try {
+                cont.accept(callable.apply(args));
+            } catch (BuiltinFunctionException | JumpException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new BuiltinFunctionException(new StringValue("NativeError: " + e.getMessage()));
+            }
+        });
     }
 
     /**
@@ -68,13 +78,13 @@ public class ObjectValue implements Value {
     protected final void checkArgument(String method, List<Value> args, Class<? extends Value>... paramsTypes) {
         // 检查传参个数是否一致
         if (args.size() != paramsTypes.length) {
-            throw new ThrowException(new StringValue(buildArgumentExceptionMsg(method, args, paramsTypes)));
+            throw new BuiltinFunctionException(new StringValue(buildArgumentExceptionMsg(method, args, paramsTypes)));
         }
 
         // 检查传参类型是否匹配
         for (int i = 0; i < args.size(); i++) {
             if (!paramsTypes[i].isAssignableFrom(args.get(i).getClass())) {
-                throw new ThrowException(new StringValue(buildArgumentExceptionMsg(method, args, paramsTypes)));
+                throw new BuiltinFunctionException(new StringValue(buildArgumentExceptionMsg(method, args, paramsTypes)));
             }
         }
     }
@@ -86,7 +96,7 @@ public class ObjectValue implements Value {
                 .map(t -> TYPE_ID_MAP.getOrDefault(t, "any"))
                 .collect(Collectors.joining(", "));
         String argsTypeList = args.stream().map(Value::typeId).collect(Collectors.joining(", "));
-        return String.format("method %s expect parameters (%s) but receive (%s)",
+        return String.format("ArgumentError: method %s expect parameters (%s) but receive (%s)",
                 method, paramsTypeList, argsTypeList);
     }
 

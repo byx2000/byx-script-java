@@ -1,14 +1,11 @@
 package byx.script.core.parser.ast.stmt;
 
 /**
- * try-catch-finally语句
+ * try-catch语句
  * try {
- *     stmts
- * } catch {
- *     stmts
- * } finally {
- *     stmts
+ *     tryBody
+ * } catch (catchVar) {
+ *     catchBody
  * }
  */
-public record Try(Statement tryBranch, String catchVar, Statement catchBranch,
-                  Statement finallyBranch) implements Statement {}
+public record Try(Statement tryBody, String catchVar, Statement catchBody) implements Statement {}

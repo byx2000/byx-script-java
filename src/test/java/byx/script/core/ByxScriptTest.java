@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static byx.script.core.TestUtils.*;
+import static byx.script.core.TestUtils.getOutput;
+import static byx.script.core.TestUtils.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ByxScriptTest {
@@ -34,7 +35,7 @@ public class ByxScriptTest {
         verify("""
                 var f1 = (a, b) => 123 * 456
                 Console.println(f1())
-                                
+                
                 var f2 = (a, b) => a + b
                 Console.println(f2(100, 200, 400))
                 """, """
@@ -52,7 +53,7 @@ public class ByxScriptTest {
                 arr[3][1] *= 100
                 arr[4].c[0] = 12
                 arr[4].c[1] -= 8
-                                
+
                 Console.println(arr[0])
                 Console.println(arr[1])
                 Console.println(arr[3][1])
@@ -296,7 +297,7 @@ public class ByxScriptTest {
                         getDescription: () => '(' + name + ' ' + age + ' ' + score + ')'
                     }
                 }
-                                
+
                 var s1 = Student('Zhang San', 21, 87.5)
                 var s2 = Student('Li Si', 23, 95)
                 Console.println(s1.getName())
@@ -741,14 +742,14 @@ public class ByxScriptTest {
                     y = y + 1
                     return false
                 }
-                                
+
                 x = 0
                 y = 0
                 var b = f2() && f1()
                 Console.println(b)
                 Console.println(x)
                 Console.println(y)
-                                
+
                 x = 0
                 y = 0
                 b = f1() || f2()
@@ -970,6 +971,10 @@ public class ByxScriptTest {
                 Console.println(s, i)""", """
                 349866 837
                 """);
+    }
+
+    @Test
+    public void testNestedBreak() {
         verify("""
                 for (var i = 0; i < 100; ++i) {
                     for (var j = 0; j < 100; ++j) {
@@ -1018,6 +1023,85 @@ public class ByxScriptTest {
                 Console.println(s, i)""", """
                 277694 100
                 """);
+    }
+
+    @Test
+    public void testNestedContinue() {
+        verify("""
+                var s = 0
+                for (var i = 0; i < 100; ++i) {
+                    for (var j = 0; j < 100; ++j) {
+                        if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                            continue;
+                        }
+                        s += i * j
+                    }
+                }
+                Console.println(s)
+                """, getOutput(out -> {
+                int s = 0;
+                for (int i = 0; i < 100; ++i) {
+                    for (int j = 0; j < 100; ++j) {
+                        if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
+                            continue;
+                        }
+                        s += i * j;
+                    }
+                }
+                out.println(s);
+        }));
+    }
+
+    @Test
+    public void testContinueAndBreak() {
+        verify("""
+                var i = 1
+                while (i <= 10) {
+                    if (i % 2 == 0) {
+                        i++
+                        continue
+                    }
+                    if (i == 7) {
+                        break
+                    }
+                    Console.println(i)
+                    i++
+                }
+                """, getOutput(out -> {
+                int i = 1;
+                while (i <= 10) {
+                    if (i % 2 == 0) {
+                        i++;
+                        continue;
+                    }
+                    if (i == 7) {
+                        break;
+                    }
+                    out.println(i);
+                    i++;
+                }
+        }));
+        verify("""
+                for (var i = 1; i <= 10; i++) {
+                    if (i % 2 == 0) {
+                        continue
+                    }
+                    if (i == 7) {
+                        break
+                    }
+                    Console.println(i)
+                }
+                """, getOutput(out -> {
+                for (int i = 1; i <= 10; i++) {
+                    if (i % 2 == 0) {
+                        continue;
+                    }
+                    if (i == 7) {
+                        break;
+                    }
+                    out.println(i);
+                }
+        }));
     }
 
     @Test
@@ -1428,88 +1512,6 @@ public class ByxScriptTest {
     }
 
     @Test
-    public void testEqualOverload() {
-        verify("""
-                func Pair1(first, second) {
-                    return {
-                        first, second,
-                        _equal(p) {
-                            return first == p.first && second == p.second
-                        }
-                    }
-                }
-                
-                var p1 = Pair1(100, 200)
-                var p2 = Pair1(100, 200)
-                var p3 = Pair1(200, 300)
-                Console.println(p1 == p2)
-                Console.println(p1 == p3)
-                Console.println(p2 != p3)
-                
-                func Pair2(first, second) {
-                    return {first, second}
-                }
-                
-                var p4 = Pair2(100, 200)
-                var p5 = Pair2(100, 200)
-                var p6 = Pair2(200, 300)
-                Console.println(p4 == p5)
-                Console.println(p4 == p6)
-                Console.println(p5 != p6)
-                """, """
-                true
-                false
-                true
-                false
-                false
-                true
-                """);
-    }
-
-    @Test
-    public void testOpOverload() {
-        verify("""
-                func Vector2(x, y) {
-                    return {
-                        x, y,
-                        _add(v) {
-                            return Vector2(x + v.x, y + v.y)
-                        },
-                        _sub(v) {
-                            return Vector2(x - v.x, y - v.y)
-                        },
-                        _mul(v) {
-                            return x * v.x + y * v.y
-                        },
-                        _div(a) {
-                            return Vector2(x / a, y / a)
-                        }
-                    }
-                }
-                
-                var v1 = Vector2(3, 5)
-                var v2 = Vector2(4, -7)
-                
-                var v3 = v1 + v2
-                Console.println(v3.x, v3.y)
-                
-                var v4 = v1 - v2
-                Console.println(v4.x, v4.y)
-                
-                var v5 = v1 * v2
-                Console.println(v5)
-                
-                var v6 = v1 / 2.0
-                Console.println(v6.x, v6.y)
-                """, """
-                7 -2
-                -1 12
-                -23
-                1.5 2.5
-                """);
-    }
-
-    @Test
     public void testTry() {
         verify("""
                 func testException(f) {
@@ -1517,8 +1519,6 @@ public class ByxScriptTest {
                         f()
                     } catch (e) {
                         Console.println('catch', e)
-                    } finally {
-                        Console.println('finally')
                     }
                 }
                 
@@ -1532,17 +1532,16 @@ public class ByxScriptTest {
                 })
                 
                 testException(() => {
+                    Console.println('test3-1')
                     throw 456
-                    Console.println('test3')
+                    Console.println('test3-2')
                 })
                 """, """
                 test1
-                finally
                 test2
                 catch 123
-                finally
+                test3-1
                 catch 456
-                finally
                 """);
         verify("""
                 try {
@@ -1556,24 +1555,216 @@ public class ByxScriptTest {
                 123
                 catch hello
                 """);
+    }
+
+    @Test
+    public void testNestedTry() {
         verify("""
+            Console.println('begin')
+            try {
+                Console.println('try1-1')
                 try {
-                    Console.println(123)
-                    throw 'hello'
-                    Console.println(456)
+                    Console.println('try2-1')
+                    throw 123
+                    Console.println('try2-2')
                 } catch (e) {
-                    Console.println('catch1', e)
-                    try {
-                        throw 'hi'
-                    } catch (e) {
-                        Console.println('catch2', e)
-                    }
+                    Console.println('catch1-1', e)
+                    throw 456
+                    Console.println('catch1-2', e)
                 }
-                """, """
-                123
-                catch1 hello
-                catch2 hi
-                """);
+                Console.println('try1-2')
+            } catch (e) {
+                Console.println('catch2', e)
+            }
+            Console.println('end')
+            """, """
+            begin
+            try1-1
+            try2-1
+            catch1-1 123
+            catch2 456
+            end
+            """);
+    }
+
+    @Test
+    public void testNestedCatch() {
+        verify("""
+            Console.println('begin')
+            try {
+                Console.println('try1-1')
+                throw 123
+                Console.println('try1-2')
+            } catch (e) {
+                Console.println('catch1-1', e)
+                try {
+                    Console.println('try2-1')
+                    throw 456
+                    Console.println('try2-2')
+                } catch (e) {
+                    Console.println('catch2', e)
+                }
+                Console.println('catch1-2')
+            }
+            Console.println('end')
+            """, """
+            begin
+            try1-1
+            catch1-1 123
+            try2-1
+            catch2 456
+            catch1-2
+            end
+            """);
+    }
+
+    @Test
+    public void testTryAndReturn() {
+        verify("""
+            func f(n) {
+                if (n == 123) {
+                    throw 'error'
+                }
+            }
+            
+            func g() {
+                try {
+                    f(123)
+                    Console.println('success')
+                    return 'ok'
+                } catch (e) {
+                    Console.println('catch')
+                    return 'failed'
+                }
+            }
+            
+            Console.println(g())
+            """, """
+            catch
+            failed
+            """);
+        verify("""
+            func f(n) {
+                if (n == 123) {
+                    throw 'error'
+                }
+            }
+            
+            func g() {
+                try {
+                    f(567)
+                    Console.println('success')
+                    return 'ok'
+                } catch (e) {
+                    Console.println('catch')
+                    return 'failed'
+                }
+            }
+            
+            Console.println(g())
+            """, """
+            success
+            ok
+            """);
+    }
+
+    @Test
+    public void testTryScope() {
+        verify("""
+            var a = 123
+            try {
+                var a = 456
+                throw 'error'
+            } catch (e) {
+                Console.println(a)
+            }
+            """, """
+            123
+            """);
+        verify("""
+            var a = 123
+            try {
+                var a = 456
+                Console.println('hello'.charAt(10))
+            } catch (e) {
+                Console.println(a)
+            }
+            """, """
+            123
+            """);
+    }
+
+    @Test
+    public void testTryAndContinue() {
+        verify("""
+            for (var i = 1; i <= 5; i++) {
+                try {
+                    for (var j = i; j <= 5; j++) {
+                        if (j == 3) {
+                            throw 'error'
+                        }
+                    }
+                } catch (e) {
+                    continue
+                }
+                Console.println(i)
+            }
+            """, """
+            4
+            5
+            """);
+    }
+
+    @Test
+    public void testTryAndBreak() {
+        verify("""
+            for (var i = 1; i <= 5; i++) {
+                Console.println(i)
+                try {
+                    for (var j = 1; j <= i; j++) {
+                        if (j == 3) {
+                            throw 'error'
+                        }
+                    }
+                } catch (e) {
+                    break
+                }
+            }
+            """, """
+            1
+            2
+            3
+            """);
+    }
+
+    @Test
+    public void testBuiltinThrow() {
+        verify("""
+            Console.println('begin')
+            try {
+                Console.println('hello'.charAt(10))
+            } catch (e) {
+                Console.println('catch')
+            }
+            Console.println('end')
+            """, """
+            begin
+            catch
+            end
+            """);
+        verify("""
+            Console.println('begin')
+            try {
+                Console.println('hello'.charAt(1))
+            } catch (e) {
+                Console.println('catch')
+            }
+            Console.println('end')
+            """, """
+            begin
+            e
+            end
+            """);
     }
 
     @Test
@@ -1600,5 +1791,21 @@ public class ByxScriptTest {
         TimeUnit.SECONDS.sleep(1);
         t.interrupt();
         t.join();
+    }
+
+    @Test
+    public void testStackOverflow() {
+        verify("""
+            func sum(n) {
+                if (n == 1) {
+                    return 1
+                }
+                return sum(n - 1) + n
+            }
+            
+            Console.println(sum(10000))
+            """, """
+            50005000
+            """);
     }
 }

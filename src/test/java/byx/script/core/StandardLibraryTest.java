@@ -316,7 +316,7 @@ public class StandardLibraryTest {
     public void testMath() {
         verify("""
                 import math
-                                
+
                 Console.println(Math.abs(15))
                 Console.println(Math.abs(-3.14))
                 Console.println(Math.sin(10))

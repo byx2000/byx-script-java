@@ -12,7 +12,7 @@ public class SampleTest {
                 func TreeNode(val, left, right) {
                     return {val, left, right}
                 }
-                                
+
                 // 前序遍历
                 func preorderTraverse(root) {
                     var result = []
@@ -27,7 +27,7 @@ public class SampleTest {
                     doTraverse(root)
                     return result
                 }
-                                
+
                 // 中序遍历
                 func inorderTraverse(root) {
                     var result = []
@@ -42,7 +42,7 @@ public class SampleTest {
                     doTraverse(root)
                     return result
                 }
-                                
+
                 // 后序遍历
                 func postorderTraverse(root) {
                     var result = []
@@ -57,7 +57,7 @@ public class SampleTest {
                     doTraverse(root)
                     return result
                 }
-                                
+
                 // 层序遍历
                 func levelTraverse(root) {
                     var result = []
@@ -77,9 +77,9 @@ public class SampleTest {
                     }
                     return result
                 }
-                                
+
                 var root = TreeNode(1, TreeNode(2, TreeNode(4, TreeNode(7), null), TreeNode(5)), TreeNode(3, null, TreeNode(6)))
-                                
+
                 Console.println(preorderTraverse(root))
                 Console.println(inorderTraverse(root))
                 Console.println(postorderTraverse(root))
@@ -103,20 +103,20 @@ public class SampleTest {
                         return cnt
                     }
                 }
-                                
+
                 var c1 = SimpleCounter()
                 Console.println(c1())
                 Console.println(c1())
                 Console.println(c1())
-                                
+
                 var c2 = SimpleCounter()
                 Console.println(c2())
                 Console.println(c2())
                 Console.println(c2())
-                                
+
                 Console.println(c1())
                 Console.println(c2())
-                                
+
                 // 计数器
                 func Counter(init) {
                     var cnt = init
@@ -129,7 +129,7 @@ public class SampleTest {
                         dec: () => {cnt--}
                     }
                 }
-                                
+
                 var c3 = Counter(100)
                 Console.println(c3.current()) // 100
                 c3.inc()
@@ -140,7 +140,7 @@ public class SampleTest {
                 Console.println(c3.current()) // 101
                 c3.dec()
                 Console.println(c3.current()) // 100
-                                
+
                 var c4 = Counter(200)
                 Console.println(c4.current()) // 200
                 c4.inc()
@@ -182,7 +182,7 @@ public class SampleTest {
                     }
                     return n * factorial(n - 1)
                 }
-                                
+
                 Console.println(factorial(10))
                 """, """
                 3628800
@@ -198,14 +198,14 @@ public class SampleTest {
                     }
                     return fib1(n - 1) + fib1(n - 2)
                 }
-                                
+
                 func fib2(n) {
                     if (n == 1 || n == 2) {
                         return 1
                     }
                     return fib2(n - 1) + fib2(n - 2)
                 }
-                                
+
                 Console.println(fib1(10))
                 Console.println(fib1(20))
                 Console.println(fib2(10))
@@ -230,14 +230,14 @@ public class SampleTest {
                         }
                     }
                 }
-                                
+
                 var mat = [
                     [1, 2, 3],
                     [4, 5, 6],
                     [7, 8, 9]
                 ]
                 transpose(mat)
-                                
+
                 for (var i = 0; i < mat.length(); ++i) {
                     Console.println(mat[i])
                 }
@@ -257,7 +257,7 @@ public class SampleTest {
                     func merge(left, mid, right) {
                         var i = left
                         var j = mid + 1
-                       
+
                         for (var k = left; k <= right; k++) {
                             if (i > mid) {
                                 temp[k] = nums[j]
@@ -273,12 +273,12 @@ public class SampleTest {
                                 j = j + 1
                             }
                         }
-                       
+
                         for (var k = left; k <= right; ++k) {
                             nums[k] = temp[k]
                         }
                     }
-                   
+
                     func sort(left, right) {
                         if (left >= right) {
                             return
@@ -288,10 +288,10 @@ public class SampleTest {
                         sort(mid + 1, right)
                         merge(left, mid, right)
                     }
-                   
+
                     sort(0, nums.length() - 1)
                 }
-                   
+
                 var nums = [3, 2, 1, 5, 4, 6, 9, 7, 8]
                 MergeSort(nums)
                 Console.println(nums)
@@ -317,7 +317,7 @@ public class SampleTest {
                         dfs(r, c - 1)
                         dfs(r, c + 1)
                     }
-                   
+
                     var cnt = 0
                     for (var i = 0; i < map.length(); ++i) {
                         for (var j = 0; j < map[i].length(); ++j) {
@@ -329,7 +329,7 @@ public class SampleTest {
                     }
                     return cnt
                 }
-                                
+
                 var map1 = [
                     ['1', '1', '1', '1', '0'],
                     ['1', '1', '0', '1', '0'],
@@ -337,7 +337,7 @@ public class SampleTest {
                     ['0', '0', '0', '0', '0']
                 ]
                 Console.println(numberOfIslands(map1))
-                                
+
                 var map2 = [
                     ['1', '1', '0', '0', '0'],
                     ['1', '1', '0', '0', '0'],
@@ -366,7 +366,7 @@ public class SampleTest {
                             return false
                         }
                     }
-                 
+
                     var maxLen = -1
                     for (var i = 0; i < s.length(); i++) {
                         for (var j = i; j < s.length(); j++) {
@@ -375,15 +375,15 @@ public class SampleTest {
                             }
                         }
                     }
-                                
+
                     return maxLen
                 }
-                   
+
                 Console.println(LongestPalindrome1('babad'))
                 Console.println(LongestPalindrome1('cbbd'))
                 Console.println(LongestPalindrome1('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
                 Console.println(LongestPalindrome1('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
-                                
+
                 func LongestPalindrome2(s) {
                     var cache = []
                     for (var i = 0; i < s.length(); ++i) {
@@ -392,12 +392,12 @@ public class SampleTest {
                             cache[i].addLast(null)
                         }
                     }
-                     
+
                     func isPalindrome(i, j) {
                         if (cache[i][j] != null) {
                             return cache[i][j]
                         }
-                 
+
                         if (i == j) {
                             cache[i][j] = true
                         } else if (i + 1 == j) {
@@ -407,10 +407,10 @@ public class SampleTest {
                         } else {
                             cache[i][j] = false
                         }
-                 
+
                         return cache[i][j]
                     }
-                 
+
                     var maxLen = -1
                     for (var i = 0; i < s.length(); ++i) {
                         for (var j = i; j < s.length(); ++j) {
@@ -419,7 +419,7 @@ public class SampleTest {
                             }
                         }
                     }
-                                
+
                     return maxLen
                 }
                 
@@ -444,19 +444,19 @@ public class SampleTest {
         verify("""
                 func permutation(nums) {
                     var result = []
-                               
+
                     var book = []
                     for (var i = 0; i < nums.length(); i++) {
                         book.addLast(false)
                     }
-                               
+
                     var p = []
                     func dfs(index) {
                         if (index == nums.length()) {
                             result.addLast(p.copy())
                             return
                         }
-                               
+
                         for (var i = 0; i < nums.length(); ++i) {
                             if (!book[i]) {
                                 book[i] = true
@@ -467,12 +467,12 @@ public class SampleTest {
                             }
                         }
                     }
-                               
+
                     dfs(0)
-                               
+
                     return result
                 }
-                                
+
                 var result = permutation([1, 2, 3])
                 for (var i = 0; i < result.length(); ++i) {
                     Console.println(result[i])
@@ -495,7 +495,7 @@ public class SampleTest {
                     nums[i] = nums[j]
                     nums[j] = t
                 }
-                                
+
                 func partition(nums, left, right) {
                     var i = left + 1
                     var j = right
@@ -509,7 +509,7 @@ public class SampleTest {
                     swap(nums, left, j)
                     return j
                 }
-                                
+
                 func qsort(nums, left, right) {
                     if (left >= right) {
                         return
@@ -518,15 +518,14 @@ public class SampleTest {
                     qsort(nums, left, mid - 1)
                     qsort(nums, mid + 1, right)
                 }
-                                
+
                 var nums1 = [3, 2, 1, 5, 4, 6, 9, 7, 8]
                 qsort(nums1, 0, nums1.length() - 1)
                 Console.println(nums1)
-                                
+
                 var nums2 = [2, 4, 3, 2, 5, 7]
                 qsort(nums2, 0, nums2.length() - 1)
                 Console.println(nums2)
-                                
                 """, """
                 [1, 2, 3, 4, 5, 6, 7, 8, 9]
                 [2, 2, 3, 4, 5, 7]
@@ -543,7 +542,7 @@ public class SampleTest {
                         next: next
                     }
                 }
-                                
+
                 // 将链表转换为list
                 func toList(head) {
                     var result = []
@@ -557,7 +556,7 @@ public class SampleTest {
                     traverse(head)
                     return result
                 }
-                                
+
                 // 反转链表
                 func reverse(head) {
                     if (head == null || head.next == null) {
@@ -569,7 +568,7 @@ public class SampleTest {
                     head.next = null
                     return q
                 }
-                                
+
                 var head = LinkedList(1, LinkedList(2, LinkedList(3, LinkedList(4, LinkedList(5)))))
                 Console.println(toList(head))
                 Console.println(toList(reverse(head)))
@@ -593,7 +592,7 @@ public class SampleTest {
                         j--
                     }
                 }
-                                
+
                 var nums1 = [1, 2, 3, 4, 5]
                 reverse(nums1)
                 Console.println(nums1)
@@ -620,10 +619,10 @@ public class SampleTest {
                         }
                     }
                 }
-                                
+
                 var nums = [3, 2, 1, 5, 4, 6, 9, 7, 8]
                 SelectionSort(nums)
-                                
+
                 for (var i = 0; i < nums.length(); ++i) {
                     Console.print(nums[i] + ' ')
                 }
@@ -643,7 +642,7 @@ public class SampleTest {
                         top: () => elems[elems.length() - 1]
                     }
                 }
-                                
+
                 var stack = Stack()
                 stack.push(1)
                 stack.push(2)
@@ -680,7 +679,7 @@ public class SampleTest {
                     }
                     return result
                 }
-                                
+
                 Console.println(stringToInt('0'))
                 Console.println(stringToInt('2'))
                 Console.println(stringToInt('123'))
@@ -698,24 +697,24 @@ public class SampleTest {
         verify("""
                 func SubSet(nums) {
                     var result = []
-                               
+
                     func dfs(index, set) {
                         if (index == nums.length()) {
                             result.addLast(set.copy())
                             return
                         }
-                               
+
                         dfs(index + 1, set)
-                               
+
                         set.addLast(nums[index])
                         dfs(index + 1, set)
                         set.removeLast()
                     }
-                               
+
                     dfs(0, [])
                     return result
                 }
-                                
+
                 var result = SubSet([1, 2, 3])
                 for (var i = 0; i < result.length(); i++) {
                     Console.println(result[i])
@@ -745,7 +744,7 @@ public class SampleTest {
                     }
                     return undefined
                 }
-                                
+
                 Console.println(twoSum([2, 7, 11, 15], 9))
                 Console.println(twoSum([3, 2, 4], 6))
                 Console.println(twoSum([3, 3], 6))
