@@ -10,171 +10,188 @@ import byx.script.core.parser.ast.stmt.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static byx.script.core.interpreter.GuardUtils.*;
-
 public class ByxScriptEvaluator {
     private static final ThreadLocal<FunctionStack> FUNCTION_STACK_HOLDER = new ThreadLocal<>();
 
     private record TryContext(
         String catchVar,
         Statement catchBody,
-        Runnable contAfterTry,
+        Consumer<Void> contAfterTry,
         Scope scope,
         FunctionFrame frame,
-        Runnable breakCont,
-        Runnable continueCont
+        Consumer<Void> breakCont,
+        Consumer<Void> continueCont
     ) {}
     private static final ThreadLocal<ArrayDeque<TryContext>> TRY_STACK_HOLDER = new ThreadLocal<>();
 
     public static void execute(Program program, Scope scope) {
         FUNCTION_STACK_HOLDER.set(new FunctionStack());
         TRY_STACK_HOLDER.set(new ArrayDeque<>());
-        run(() -> execStmtList(program.stmts(), scope, () -> {}), 1000);
+        execStmtList(program.stmts(), scope).run(v -> {});
         FUNCTION_STACK_HOLDER.remove();
         TRY_STACK_HOLDER.remove();
     }
 
-    private static void evalExpr(Expr node, Scope scope, Consumer<Value> cont) {
-        guard(() -> evalExpr(node, scope, cont));
+    private static Cont<Value> evalExpr(Expr node, Scope scope) {
         checkThreadInterrupt();
 
         if (node instanceof Literal n) {
-            cont.accept(n.value());
+            return Cont.value(n.value());
         } else if (node instanceof ListLiteral n) {
-            evalExprList(n.elems(), scope, wrap(values -> cont.accept(new ListValue(values))));
+            return evalExprList(n.elems(), scope).map(ListValue::new);
         } else if (node instanceof ObjectLiteral n) {
-            evalObjectLiteral(new ArrayList<>(n.fields().entrySet()), new HashMap<>(), 0, scope, cont);
+            return evalObjectLiteral(new ArrayList<>(n.fields().entrySet()), new HashMap<>(), 0, scope);
         } else if (node instanceof CallableLiteral n) {
-            cont.accept(makeCallableValue(n, scope));
+            return Cont.value(makeCallableValue(n, scope));
         } else if (node instanceof Var n) {
-            cont.accept(scope.getVar(n.varName()));
+            return Cont.value(scope.getVar(n.varName()));
         } else if (node instanceof UnaryExpr n) {
-            evalExpr(n.expr(), scope, wrap(v -> {
-                switch (n.op()) {
-                    case Not -> cont.accept(evalNot(v));
-                    case Neg -> cont.accept(evalNeg(v));
-                }
-            }));
+            return evalExpr(n.expr(), scope)
+                .map(v -> switch (n.op()) {
+                    case Not -> evalNot(v);
+                    case Neg -> evalNeg(v);
+                });
         } else if (node instanceof BinaryExpr n) {
             Expr lhs = n.lhs();
             Expr rhs = n.rhs();
-            switch (n.op()) {
-                case Add -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalAdd(v1, v2))))));
-                case Sub -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalSub(v1, v2))))));
-                case Mul -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalMul(v1, v2))))));
-                case Div -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalDiv(v1, v2))))));
-                case Rem -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalRem(v1, v2))))));
-                case LessThan -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalLessThan(v1, v2))))));
-                case LessEqualThan -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalLessEqualThan(v1, v2))))));
-                case GreaterThan -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalGreaterThan(v1, v2))))));
-                case GreaterEqualThan -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalGreaterEqualThan(v1, v2))))));
-                case Equal -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalEqual(v1, v2))))));
-                case NotEqual -> evalExpr(lhs, scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> cont.accept(evalNotEqual(v1, v2))))));
-                case And -> evalAnd(lhs, rhs, scope, cont);
-                case Or -> evalOr(lhs, rhs, scope, cont);
-            }
+            return switch (n.op()) {
+                case Add -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalAdd(v1, v2)));
+                case Sub -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalSub(v1, v2)));
+                case Mul -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalMul(v1, v2)));
+                case Div -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalDiv(v1, v2)));
+                case Rem -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalRem(v1, v2)));
+                case LessThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalLessThan(v1, v2)));
+                case LessEqualThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalLessEqualThan(v1, v2)));
+                case GreaterThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalGreaterThan(v1, v2)));
+                case GreaterEqualThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalGreaterEqualThan(v1, v2)));
+                case Equal -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalEqual(v1, v2)));
+                case NotEqual -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalNotEqual(v1, v2)));
+                case And -> evalAnd(lhs, rhs, scope);
+                case Or -> evalOr(lhs, rhs, scope);
+            };
         } else if (node instanceof FieldAccess n) {
-            evalExpr(n.expr(), scope, wrap(v -> cont.accept(getField(v, n.field()))));
+            return evalExpr(n.expr(), scope)
+                .map(v -> getField(v, n.field()));
         } else if (node instanceof Subscript n) {
-            evalExpr(n.expr(), scope, wrap(v -> evalExpr(n.subscript(), scope, wrap(s -> cont.accept(evalSubscript(v, s))))));
+            return evalExpr(n.expr(), scope)
+                .flatMap(v -> evalExpr(n.subscript(), scope)
+                    .map(s -> evalSubscript(v, s)));
         } else if (node instanceof Call n) {
-            evalExpr(n.expr(), scope, wrap(callee -> evalExprList(n.args(), scope, wrap(args -> evalCall(callee, args, cont)))));
-        } else {
-            throw new ByxScriptRuntimeException("unknown expression type: " + node);
+            return evalExpr(n.expr(), scope)
+                .flatMap(callee -> evalExprList(n.args(), scope)
+                    .flatMap(args -> evalCall(callee, args)));
         }
+
+        throw new ByxScriptRuntimeException("unknown expression type: " + node);
     }
 
-    private static void execStmt(Statement node, Scope scope, Runnable cont) {
-        guard(() -> execStmt(node, scope, cont));
+    private static Cont<Void> execStmt(Statement node, Scope scope) {
         checkThreadInterrupt();
 
         FunctionStack functionStack = FUNCTION_STACK_HOLDER.get();
         FunctionFrame frame = functionStack.peek();
 
         if (node instanceof VarDeclare n) {
-            evalExpr(n.value(), scope, wrap(v -> {
+            return evalExpr(n.value(), scope).map(v -> {
                 scope.declareVar(n.varName(), v);
-                cont.run();
-            }));
+                return null;
+            });
         } else if (node instanceof Assign n) {
             Expr lhs = n.lhs();
             Expr rhs = n.rhs();
             if (lhs instanceof Var e) {
                 // 变量赋值
-                evalExpr(rhs, scope, wrap(v -> {
+                return evalExpr(rhs, scope).map(v -> {
                     scope.setVar(e.varName(), v);
-                    cont.run();
-                }));
+                    return null;
+                });
             } else if (lhs instanceof FieldAccess e) {
                 // 字段赋值
-                evalExpr(e.expr(), scope, wrap(v1 -> evalExpr(rhs, scope, wrap(v2 -> {
-                    setField(v1, e.field(), v2);
-                    cont.run();
-                }))));
+                return evalExpr(e.expr(), scope).flatMap(v1 ->
+                    evalExpr(rhs, scope).map(v2 -> {
+                        setField(v1, e.field(), v2);
+                        return null;
+                    }));
             } else if (lhs instanceof Subscript e) {
                 // 数组下标赋值
-                evalExpr(e.expr(), scope, wrap(v1 -> evalExpr(e.subscript(), scope, wrap(v2 -> evalExpr(rhs, scope, wrap(v3 -> {
-                    setSubscript(v1, v2, v3);
-                    cont.run();
-                }))))));
+                return evalExpr(e.expr(), scope).flatMap(v1 ->
+                    evalExpr(e.subscript(), scope).flatMap(v2 ->
+                        evalExpr(rhs, scope).map(v3 -> {
+                            setSubscript(v1, v2, v3);
+                            return null;
+                        })));
             }
         } else if (node instanceof If n) {
-            execIf(n, 0, scope, cont);
+            return execIf(n, 0, scope);
         } else if (node instanceof For n) {
-            frame.pushBreakStack(cont);
-            Scope newScope = new Scope(scope);
-            frame.pushContinueStack(wrap(() -> execStmt(n.update(), newScope, wrap(() -> execFor(n, newScope, wrap(() -> {
-                frame.popBreakStack();
-                frame.popContinueStack();
-                cont.run();
-            }))))));
-            execStmt(n.init(), newScope, wrap(() -> execFor(n, newScope, wrap(() -> {
-                frame.popBreakStack();
-                frame.popContinueStack();
-                cont.run();
-            }))));
+            return cont -> {
+                frame.pushBreakStack(cont);
+                Scope newScope = new Scope(scope);
+                frame.pushContinueStack(vv -> execStmt(n.update(), newScope)
+                    .flatMap(v -> execFor(n, newScope))
+                    .map(v -> {
+                        frame.popBreakStack();
+                        frame.popContinueStack();
+                        return (Void) null;
+                    }).run(cont));
+                execStmt(n.init(), newScope)
+                    .flatMap(v -> execFor(n, newScope))
+                    .map(v -> {
+                        frame.popBreakStack();
+                        frame.popContinueStack();
+                        return (Void) null;
+                    }).run(cont);
+            };
         } else if (node instanceof While n) {
-            frame.pushBreakStack(cont);
-            frame.pushContinueStack(wrap(() -> execWhile(n, scope, wrap(() -> {
-                frame.popBreakStack();
-                frame.popContinueStack();
-                cont.run();
-            }))));
-            execWhile(n, scope, wrap(() -> {
-                frame.popBreakStack();
-                frame.popContinueStack();
-                cont.run();
-            }));
+            return cont -> {
+                frame.pushBreakStack(cont);
+                frame.pushContinueStack(vv -> execWhile(n, scope).map(v -> {
+                    frame.popBreakStack();
+                    frame.popContinueStack();
+                    return (Void) null;
+                }).run(cont));
+                execWhile(n, scope).map(v -> {
+                    frame.popBreakStack();
+                    frame.popContinueStack();
+                    return (Void) null;
+                }).run(cont);
+            };
         } else if (node instanceof Block n) {
-            execStmtList(n.stmts(), new Scope(scope), cont);
+            return execStmtList(n.stmts(), new Scope(scope));
         } else if (node instanceof Break) {
-            if (frame.isBreakStackEmpty()) {
-                throw new ByxScriptRuntimeException("break statement only allow in loop");
-            }
-            frame.popBreakStack().run();
+            return cont -> {
+                if (frame.isBreakStackEmpty()) {
+                    throw new ByxScriptRuntimeException("break statement only allow in loop");
+                }
+                frame.popBreakStack().accept(null);
+            };
         } else if (node instanceof Continue) {
-            if (frame.isContinueStackEmpty()) {
-                throw new ByxScriptRuntimeException("continue statement only allow in loop");
-            }
-            frame.peekContinueStack().run();
+            return cont -> {
+                if (frame.isContinueStackEmpty()) {
+                    throw new ByxScriptRuntimeException("continue statement only allow in loop");
+                }
+                frame.peekContinueStack().accept(null);
+            };
         } else if (node instanceof Return n) {
-            evalExpr(n.retVal(), scope, wrap(v -> {
+            return evalExpr(n.retVal(), scope).flatMap(v -> cont -> {
                 if (functionStack.isEmpty()) {
                     throw new ByxScriptRuntimeException("return statement only allow in function");
                 }
                 functionStack.pop().getReturnCont().accept(v);
-            }));
+            });
         } else if (node instanceof ExprStatement n) {
-            evalExpr(n.expr(), scope, wrap(v -> cont.run()));
+            return evalExpr(n.expr(), scope).map(v -> null);
         } else if (node instanceof Try n) {
-            TRY_STACK_HOLDER.get().push(new TryContext(n.catchVar(), n.catchBody(), cont, scope, frame,
-                frame.peekBreakStack(), frame.peekContinueStack()));
-            execStmt(n.tryBody(), scope, cont);
+            return cont -> {
+                TRY_STACK_HOLDER.get().push(new TryContext(n.catchVar(), n.catchBody(), cont, scope, frame,
+                    frame.peekBreakStack(), frame.peekContinueStack()));
+                execStmt(n.tryBody(), scope).run(cont);
+            };
         } else if (node instanceof Throw n) {
-            evalExpr(n.expr(), scope, wrap(ByxScriptEvaluator::execThrow));
-        } else {
-            throw new ByxScriptRuntimeException("unknown statement type: " + node);
+            return evalExpr(n.expr(), scope).flatMap(ByxScriptEvaluator::execThrow);
         }
+
+        throw new ByxScriptRuntimeException("unknown statement type: " + node);
     }
 
     // 检测线程中断状态
@@ -184,134 +201,124 @@ public class ByxScriptEvaluator {
         }
     }
 
-    private static void doEvalExprList(List<Expr> exprs, List<Value> values, int i, Scope scope, Consumer<List<Value>> cont) {
-        guard(() -> doEvalExprList(exprs, values, i, scope, cont));
+    private static Cont<List<Value>> doEvalExprList(List<Expr> exprs, List<Value> values, int i, Scope scope) {
         if (i == exprs.size()) {
-            cont.accept(values);
+            return Cont.value(values);
         } else {
-            evalExpr(exprs.get(i), scope, wrap(v -> {
+            return evalExpr(exprs.get(i), scope).flatMap(v -> {
                 values.add(v);
-                doEvalExprList(exprs, values, i + 1, scope, cont);
-            }));
+                return doEvalExprList(exprs, values, i + 1, scope);
+            });
         }
     }
 
-    private static void evalExprList(List<Expr> exprs, Scope scope, Consumer<List<Value>> cont) {
-        guard(() -> evalExprList(exprs, scope, cont));
-        doEvalExprList(exprs, new ArrayList<>(), 0, scope, cont);
+    private static Cont<List<Value>> evalExprList(List<Expr> exprs, Scope scope) {
+        return doEvalExprList(exprs, new ArrayList<>(), 0, scope);
     }
 
-    private static void evalObjectLiteral(List<Map.Entry<String, Expr>> entries, Map<String, Value> fields, int i, Scope scope, Consumer<Value> cont) {
-        guard(() -> evalObjectLiteral(entries, fields, i, scope, cont));
+    private static Cont<Value> evalObjectLiteral(List<Map.Entry<String, Expr>> entries, Map<String, Value> fields, int i, Scope scope) {
         if (i == entries.size()) {
-            cont.accept(new ObjectValue(fields));
+            return Cont.value(new ObjectValue(fields));
         } else {
             Map.Entry<String, Expr> entry = entries.get(i);
             String key = entry.getKey();
             Expr e = entry.getValue();
-            evalExpr(e, scope, wrap(v -> {
+            return evalExpr(e, scope).flatMap(v -> {
                 fields.put(key, v);
-                evalObjectLiteral(entries, fields, i + 1, scope, cont);
-            }));
+                return evalObjectLiteral(entries, fields, i + 1, scope);
+            });
         }
     }
 
-    private static void execIf(If node, int i, Scope scope, Runnable cont) {
-        guard(() -> execIf(node, i, scope, cont));
+    private static Cont<Void> execIf(If node, int i, Scope scope) {
         if (i == node.cases().size()) {
-            execStmt(node.elseBranch(), scope, cont);
+            return execStmt(node.elseBranch(), scope);
         } else {
             Pair<Expr, Statement> p = node.cases().get(i);
-            evalExpr(p.first(), scope, wrap(v -> {
+            return evalExpr(p.first(), scope).flatMap(v -> {
                 if (getCondition(v)) {
-                    execStmt(p.second(), scope, cont);
+                    return execStmt(p.second(), scope);
                 } else {
-                    execIf(node, i + 1, scope, cont);
+                    return execIf(node, i + 1, scope);
                 }
-            }));
+            });
         }
     }
 
-    private static void execFor(For node, Scope scope, Runnable cont) {
-        guard(() -> execFor(node, scope, cont));
-        evalExpr(node.cond(), scope, wrap(v -> {
+    private static Cont<Void> execFor(For node, Scope scope) {
+        return evalExpr(node.cond(), scope).flatMap(v -> {
             if (getCondition(v)) {
-                execStmt(node.body(), scope,
-                    wrap(() -> execStmt(node.update(), scope,
-                        wrap(() -> execFor(node, scope, cont)))));
+                return execStmt(node.body(), scope)
+                    .flatMap(x -> execStmt(node.update(), scope))
+                    .flatMap(x -> execFor(node, scope));
             } else {
-                cont.run();
+                return Cont.value(null);
             }
-        }));
+        });
     }
 
-    private static void execWhile(While node, Scope scope, Runnable cont) {
-        guard(() -> execWhile(node, scope, cont));
-        evalExpr(node.cond(), scope, wrap(v -> {
+    private static Cont<Void> execWhile(While node, Scope scope) {
+        return evalExpr(node.cond(), scope).flatMap(v -> {
             if (getCondition(v)) {
-                execStmt(node.body(), scope, wrap(() -> execWhile(node, scope, cont)));
+                return execStmt(node.body(), scope)
+                    .flatMap(x -> execWhile(node, scope));
             } else {
-                cont.run();
+                return Cont.value(null);
             }
-        }));
+        });
     }
 
-    private static void execStmtList(List<Statement> stmts, Scope scope, Runnable cont) {
-        guard(() -> execStmtList(stmts, scope, cont));
-        doExecStmtList(stmts, 0, scope, cont);
+    private static Cont<Void> execStmtList(List<Statement> stmts, Scope scope) {
+        return doExecStmtList(stmts, 0, scope);
     }
 
-    private static void doExecStmtList(List<Statement> stmts, int i, Scope scope, Runnable cont) {
-        guard(() -> doExecStmtList(stmts, i, scope, cont));
+    private static Cont<Void> doExecStmtList(List<Statement> stmts, int i, Scope scope) {
         if (i == stmts.size()) {
-            cont.run();
+            return Cont.value(null);
         } else {
-            execStmt(stmts.get(i), scope, wrap(() -> doExecStmtList(stmts, i + 1, scope, cont)));
+            return execStmt(stmts.get(i), scope)
+                .flatMap(x -> doExecStmtList(stmts, i + 1, scope));
         }
     }
 
-    private static void execThrow(Value valueToThrow) {
-        // 找到throw对应的try语句上下文
-        ArrayDeque<TryContext> tryStack = TRY_STACK_HOLDER.get();
-        if (tryStack.isEmpty()) {
-            throw new ByxScriptRuntimeException("uncaught exception from script: " + valueToThrow);
-        }
-        TryContext tryContext = tryStack.pop();
-        Scope newScope = new Scope(tryContext.scope);
-        newScope.declareVar(tryContext.catchVar, valueToThrow);
+    private static Cont<Void> execThrow(Value valueToThrow) {
+        return cont -> {
+            // 找到throw对应的try语句上下文
+            ArrayDeque<TryContext> tryStack = TRY_STACK_HOLDER.get();
+            if (tryStack.isEmpty()) {
+                throw new ByxScriptRuntimeException("uncaught exception from script: " + valueToThrow);
+            }
+            TryContext tryContext = tryStack.pop();
+            Scope newScope = new Scope(tryContext.scope);
+            newScope.declareVar(tryContext.catchVar, valueToThrow);
 
-        // 弹出函数帧
-        FunctionStack functionStack = FUNCTION_STACK_HOLDER.get();
-        functionStack.popUntil(tryContext.frame);
-        FunctionFrame frame = functionStack.peek();
-        frame.popBreakStackUntil(tryContext.breakCont);
-        frame.popContinueStackUntil(tryContext.continueCont);
+            // 弹出函数帧
+            FunctionStack functionStack = FUNCTION_STACK_HOLDER.get();
+            functionStack.popUntil(tryContext.frame);
+            FunctionFrame frame = functionStack.peek();
+            frame.popBreakStackUntil(tryContext.breakCont);
+            frame.popContinueStackUntil(tryContext.continueCont);
 
-        // 执行catch分支
-        execStmt(tryContext.catchBody, newScope, wrap(tryContext.contAfterTry));
+            // 执行catch分支
+            execStmt(tryContext.catchBody, newScope).run(tryContext.contAfterTry);
+        };
     }
 
     private static CallableValue makeCallableValue(CallableLiteral node, Scope scope) {
         List<String> params = node.params();
         Statement body = node.body();
-        return new CallableValue() {
-            @Override
-            public void accept(List<Value> args, Consumer<Value> cont) {
-                guard(() -> this.accept(args, cont));
-
-                // 传递实参
-                Scope newScope = new Scope(scope);
-                for (int i = 0; i < params.size(); ++i) {
-                    if (i < args.size()) {
-                        newScope.declareVar(params.get(i), args.get(i));
-                    } else {
-                        newScope.declareVar(params.get(i), NullValue.INSTANCE);
-                    }
+        return args -> {
+            // 传递实参
+            Scope newScope = new Scope(scope);
+            for (int i = 0; i < params.size(); ++i) {
+                if (i < args.size()) {
+                    newScope.declareVar(params.get(i), args.get(i));
+                } else {
+                    newScope.declareVar(params.get(i), NullValue.INSTANCE);
                 }
-
-                // 执行函数体
-                execStmt(body, newScope, wrap(() -> cont.accept(NullValue.INSTANCE)));
             }
+
+            return execStmt(body, newScope).map(v -> NullValue.INSTANCE);
         };
     }
 
@@ -566,58 +573,54 @@ public class ByxScriptEvaluator {
         return BoolValue.TRUE;
     }
 
-    private static void evalAnd(Expr lhs, Expr rhs, Scope scope, Consumer<Value> cont) {
-        guard(() -> evalAnd(lhs, rhs, scope, cont));
-        evalExpr(lhs, scope, wrap(v1 -> {
+    private static Cont<Value> evalAnd(Expr lhs, Expr rhs, Scope scope) {
+        return evalExpr(lhs, scope).flatMap(v1 -> {
             // 实现短路特性
             if (v1 instanceof BoolValue v && !v.getValue()) {
-                cont.accept(BoolValue.FALSE);
-                return;
+                return Cont.value(BoolValue.FALSE);
             }
 
-            evalExpr(rhs, scope, wrap(v2 -> {
+            return evalExpr(rhs, scope).map(v2 -> {
                 if (v1 instanceof BoolValue b1 && v2 instanceof BoolValue b2) {
-                    cont.accept(BoolValue.of(b1.getValue() && b2.getValue()));
-                    return;
+                    return BoolValue.of(b1.getValue() && b2.getValue());
                 }
 
                 throw buildBinaryOpUnsupportedException("&&", v1, v2);
-            }));
-        }));
+            });
+        });
     }
 
-    private static void evalOr(Expr lhs, Expr rhs, Scope scope, Consumer<Value> cont) {
-        guard(() -> evalOr(lhs, rhs, scope, cont));
-        evalExpr(lhs, scope, wrap(v1 -> {
+    private static Cont<Value> evalOr(Expr lhs, Expr rhs, Scope scope) {
+        return evalExpr(lhs, scope).flatMap(v1 -> {
             // 实现短路特性
             if (v1 instanceof BoolValue v && v.getValue()) {
-                cont.accept(BoolValue.TRUE);
-                return;
+                return Cont.value(BoolValue.TRUE);
             }
 
-            evalExpr(rhs, scope, wrap(v2 -> {
+            return evalExpr(rhs, scope).map(v2 -> {
                 if (v1 instanceof BoolValue b1 && v2 instanceof BoolValue b2) {
-                    cont.accept(BoolValue.of(b1.getValue() || b2.getValue()));
-                    return;
+                    return BoolValue.of(b1.getValue() || b2.getValue());
                 }
 
                 throw buildBinaryOpUnsupportedException("||", v1, v2);
-            }));
-        }));
+            });
+        });
     }
 
-    private static void evalCall(Value v, List<Value> args, Consumer<Value> cont) {
+    private static Cont<Value> evalCall(Value v, List<Value> args) {
         if (v instanceof CallableValue c) {
-            FunctionStack functionStack = FUNCTION_STACK_HOLDER.get();
-            functionStack.push(cont);
-            try {
-                c.accept(args, wrap(r -> {
-                    functionStack.pop();
-                    cont.accept(r);
-                }));
-            } catch (BuiltinFunctionException e) {
-                execThrow(e.getValue());
-            }
+            return cont -> {
+                FunctionStack functionStack = FUNCTION_STACK_HOLDER.get();
+                functionStack.push(cont);
+                try {
+                    c.apply(args).map(vv -> {
+                        functionStack.pop();
+                        return vv;
+                    }).run(cont);
+                } catch (BuiltinFunctionException e) {
+                    execThrow(e.getValue()).run(x -> {});
+                }
+            };
         } else {
             throw new ByxScriptRuntimeException(String.format("%s is not callable", v.typeId()));
         }

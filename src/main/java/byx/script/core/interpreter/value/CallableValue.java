@@ -1,10 +1,11 @@
 package byx.script.core.interpreter.value;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import byx.script.core.interpreter.Cont;
 
-public interface CallableValue extends Value, BiConsumer<List<Value>, Consumer<Value>> {
+import java.util.List;
+import java.util.function.Function;
+
+public interface CallableValue extends Value, Function<List<Value>, Cont<Value>> {
     @Override
     default String typeId() {
         return "callable";
