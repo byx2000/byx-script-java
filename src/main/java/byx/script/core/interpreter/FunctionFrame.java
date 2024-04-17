@@ -7,8 +7,8 @@ import java.util.function.Consumer;
 
 public class FunctionFrame {
     private final Consumer<Value> returnCont;
-    private final ArrayDeque<Runnable> breakStack = new ArrayDeque<>();
-    private final ArrayDeque<Runnable> continueStack = new ArrayDeque<>();
+    private final ArrayDeque<Consumer<Void>> breakStack = new ArrayDeque<>();
+    private final ArrayDeque<Consumer<Void>> continueStack = new ArrayDeque<>();
 
     public FunctionFrame(Consumer<Value> returnCont) {
         this.returnCont = returnCont;
@@ -22,21 +22,21 @@ public class FunctionFrame {
         return breakStack.isEmpty();
     }
 
-    public Runnable peekBreakStack() {
+    public Consumer<Void> peekBreakStack() {
         return breakStack.peek();
     }
 
-    public Runnable popBreakStack() {
+    public Consumer<Void> popBreakStack() {
         return breakStack.pop();
     }
 
-    public void popBreakStackUntil(Runnable cont) {
+    public void popBreakStackUntil(Consumer<Void> cont) {
         while (!breakStack.isEmpty() && breakStack.peek() != cont) {
             breakStack.pop();
         }
     }
 
-    public void pushBreakStack(Runnable cont) {
+    public void pushBreakStack(Consumer<Void> cont) {
         breakStack.push(cont);
     }
 
@@ -44,21 +44,21 @@ public class FunctionFrame {
         return continueStack.isEmpty();
     }
 
-    public Runnable peekContinueStack() {
+    public Consumer<Void> peekContinueStack() {
         return continueStack.peek();
     }
 
-    public Runnable popContinueStack() {
+    public Consumer<Void> popContinueStack() {
         return continueStack.pop();
     }
 
-    public void popContinueStackUntil(Runnable cont) {
+    public void popContinueStackUntil(Consumer<Void> cont) {
         while (!continueStack.isEmpty() && continueStack.peek() != cont) {
             continueStack.pop();
         }
     }
 
-    public void pushContinueStack(Runnable cont) {
+    public void pushContinueStack(Consumer<Void> cont) {
         continueStack.push(cont);
     }
 }

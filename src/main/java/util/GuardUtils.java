@@ -1,5 +1,6 @@
-package byx.script.core.interpreter;
+package util;
 
+import byx.script.core.interpreter.Cont;
 import byx.script.core.interpreter.exception.JumpException;
 
 import java.util.function.Consumer;
@@ -41,12 +42,12 @@ public class GuardUtils {
         };
     }
 
-    public static Runnable wrap(Runnable runnable) {
-        return new Runnable() {
+    public static <T> Cont<T> wrapCont(Cont<T> cont) {
+        return new Cont<>() {
             @Override
-            public void run() {
-                guard(this);
-                runnable.run();
+            public void run(Consumer<T> c) {
+                guard(() -> this.run(c));
+                cont.run(c);
             }
         };
     }

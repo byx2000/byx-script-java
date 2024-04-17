@@ -1808,4 +1808,15 @@ public class ByxScriptTest {
             50005000
             """);
     }
+
+    @Test
+    public void testLongList() {
+        String script = String.format("""
+            var list = [%s]
+            Console.println(list[100])
+            """, "1" + ", 1".repeat(10000));
+        verify(script, """
+            1
+            """);
+    }
 }

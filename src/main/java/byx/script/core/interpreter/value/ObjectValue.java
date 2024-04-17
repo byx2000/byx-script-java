@@ -1,5 +1,6 @@
 package byx.script.core.interpreter.value;
 
+import byx.script.core.interpreter.Cont;
 import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
 import byx.script.core.interpreter.exception.BuiltinFunctionException;
 import byx.script.core.interpreter.exception.JumpException;
@@ -56,9 +57,9 @@ public class ObjectValue implements Value {
     }
 
     protected void setCallableField(String field, Function<List<Value>, Value> callable) {
-        setField(field, (CallableValue) (args, cont) -> {
+        setField(field, (CallableValue) args -> {
             try {
-                cont.accept(callable.apply(args));
+                return Cont.value(callable.apply(args));
             } catch (BuiltinFunctionException | JumpException e) {
                 throw e;
             } catch (Exception e) {

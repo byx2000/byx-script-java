@@ -2,8 +2,7 @@ package byx.script.core;
 
 import byx.script.core.interpreter.ByxScriptEvaluator;
 import byx.script.core.interpreter.Scope;
-import byx.script.core.interpreter.exception.*;
-import byx.script.core.interpreter.value.CallableValue;
+import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
 import byx.script.core.interpreter.value.Value;
 import byx.script.core.interpreter.value.builtin.Console;
 import byx.script.core.interpreter.value.builtin.Math;
@@ -45,12 +44,6 @@ public class ByxScriptRunner {
             addBuiltin("Reader", new Reader(scanner));
             addBuiltin("Reflect", Reflect.INSTANCE);
             addBuiltin("Math", Math.INSTANCE);
-            addBuiltin("callcc", (CallableValue) (args, cont) -> {
-                CallableValue fun = (CallableValue) args.get(0);
-                fun.accept(List.of(
-                    (CallableValue) (as, c) -> cont.accept(as.get(0))
-                ), cont);
-            });
         } catch (URISyntaxException e) {
             throw new ByxScriptRuntimeException("load lib path failed", e);
         }
