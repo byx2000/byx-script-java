@@ -34,7 +34,7 @@ public class ByxScriptTest {
         verify("""
                 var f1 = (a, b) => 123 * 456
                 Console.println(f1())
-                                
+
                 var f2 = (a, b) => a + b
                 Console.println(f2(100, 200, 400))
                 """, """
@@ -52,7 +52,7 @@ public class ByxScriptTest {
                 arr[3][1] *= 100
                 arr[4].c[0] = 12
                 arr[4].c[1] -= 8
-                                
+
                 Console.println(arr[0])
                 Console.println(arr[1])
                 Console.println(arr[3][1])
@@ -296,7 +296,7 @@ public class ByxScriptTest {
                         getDescription: () => '(' + name + ' ' + age + ' ' + score + ')'
                     }
                 }
-                                
+
                 var s1 = Student('Zhang San', 21, 87.5)
                 var s2 = Student('Li Si', 23, 95)
                 Console.println(s1.getName())
@@ -741,14 +741,14 @@ public class ByxScriptTest {
                     y = y + 1
                     return false
                 }
-                                
+
                 x = 0
                 y = 0
                 var b = f2() && f1()
                 Console.println(b)
                 Console.println(x)
                 Console.println(y)
-                                
+
                 x = 0
                 y = 0
                 b = f1() || f2()

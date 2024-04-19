@@ -1,16 +1,19 @@
 package byx.script.core.parser;
 
+import byx.script.core.common.Pair;
 import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
 import byx.script.core.interpreter.value.*;
 import byx.script.core.parser.ast.Program;
 import byx.script.core.parser.ast.expr.*;
 import byx.script.core.parser.ast.stmt.*;
 import byx.script.core.parser.exception.ByxScriptParseException;
-import byx.script.core.parser.exception.ParseException;
+import byx.script.core.parser.exception.InternalParseException;
 import byx.script.core.parser.parserc.Parser;
-import byx.script.core.common.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static byx.script.core.parser.parserc.Parsers.*;
@@ -170,7 +173,7 @@ public class ByxScriptParser {
 
     private static final Parser<List<String>> idList = oneOf(
             identifier.and(skip(comma).and(identifier_fatal).many()).map(ByxScriptParser::mapToList),
-            empty().value(Collections.emptyList())
+            empty(Collections.emptyList())
     );
 
     // 函数字面量
@@ -264,7 +267,7 @@ public class ByxScriptParser {
 
     // 函数声明
     private static final Parser<List<String>> paramList = oneOf(
-            expect(rp).value(Collections.emptyList()),
+            expect(rp, Collections.emptyList()),
             identifier_fatal.and(skip(comma).and(identifier_fatal).many()).map(ByxScriptParser::mapToList)
     );
     private static final Parser<Statement> funcDeclare = skip(func_)
@@ -457,28 +460,21 @@ public class ByxScriptParser {
         Expr lhs = p.first().first();
         Expr rhs = p.second();
         String op = p.first().second();
-        switch (op) {
-            case "=" -> {
-                return new Assign(lhs, rhs);
-            }
-            case "+=" -> {
-                return new Assign(lhs, new BinaryExpr(BinaryOp.Add, lhs, rhs));
-            }
-            case "-=" -> {
-                return new Assign(lhs, new BinaryExpr(BinaryOp.Sub, lhs, rhs));
-            }
-            case "*=" -> {
-                return new Assign(lhs, new BinaryExpr(BinaryOp.Mul, lhs, rhs));
-            }
-            case "/=" -> {
-                return new Assign(lhs, new BinaryExpr(BinaryOp.Div, lhs, rhs));
-            }
-        }
-        throw new RuntimeException("invalid assign expression: " + op);
+        return switch (op) {
+            case "=" -> new Assign(lhs, rhs);
+            case "+=" -> new Assign(lhs, new BinaryExpr(BinaryOp.Add, lhs, rhs));
+            case "-=" -> new Assign(lhs, new BinaryExpr(BinaryOp.Sub, lhs, rhs));
+            case "*=" -> new Assign(lhs, new BinaryExpr(BinaryOp.Mul, lhs, rhs));
+            case "/=" -> new Assign(lhs, new BinaryExpr(BinaryOp.Div, lhs, rhs));
+            default -> throw new RuntimeException("invalid assign expression: " + op);
+        };
     }
 
     private static <T> Parser<T> withFatal(Parser<T> p, String msg) {
-        return p.fatal(c -> new ByxScriptParseException(c, msg));
+        return p.fatal(e -> {
+            Pair<Integer, Integer> rowAndCol = calculateRowAndCol(e.getInput(), e.getIndex());
+            return new ByxScriptParseException(rowAndCol.first(), rowAndCol.second(), msg);
+        });
     }
 
     private static <T> List<T> mapToList(Pair<T, List<T>> p) {
@@ -514,8 +510,22 @@ public class ByxScriptParser {
         return new Try(tryBranch, catchVar, catchBranch, finallyBranch);
     }
 
+    private static Pair<Integer, Integer> calculateRowAndCol(String s, int index) {
+        int row = 1;
+        int col = 1;
+        for (int i = 0; i < index; ++i) {
+            if (s.charAt(i) == '\n') {
+                row++;
+                col = 1;
+            } else {
+                col++;
+            }
+        }
+        return new Pair<>(row, col);
+    }
+
     /**
-     * 解析脚本
+     * 将脚本解析为抽象语法树
      * @param script 脚本字符串
      * @return 抽象语法树
      */
@@ -524,8 +534,9 @@ public class ByxScriptParser {
             return program.parse(script);
         } catch (ByxScriptParseException e) {
             throw e;
-        } catch (ParseException e) {
-            throw new ByxScriptParseException(e.getCursor(), e.getMsg());
+        } catch (InternalParseException e) {
+            Pair<Integer, Integer> rowAndCol = calculateRowAndCol(e.getInput(), e.getIndex());
+            throw new ByxScriptParseException(rowAndCol.first(), rowAndCol.second(), "unknown parse exception");
         } catch (Exception e) {
             throw new ByxScriptParseException("unknown parse exception: " + e.getMessage());
         }

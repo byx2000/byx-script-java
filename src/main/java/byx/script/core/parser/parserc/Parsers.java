@@ -1,10 +1,12 @@
 package byx.script.core.parser.parserc;
 
-import byx.script.core.parser.exception.ParseException;
 import byx.script.core.common.Pair;
+import byx.script.core.parser.exception.InternalParseException;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -14,74 +16,10 @@ import java.util.stream.Collectors;
  */
 public class Parsers {
     /**
-     * 在当前位置解析成功，并返回由resultSupplier生成的解析结果
-     * @param resultSupplier 结果生成器，参数为cursor
-     */
-    public static <R> Parser<R> success(Function<Cursor, R> resultSupplier) {
-        return cursor -> new ParseResult<>(resultSupplier.apply(cursor), cursor, cursor);
-    }
-
-    /**
-     * 在当前位置解析成功，并返回由resultSupplier生成的解析结果
-     * @param resultSupplier 结果生成器
-     */
-    public static <R> Parser<R> success(Supplier<R> resultSupplier) {
-        return success(cursor -> resultSupplier.get());
-    }
-
-    /**
-     * 在当前位置解析成功，并返回指定解析结果
-     * @param result 结果
-     */
-    public static <R> Parser<R> success(R result) {
-        return success(() -> result);
-    }
-
-    /**
-     * 在当前位置解析成功，并返回null作为解析结果
-     */
-    public static <R> Parser<R> success() {
-        return success((R) null);
-    }
-
-    /**
-     * 在当前位置抛出自定义异常
-     * @param exceptionSupplier 异常生成器，参数为cursor
-     */
-    public static <R> Parser<R> fail(Function<Cursor, RuntimeException> exceptionSupplier) {
-        return cursor -> {
-            throw exceptionSupplier.apply(cursor);
-        };
-    }
-
-    /**
-     * 在当前位置抛出自定义异常
-     * @param exceptionSupplier 异常生成器
-     */
-    public static <R> Parser<R> fail(Supplier<RuntimeException> exceptionSupplier) {
-        return fail(cursor -> exceptionSupplier.get());
-    }
-
-    /**
-     * 在当前位置抛出ParseException，并携带错误消息msg
-     * @param msg 错误消息
-     */
-    public static <R> Parser<R> fail(String msg) {
-        return fail(cursor -> new ParseException(cursor, msg));
-    }
-
-    /**
      * 在当前位置抛出ParseException，错误消息为空
      */
     public static <R> Parser<R> fail() {
-        return fail("");
-    }
-
-    /**
-     * 不执行任何操作的解析器，并返回null作为解析结果
-     */
-    public static <R> Parser<R> empty() {
-        return success();
+        return (s, index) -> {throw new InternalParseException(s, index);};
     }
 
     /**
@@ -89,7 +27,7 @@ public class Parsers {
      * @param result 解析结果
      */
     public static <R> Parser<R> empty(R result) {
-        return success(result);
+        return (s, index) -> new ParseResult<>(result, index);
     }
 
     /**
@@ -97,11 +35,11 @@ public class Parsers {
      * @param result 解析结果
      */
     public static <R> Parser<R> end(R result) {
-        return cursor -> {
-            if (!cursor.end()) {
-                throw new ParseException(cursor, "expected end of input");
+        return (s, index) -> {
+            if (index < s.length()) {
+                throw new InternalParseException(s, index);
             }
-            return new ParseResult<>(result, cursor, cursor);
+            return new ParseResult<>(result, index);
         };
     }
 
@@ -118,12 +56,17 @@ public class Parsers {
      * @param predicate 匹配条件
      */
     public static Parser<Character> ch(Predicate<Character> predicate) {
-        return cursor -> {
-            char c = cursor.current();
-            if (predicate.test(c)) {
-                return new ParseResult<>(c, cursor, cursor.next());
+        return (s, index) -> {
+            if (index >= s.length()) {
+                throw new InternalParseException(s, index);
             }
-            throw new ParseException(cursor);
+
+            char c = s.charAt(index);
+            if (predicate.test(c)) {
+                return new ParseResult<>(c, index + 1);
+            }
+
+            throw new InternalParseException(s, index);
         };
     }
 
@@ -141,9 +84,7 @@ public class Parsers {
      * @param c c
      */
     public static Parser<Character> ch(char c) {
-        return ch(ch -> c == ch)
-                .mapException((cursor, throwable) ->
-                        new ParseException(cursor, String.format("expected character '%c'", c)));
+        return ch(ch -> c == ch);
     }
 
     /**
@@ -153,9 +94,7 @@ public class Parsers {
      * @param c2 c2
      */
     public static Parser<Character> range(char c1, char c2) {
-        return ch(c -> (c - c1) * (c - c2) <= 0)
-                .mapException(((cursor, throwable) ->
-                        new ParseException(cursor, String.format("expected character in range ['%c', '%c']", c1, c2))));
+        return ch(c -> (c - c1) * (c - c2) <= 0);
     }
 
     /**
@@ -165,8 +104,7 @@ public class Parsers {
      */
     public static Parser<Character> chs(Character... chs) {
         Set<Character> set = Arrays.stream(chs).collect(Collectors.toSet());
-        return ch(set::contains).mapException((cursor, throwable) ->
-                new ParseException(cursor, String.format("expected character in %s", set)));
+        return ch(set::contains);
     }
 
     /**
@@ -176,28 +114,20 @@ public class Parsers {
      */
     public static Parser<Character> not(Character... chs) {
         Set<Character> set = Arrays.stream(chs).collect(Collectors.toSet());
-        return ch(c -> !set.contains(c)).mapException((cursor, throwable) ->
-                new ParseException(cursor, String.format("expected character not in %s", set)));
+        return ch(c -> !set.contains(c));
     }
 
     /**
      * <p>如果当前位置以字符串s为前缀，则解析成功，并返回该字符串作为解析结果</p>
      * <p>如果前缀不匹配或在匹配过程中遇到输入结尾，则抛出ParseException</p>
-     * @param s 字符串
+     * @param str 字符串
      */
-    public static Parser<String> str(String s) {
-        return cursor -> {
-            Cursor oldCursor = cursor;
-            for (int i = 0; i < s.length(); ++i) {
-                if (cursor.end()) {
-                    throw new ParseException(oldCursor, String.format("expected %s", s));
-                }
-                if (cursor.current() != s.charAt(i)) {
-                    throw new ParseException(oldCursor, String.format("expected %s", s));
-                }
-                cursor = cursor.next();
+    public static Parser<String> str(String str) {
+        return (s, index) -> {
+            if (s.startsWith(str, index)) {
+                return new ParseResult<>(str, index + str.length());
             }
-            return new ParseResult<>(s, oldCursor, cursor);
+            throw new InternalParseException(s, index);
         };
     }
 
@@ -207,10 +137,7 @@ public class Parsers {
      * @param ss 字符串集合
      */
     public static Parser<String> strs(String... ss) {
-        Set<String> set = Arrays.stream(ss).collect(Collectors.toSet());
-        return Arrays.stream(ss).<Parser<String>>reduce(fail(), (p, s) -> p.or(str(s)), Parser::or)
-                .mapException((cursor, throwable) ->
-                        new ParseException(cursor, String.format("expected string in %s", set)));
+        return Arrays.stream(ss).reduce(fail(), (p, s) -> p.or(str(s)), Parser::or);
     }
 
     /**
@@ -219,15 +146,15 @@ public class Parsers {
      * @param parsers 解析器数组
      */
     public static Parser<List<Object>> seq(Parser<?>... parsers) {
-        return cursor -> {
-            Cursor oldCursor = cursor;
+        return (s, index) -> {
+            int i = index;
             List<Object> result = new ArrayList<>();
             for (Parser<?> p : parsers) {
-                ParseResult<?> r = p.parse(cursor);
+                ParseResult<?> r = p.parse(s, i);
                 result.add(r.result());
-                cursor = r.remain();
+                i = r.index();
             }
-            return new ParseResult<>(result, oldCursor, cursor);
+            return new ParseResult<>(result, i);
         };
     }
 
@@ -238,7 +165,14 @@ public class Parsers {
      */
     @SafeVarargs
     public static <R> Parser<R> oneOf(Parser<R>... parsers) {
-        return Arrays.stream(parsers).reduce(fail(), Parser::or);
+        return (s, index) -> {
+            for (Parser<R> p : parsers) {
+                try {
+                    return p.parse(s, index);
+                } catch (InternalParseException ignored) {}
+            }
+            throw new InternalParseException(s, index);
+        };
     }
 
     /**
@@ -248,13 +182,13 @@ public class Parsers {
      * @param parsers 解析器数组
      */
     public static Parser<Object> alt(Parser<?>... parsers) {
-        return cursor -> {
+        return (s, index) -> {
             for (Parser<?> p : parsers) {
                 try {
-                    return p.mapTo(Object.class).parse(cursor);
-                } catch (ParseException ignored) {}
+                    return p.mapTo(Object.class).parse(s, index);
+                } catch (InternalParseException ignored) {}
             }
-            throw new ParseException(cursor, "no parser available");
+            throw new InternalParseException(s, index);
         };
     }
 
@@ -264,7 +198,7 @@ public class Parsers {
      * @param parserSupplier 解析器生成器
      */
     public static <R> Parser<R> lazy(Supplier<Parser<R>> parserSupplier) {
-        return cursor -> parserSupplier.get().parse(cursor);
+        return (s, index) -> parserSupplier.get().parse(s, index);
     }
 
     public static class SkipWrapper<R> {
@@ -288,13 +222,15 @@ public class Parsers {
     }
 
     /**
-     * 在当前位置应用解析器predicate，解析成功不消耗任何输入，解析失败抛出ParseException
+     * 在当前位置应用解析器predicate，解析成功不消耗任何输入，并返回value，解析失败抛出ParseException
+     *
+     * @param value value
      * @param predicate predicate
      */
-    public static <R> Parser<R> expect(Parser<?> predicate) {
-        return cursor -> {
-            predicate.parse(cursor);
-            return new ParseResult<>(null, cursor, cursor);
+    public static <R> Parser<R> expect(Parser<?> predicate, R value) {
+        return (s, index) -> {
+            predicate.parse(s, index);
+            return new ParseResult<>(value, index);
         };
     }
 
@@ -303,13 +239,13 @@ public class Parsers {
      * @param predicate predicate
      */
     public static <R> Parser<R> not(Parser<?> predicate) {
-        return cursor -> {
+        return (s, index) -> {
             try {
-                predicate.parse(cursor);
-            } catch (ParseException e) {
-                return new ParseResult<>(null, cursor, cursor);
+                predicate.parse(s, index);
+            } catch (InternalParseException e) {
+                return new ParseResult<>(null, index);
             }
-            throw new ParseException(cursor);
+            throw new InternalParseException(s, index);
         };
     }
 }
