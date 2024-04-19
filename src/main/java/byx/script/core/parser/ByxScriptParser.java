@@ -122,13 +122,12 @@ public class ByxScriptParser {
     private static final Parser<String> try_ = str("try").notFollow(identifierPart).surround(ignorable);
     private static final Parser<String> catch_ = str("catch").notFollow(identifierPart).surround(ignorable);
     private static final Parser<String> catch_fatal = withFatal(catch_, "expect 'catch'");
-    private static final Parser<String> finally_ = str("finally").notFollow(identifierPart).surround(ignorable);
     private static final Parser<String> throw_ = str("throw").notFollow(identifierPart).surround(ignorable);
 
     private static final Parser<String> keywords = oneOf(
             import_, var_, if_, else_, for_, while_,
             break_, continue_, return_, func_, null_,
-            try_, catch_, finally_, throw_
+            try_, catch_, throw_
     );
 
     // 标识符
@@ -359,11 +358,9 @@ public class ByxScriptParser {
             .and(identifier)
             .skip(rp_fatal)
             .and(block_fatal);
-    private static final Parser<Statement> finallyPart = skip(finally_).and(block_fatal);
     private static final Parser<Statement> tryStmt =
             tryPart
             .and(catchPart)
-            .and(finallyPart.opt(new Block(Collections.emptyList())))
             .map(ByxScriptParser::buildTryNode);
 
     // throw语句
@@ -502,12 +499,11 @@ public class ByxScriptParser {
         return new For(init, cond, update, body);
     }
 
-    private static Try buildTryNode(Pair<Pair<Statement, Pair<String, Statement>>, Statement> p) {
-        Statement tryBranch = p.first().first();
-        String catchVar = p.first().second().first();
-        Statement catchBranch = p.first().second().second();
-        Statement finallyBranch = p.second();
-        return new Try(tryBranch, catchVar, catchBranch, finallyBranch);
+    private static Try buildTryNode(Pair<Statement, Pair<String, Statement>> p) {
+        Statement tryBranch = p.first();
+        String catchVar = p.second().first();
+        Statement catchBranch = p.second().second();
+        return new Try(tryBranch, catchVar, catchBranch);
     }
 
     private static Pair<Integer, Integer> calculateRowAndCol(String s, int index) {

@@ -140,13 +140,11 @@ public class ByxScriptEvaluator {
             evalExpr(n.expr(), scope);
         } else if (node instanceof Try n) {
             try {
-                executeStatement(n.tryBranch(), scope);
+                executeStatement(n.tryBody(), scope);
             } catch (ThrowException e) {
                 Scope newScope = new Scope(scope);
                 newScope.declareVar(n.catchVar(), e.getValue());
-                executeStatement(n.catchBranch(), newScope);
-            } finally {
-                executeStatement(n.finallyBranch(), scope);
+                executeStatement(n.catchBody(), newScope);
             }
         } else if (node instanceof Throw n) {
             throw new ThrowException(evalExpr(n.expr(), scope));
@@ -248,10 +246,6 @@ public class ByxScriptEvaluator {
             if (rhs instanceof StringValue v) {
                 return new StringValue("null" + v.value());
             }
-        } else if (lhs instanceof ObjectValue v) {
-            if (v.hasField("_add")) {
-                return evalCall(v.getField("_add"), List.of(rhs));
-            }
         }
 
         throw buildBinaryOpUnsupportedException("+", lhs, rhs);
@@ -269,10 +263,6 @@ public class ByxScriptEvaluator {
                 return new DoubleValue(v1.value() - v2.value());
             } else if (rhs instanceof DoubleValue v2) {
                 return new DoubleValue(v1.value() - v2.value());
-            }
-        } else if (lhs instanceof ObjectValue v) {
-            if (v.hasField("_sub")) {
-                return evalCall(v.getField("_sub"), List.of(rhs));
             }
         }
 
@@ -292,10 +282,6 @@ public class ByxScriptEvaluator {
             } else if (rhs instanceof DoubleValue v2) {
                 return new DoubleValue(v1.value() * v2.value());
             }
-        } else if (lhs instanceof ObjectValue v) {
-            if (v.hasField("_mul")) {
-                return evalCall(v.getField("_mul"), List.of(rhs));
-            }
         }
 
         throw buildBinaryOpUnsupportedException("*", lhs, rhs);
@@ -313,10 +299,6 @@ public class ByxScriptEvaluator {
                 return new DoubleValue(v1.value() / v2.value());
             } else if (rhs instanceof DoubleValue v2) {
                 return new DoubleValue(v1.value() / v2.value());
-            }
-        } else if (lhs instanceof ObjectValue v) {
-            if (v.hasField("_div")) {
-                return evalCall(v.getField("_div"), List.of(rhs));
             }
         }
 
@@ -440,22 +422,12 @@ public class ByxScriptEvaluator {
             if (rhs instanceof ListValue v2) {
                 return BoolValue.of(v1.getElems().equals(v2.getElems()));
             }
-        } else if (lhs instanceof ObjectValue v) {
-            if (v.hasField("_equal")) {
-                return evalCall(v.getField("_equal"), List.of(rhs));
-            }
         }
 
         return BoolValue.of(lhs == rhs);
     }
 
     private static Value evalNotEqual(Value lhs, Value rhs) {
-        if (lhs instanceof ObjectValue v) {
-            if (v.hasField("_notEqual")) {
-                return evalCall(v.getField("_notEqual"), List.of(rhs));
-            }
-        }
-
         Value ret = evalEqual(lhs, rhs);
         if (ret instanceof BoolValue v) {
             return BoolValue.of(!v.getValue());

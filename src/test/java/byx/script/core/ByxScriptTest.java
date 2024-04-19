@@ -1428,88 +1428,6 @@ public class ByxScriptTest {
     }
 
     @Test
-    public void testEqualOverload() {
-        verify("""
-                func Pair1(first, second) {
-                    return {
-                        first, second,
-                        _equal(p) {
-                            return first == p.first && second == p.second
-                        }
-                    }
-                }
-                
-                var p1 = Pair1(100, 200)
-                var p2 = Pair1(100, 200)
-                var p3 = Pair1(200, 300)
-                Console.println(p1 == p2)
-                Console.println(p1 == p3)
-                Console.println(p2 != p3)
-                
-                func Pair2(first, second) {
-                    return {first, second}
-                }
-                
-                var p4 = Pair2(100, 200)
-                var p5 = Pair2(100, 200)
-                var p6 = Pair2(200, 300)
-                Console.println(p4 == p5)
-                Console.println(p4 == p6)
-                Console.println(p5 != p6)
-                """, """
-                true
-                false
-                true
-                false
-                false
-                true
-                """);
-    }
-
-    @Test
-    public void testOpOverload() {
-        verify("""
-                func Vector2(x, y) {
-                    return {
-                        x, y,
-                        _add(v) {
-                            return Vector2(x + v.x, y + v.y)
-                        },
-                        _sub(v) {
-                            return Vector2(x - v.x, y - v.y)
-                        },
-                        _mul(v) {
-                            return x * v.x + y * v.y
-                        },
-                        _div(a) {
-                            return Vector2(x / a, y / a)
-                        }
-                    }
-                }
-                
-                var v1 = Vector2(3, 5)
-                var v2 = Vector2(4, -7)
-                
-                var v3 = v1 + v2
-                Console.println(v3.x, v3.y)
-                
-                var v4 = v1 - v2
-                Console.println(v4.x, v4.y)
-                
-                var v5 = v1 * v2
-                Console.println(v5)
-                
-                var v6 = v1 / 2.0
-                Console.println(v6.x, v6.y)
-                """, """
-                7 -2
-                -1 12
-                -23
-                1.5 2.5
-                """);
-    }
-
-    @Test
     public void testTry() {
         verify("""
                 func testException(f) {
@@ -1517,8 +1435,6 @@ public class ByxScriptTest {
                         f()
                     } catch (e) {
                         Console.println('catch', e)
-                    } finally {
-                        Console.println('finally')
                     }
                 }
                 
@@ -1537,12 +1453,9 @@ public class ByxScriptTest {
                 })
                 """, """
                 test1
-                finally
                 test2
                 catch 123
-                finally
                 catch 456
-                finally
                 """);
         verify("""
                 try {

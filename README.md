@@ -4,7 +4,7 @@ ByxScript是一门类似JavaScript的函数式动态类型编程语言，支持�
 
 * 支持整数、浮点数、布尔值、字符串、列表、函数、对象、null八种基本数据类型
 * 支持if选择语句、for循环、while循环、异常处理等常用流程控制语句
-* 支持闭包、高阶函数、运算符重载等高级特性
+* 支持闭包、高阶函数等高级特性
 
 ## 基本数据类型
 
@@ -40,6 +40,17 @@ var obj = {
 
 ```javascript
 func fib(n) {
+    if (n == 1 || n == 2) {
+        return 1
+    }
+    return fib(n - 1) + fib(n - 2)
+}
+```
+
+等价于函数类型变量：
+
+```javascript
+var fib = n => {
     if (n == 1 || n == 2) {
         return 1
     }
@@ -92,49 +103,10 @@ try {
     throw 'exception'
 } catch (e) {
     println('catch', e)
-} finally {
-    println('finally')
 }
 ```
 
-## 运算符重载
-
-```javascript
-func Vector2(x, y) {
-    return {
-        x, y,
-        _add(v) {
-            return Vector2(x + v.x, y + v.y)
-        },
-        _sub(v) {
-            return Vector2(x - v.x, y - v.y)
-        },
-        _mul(v) {
-            return x * v.x + y * v.y
-        },
-        _div(a) {
-            return Vector2(x / a, y / a)
-        }
-    }
-}
-
-var v1 = Vector2(3, 5)
-var v2 = Vector2(4, -7)
-
-var v3 = v1 + v2
-println(v3.x, v3.y) // 7 -2
-
-var v4 = v1 - v2
-println(v4.x, v4.y) // -1 12
-
-var v5 = v1 * v2
-println(v5) // -23
-
-var v6 = v1 / 2.0
-println(v6.x, v6.y) // 1.5 2.5
-```
-
-## 闭包应用
+## 闭包
 
 ```javascript
 func Counter(init) {
