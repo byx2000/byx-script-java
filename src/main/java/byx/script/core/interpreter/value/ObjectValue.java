@@ -2,26 +2,15 @@ package byx.script.core.interpreter.value;
 
 import byx.script.core.interpreter.Cont;
 import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
-import byx.script.core.interpreter.exception.BuiltinFunctionException;
-import byx.script.core.interpreter.exception.JumpException;
+import byx.script.core.util.ValueUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ObjectValue implements Value {
-    private static final Map<Class<? extends Value>, String> TYPE_ID_MAP = Map.of(
-        Value.class, "any",
-        NullValue.class, "null",
-        IntegerValue.class, "integer",
-        DoubleValue.class, "double",
-        BoolValue.class, "bool",
-        StringValue.class, "string",
-        ListValue.class, "list",
-        CallableValue.class, "callable",
-        ObjectValue.class, "object"
-    );
-
     private final Map<String, Value> fields = new HashMap<>();
 
     public ObjectValue() {
@@ -53,52 +42,16 @@ public class ObjectValue implements Value {
 
     @Override
     public String toString() {
-        return getFields().toString();
-    }
-
-    protected void setCallableField(String field, Function<List<Value>, Value> callable) {
-        setField(field, (CallableValue) args -> {
-            try {
-                return Cont.value(callable.apply(args));
-            } catch (BuiltinFunctionException | JumpException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new BuiltinFunctionException(new StringValue("NativeError: " + e.getMessage()));
-            }
-        });
+        return ValueUtils.valueToString(this);
     }
 
     /**
-     * 实现内建方法时，对调用方法时传的参数进行检查
-     *
-     * @param method 方法名
-     * @param args 实参列表
-     * @param paramsTypes 参数类型列表
+     * 添加内建属性方法
+     * @param fieldName 属性名
+     * @param callable 方法执行逻辑
      */
-    @SafeVarargs
-    protected final void checkArgument(String method, List<Value> args, Class<? extends Value>... paramsTypes) {
-        // 检查传参个数是否一致
-        if (args.size() != paramsTypes.length) {
-            throw new BuiltinFunctionException(new StringValue(buildArgumentExceptionMsg(method, args, paramsTypes)));
-        }
-
-        // 检查传参类型是否匹配
-        for (int i = 0; i < args.size(); i++) {
-            if (!paramsTypes[i].isAssignableFrom(args.get(i).getClass())) {
-                throw new BuiltinFunctionException(new StringValue(buildArgumentExceptionMsg(method, args, paramsTypes)));
-            }
-        }
-    }
-
-    // 构造错误消息
-    @SafeVarargs
-    private String buildArgumentExceptionMsg(String method, List<Value> args, Class<? extends Value>... paramsTypes) {
-        String paramsTypeList = Arrays.stream(paramsTypes)
-                .map(t -> TYPE_ID_MAP.getOrDefault(t, "any"))
-                .collect(Collectors.joining(", "));
-        String argsTypeList = args.stream().map(Value::typeId).collect(Collectors.joining(", "));
-        return String.format("ArgumentError: method %s expect parameters (%s) but receive (%s)",
-                method, paramsTypeList, argsTypeList);
+    protected void setCallableField(String fieldName, Function<List<Value>, Value> callable) {
+        setField(fieldName, (CallableValue) args -> Cont.value(callable.apply(args)));
     }
 
     @Override

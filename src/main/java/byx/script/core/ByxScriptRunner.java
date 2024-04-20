@@ -2,12 +2,9 @@ package byx.script.core;
 
 import byx.script.core.interpreter.ByxScriptEvaluator;
 import byx.script.core.interpreter.Scope;
+import byx.script.core.interpreter.builtin.*;
 import byx.script.core.interpreter.exception.ByxScriptRuntimeException;
 import byx.script.core.interpreter.value.Value;
-import byx.script.core.interpreter.value.builtin.Console;
-import byx.script.core.interpreter.value.builtin.Math;
-import byx.script.core.interpreter.value.builtin.Reader;
-import byx.script.core.interpreter.value.builtin.Reflect;
 import byx.script.core.parser.ByxScriptParser;
 import byx.script.core.parser.ast.Program;
 import byx.script.core.parser.exception.ByxScriptParseException;
@@ -39,11 +36,8 @@ public class ByxScriptRunner {
             addImportPath(Path.of("").toAbsolutePath());
             addImportPath(Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("lib")).toURI()));
 
-            // 添加内建对象
-            addBuiltin("Console", new Console(printStream));
-            addBuiltin("Reader", new Reader(scanner));
-            addBuiltin("Reflect", Reflect.INSTANCE);
-            addBuiltin("Math", Math.INSTANCE);
+            // 添加内建函数
+            addBuiltinFunctions(scanner, printStream);
         } catch (URISyntaxException e) {
             throw new ByxScriptRuntimeException("load lib path failed", e);
         }
@@ -53,7 +47,7 @@ public class ByxScriptRunner {
      * 添加导入路径
      * @param path 路径
      */
-    void addImportPath(Path path) {
+    public void addImportPath(Path path) {
         importPaths.add(path);
     }
 
@@ -61,7 +55,7 @@ public class ByxScriptRunner {
      * 添加多个导入路径
      * @param paths 路径集合
      */
-    void addImportPaths(Collection<Path> paths) {
+    public void addImportPaths(Collection<Path> paths) {
         importPaths.addAll(paths);
     }
 
@@ -70,8 +64,52 @@ public class ByxScriptRunner {
      * @param name 变量名
      * @param value 变量值
      */
-    void addBuiltin(String name, Value value) {
+    public void addBuiltin(String name, Value value) {
         builtins.put(name, value);
+    }
+
+    /**
+     * 添加内建函数
+     * @param function 内建函数
+     */
+    public void addBuiltin(BuiltinFunction function) {
+        builtins.put(function.name(), function);
+    }
+
+    // 添加内建函数
+    private void addBuiltinFunctions(Scanner scanner, PrintStream printStream) {
+        // 输入输出
+        addBuiltin(IOFunctions.println(printStream));
+        addBuiltin(IOFunctions.print(printStream));
+        addBuiltin(IOFunctions.readLine(scanner));
+        addBuiltin(IOFunctions.readInt(scanner));
+        addBuiltin(IOFunctions.readDouble(scanner));
+        addBuiltin(IOFunctions.readBool(scanner));
+        addBuiltin(IOFunctions.hasNext(scanner));
+
+        // 数学函数
+        addBuiltin(MathFunctions.SIN);
+        addBuiltin(MathFunctions.COS);
+        addBuiltin(MathFunctions.TAN);
+        addBuiltin(MathFunctions.POW);
+        addBuiltin(MathFunctions.EXP);
+        addBuiltin(MathFunctions.LN);
+        addBuiltin(MathFunctions.LOG10);
+        addBuiltin(MathFunctions.SQRT);
+        addBuiltin(MathFunctions.ROUND);
+        addBuiltin(MathFunctions.CEIL);
+        addBuiltin(MathFunctions.FLOOR);
+        addBuiltin(MathFunctions.ABS);
+        addBuiltin(MathFunctions.MAX);
+        addBuiltin(MathFunctions.MIN);
+
+        // 反射
+        addBuiltin(ReflectFunctions.TYPE_ID);
+        addBuiltin(ReflectFunctions.HASH_CODE);
+        addBuiltin(ReflectFunctions.FIELDS);
+        addBuiltin(ReflectFunctions.SET_FIELD);
+        addBuiltin(ReflectFunctions.GET_FIELD);
+        addBuiltin(ReflectFunctions.HAS_FIELD);
     }
 
     // 读取并解析导入名称

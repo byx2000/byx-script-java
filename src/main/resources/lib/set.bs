@@ -15,7 +15,7 @@ func Set(capacity) {
     var size = 0
 
     func getHashCode(obj) {
-        var hashCode = Reflect.hashCode(obj)
+        var hashCode = hashCode(obj)
         if (hashCode < 0) {
             return -hashCode
         }

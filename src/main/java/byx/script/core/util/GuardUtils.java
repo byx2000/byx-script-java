@@ -1,7 +1,7 @@
-package util;
+package byx.script.core.util;
 
 import byx.script.core.interpreter.Cont;
-import byx.script.core.interpreter.exception.JumpException;
+import byx.script.core.interpreter.exception.ExitRecursionException;
 
 import java.util.function.Consumer;
 
@@ -18,7 +18,7 @@ public class GuardUtils {
                 runnable.run();
                 CURRENT_DEPTH_HOLDER.remove();
                 return;
-            } catch (JumpException e) {
+            } catch (ExitRecursionException e) {
                 runnable = e.getRunnable();
             }
         }
@@ -27,7 +27,7 @@ public class GuardUtils {
     public static void guard(Runnable restart) {
         int depth = CURRENT_DEPTH_HOLDER.get();
         if (depth <= 0) {
-            throw new JumpException(restart);
+            throw new ExitRecursionException(restart);
         }
         CURRENT_DEPTH_HOLDER.set(depth - 1);
     }

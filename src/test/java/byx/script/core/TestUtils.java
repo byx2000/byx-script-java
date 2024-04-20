@@ -43,6 +43,10 @@ public class TestUtils {
         });
     }
 
+    public static void verifyException(Class<? extends Exception> type, String script) {
+        verifyException(type, Collections.emptyList(), script);
+    }
+
     private static String getScriptOutput(List<Path> importPaths, String script, String input) {
         try (
                 ByteArrayInputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));

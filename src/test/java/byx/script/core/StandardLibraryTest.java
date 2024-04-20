@@ -2,7 +2,6 @@ package byx.script.core;
 
 import org.junit.jupiter.api.Test;
 
-import static byx.script.core.TestUtils.getOutput;
 import static byx.script.core.TestUtils.verify;
 
 public class StandardLibraryTest {
@@ -15,21 +14,21 @@ public class StandardLibraryTest {
                 s.push(1)
                 s.push(2)
                 s.push(3)
-                Console.println(s.size(), s.isEmpty())
+                println(s.size(), s.isEmpty())
                 
-                Console.println(s.pop())
-                Console.println(s.pop())
-                Console.println(s.size(), s.isEmpty())
+                println(s.pop())
+                println(s.pop())
+                println(s.size(), s.isEmpty())
                 
                 s.push(4)
                 s.push(5)
-                Console.println(s.top())
-                Console.println(s.size())
+                println(s.top())
+                println(s.size())
                 
-                Console.println(s.pop())
-                Console.println(s.pop())
-                Console.println(s.pop())
-                Console.println(s.size(), s.isEmpty())
+                println(s.pop())
+                println(s.pop())
+                println(s.pop())
+                println(s.size(), s.isEmpty())
                 """, """
                 3 false
                 3
@@ -53,24 +52,24 @@ public class StandardLibraryTest {
                 q.enQueue(1)
                 q.enQueue(2)
                 q.enQueue(3)
-                Console.println(q.size(), q.isEmpty())
+                println(q.size(), q.isEmpty())
                 
-                Console.println(q.deQueue())
-                Console.println(q.deQueue())
-                Console.println(q.size(), q.isEmpty())
+                println(q.deQueue())
+                println(q.deQueue())
+                println(q.size(), q.isEmpty())
                 
                 q.enQueue(4)
                 q.enQueue(5)
                 q.enQueue(6)
-                Console.println(q.size())
-                Console.println(q.front())
-                Console.println(q.tail())
+                println(q.size())
+                println(q.front())
+                println(q.tail())
                 
-                Console.println(q.deQueue())
-                Console.println(q.deQueue())
-                Console.println(q.deQueue())
+                println(q.deQueue())
+                println(q.deQueue())
+                println(q.deQueue())
                 q.deQueue()
-                Console.println(q.size(), q.isEmpty())
+                println(q.size(), q.isEmpty())
                 """, """
                 3 false
                 1
@@ -93,19 +92,19 @@ public class StandardLibraryTest {
                 
                 var list1 = [1, 2, 3, 4, 5]
                 List.reverse(list1)
-                Console.println(list1)
+                println(list1)
                 
                 var list2 = [1, 2, 3, 4, 5, 6]
                 List.reverse(list2)
-                Console.println(list2)
+                println(list2)
                 
                 var list3 = [1]
                 List.reverse(list3)
-                Console.println(list3)
+                println(list3)
                 
                 var list4 = [1, 2]
                 List.reverse(list4)
-                Console.println(list4)
+                println(list4)
                 """, """
                 [5, 4, 3, 2, 1]
                 [6, 5, 4, 3, 2, 1]
@@ -117,11 +116,11 @@ public class StandardLibraryTest {
                 
                 var list1 = [5, 2, 1, 3, 4, 7, 6]
                 List.sort(list1)
-                Console.println(list1)
+                println(list1)
                 
                 var list2 = [5, 2, 1, 3, 4, 7, 8, 6]
                 List.sort(list2, (a, b) => b - a)
-                Console.println(list2)
+                println(list2)
                 
                 func Student(name, age, score) {
                     return {
@@ -140,19 +139,19 @@ public class StandardLibraryTest {
                 
                 List.sort(students, (s1, s2) => s1.name.compareTo(s2.name))
                 for (var i = 0; i < students.length(); ++i) {
-                    Console.print(students[i].toString() + ' ')
+                    print(students[i].toString() + ' ')
                 }
-                Console.println()
+                println()
                 
                 List.sort(students, (s1, s2) => s1.age - s2.age)
                 for (var i = 0; i < students.length(); ++i) {
-                    Console.print(students[i].toString() + ' ')
+                    print(students[i].toString() + ' ')
                 }
-                Console.println()
+                println()
                 
                 List.sort(students, (s1, s2) => s2.score - s1.score)
                 for (var i = 0; i < students.length(); ++i) {
-                    Console.print(students[i].toString() + ' ')
+                    print(students[i].toString() + ' ')
                 }
                 """, """
                 [1, 2, 3, 4, 5, 6, 7]
@@ -171,7 +170,7 @@ public class StandardLibraryTest {
                 Stream.of([1, 2, 3, 4, 5])
                     .map(n => n + 1)
                     .filter(n => n % 2 == 0)
-                    .forEach(Console.println)
+                    .forEach(println)
                 """, """
                 2
                 4
@@ -184,7 +183,7 @@ public class StandardLibraryTest {
                     .map(n => n + 1)
                     .filter(n => n % 2 == 1)
                     .toList()
-                Console.println(s)
+                println(s)
                 """, """
                 [3, 5]
                 """);
@@ -200,23 +199,23 @@ public class StandardLibraryTest {
                 set.add(2)
                 set.add(3)
                 set.add(2)
-                Console.println(set.toList())
-                Console.println(set.size())
-                Console.println(set.contains(1))
-                Console.println(set.contains(2))
-                Console.println(set.contains(3))
-                Console.println(set.contains(4))
-                Console.println(set.remove(1))
-                Console.println(set.remove(5))
-                Console.println(set.size())
-                Console.println(set.contains(1))
-                Console.println(set.contains(2))
-                Console.println(set.contains(3))
-                Console.println(set.contains(4))
-                Console.println(set.isEmpty())
+                println(set.toList())
+                println(set.size())
+                println(set.contains(1))
+                println(set.contains(2))
+                println(set.contains(3))
+                println(set.contains(4))
+                println(set.remove(1))
+                println(set.remove(5))
+                println(set.size())
+                println(set.contains(1))
+                println(set.contains(2))
+                println(set.contains(3))
+                println(set.contains(4))
+                println(set.isEmpty())
                 set.remove(2)
                 set.remove(3)
-                Console.println(set.isEmpty())
+                println(set.isEmpty())
                 """, """
                 [1, 2, 3]
                 3
@@ -241,7 +240,7 @@ public class StandardLibraryTest {
                 for (var i = 0; i < 100; ++i) {
                     s.add(i % 10)
                 }
-                Console.println(s.size())
+                println(s.size())
                 """, """
                 10
                 """);
@@ -256,20 +255,20 @@ public class StandardLibraryTest {
                 map.put('k1', 123)
                 map.put('k2', 456)
                 map.put('k3', 789)
-                Console.println(map.size())
-                Console.println(map.get('k1'))
-                Console.println(map.get('k2'))
-                Console.println(map.get('k3'))
-                Console.println(map.get('k4'))
-                Console.println(map.containsKey('k1'))
-                Console.println(map.containsKey('k2'))
-                Console.println(map.containsKey('k3'))
-                Console.println(map.containsKey('k4'))
-                Console.println(map.put('k2', 12345))
-                Console.println(map.get('k2'))
-                Console.println(map.remove('k4'))
-                Console.println(map.remove('k1'))
-                Console.println(map.size())
+                println(map.size())
+                println(map.get('k1'))
+                println(map.get('k2'))
+                println(map.get('k3'))
+                println(map.get('k4'))
+                println(map.containsKey('k1'))
+                println(map.containsKey('k2'))
+                println(map.containsKey('k3'))
+                println(map.containsKey('k4'))
+                println(map.put('k2', 12345))
+                println(map.get('k2'))
+                println(map.remove('k4'))
+                println(map.remove('k1'))
+                println(map.size())
                 """, """
                 3
                 123
@@ -300,82 +299,15 @@ public class StandardLibraryTest {
                     return null
                 }
                 
-                Console.println(twoSum([2, 7, 11, 15], 9))
-                Console.println(twoSum([3, 2, 4], 6))
-                Console.println(twoSum([3, 3], 6))
-                Console.println(twoSum([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))
+                println(twoSum([2, 7, 11, 15], 9))
+                println(twoSum([3, 2, 4], 6))
+                println(twoSum([3, 3], 6))
+                println(twoSum([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))
                 """, """
                 [0, 1]
                 [1, 2]
                 [0, 1]
                 [7, 9]
                 """);
-    }
-
-    @Test
-    public void testMath() {
-        verify("""
-                import math
-
-                Console.println(Math.abs(15))
-                Console.println(Math.abs(-3.14))
-                Console.println(Math.sin(10))
-                Console.println(Math.sin(12.34))
-                Console.println(Math.cos(10))
-                Console.println(Math.cos(12.34))
-                Console.println(Math.tan(10))
-                Console.println(Math.tan(12.34))
-                Console.println(Math.pow(2, 3))
-                Console.println(Math.pow(2, 3.5))
-                Console.println(Math.pow(2.5, 3))
-                Console.println(Math.pow(2.5, 3.5))
-                Console.println(Math.exp(2))
-                Console.println(Math.exp(3.14))
-                Console.println(Math.ln(25))
-                Console.println(Math.ln(12.56))
-                Console.println(Math.log10(25))
-                Console.println(Math.log10(12.56))
-                Console.println(Math.sqrt(2))
-                Console.println(Math.sqrt(31.5))
-                Console.println(Math.round(7))
-                Console.println(Math.round(8.3))
-                Console.println(Math.round(12.9))
-                Console.println(Math.ceil(7))
-                Console.println(Math.ceil(8.3))
-                Console.println(Math.ceil(12.9))
-                Console.println(Math.floor(7))
-                Console.println(Math.floor(8.3))
-                Console.println(Math.floor(12.9))
-                """, getOutput(out -> {
-            out.println(Math.abs(15));
-            out.println(Math.abs(-3.14));
-            out.println(Math.sin(10));
-            out.println(Math.sin(12.34));
-            out.println(Math.cos(10));
-            out.println(Math.cos(12.34));
-            out.println(Math.tan(10));
-            out.println(Math.tan(12.34));
-            out.println(Math.pow(2, 3));
-            out.println(Math.pow(2, 3.5));
-            out.println(Math.pow(2.5, 3));
-            out.println(Math.pow(2.5, 3.5));
-            out.println(Math.exp(2));
-            out.println(Math.exp(3.14));
-            out.println(Math.log(25));
-            out.println(Math.log(12.56));
-            out.println(Math.log10(25));
-            out.println(Math.log10(12.56));
-            out.println(Math.sqrt(2));
-            out.println(Math.sqrt(31.5));
-            out.println(Math.round(7));
-            out.println((int) Math.round(8.3));
-            out.println((int) Math.round(12.9));
-            out.println((int) Math.ceil(7));
-            out.println((int) Math.ceil(8.3));
-            out.println((int) Math.ceil(12.9));
-            out.println((int) Math.floor(7));
-            out.println((int) Math.floor(8.3));
-            out.println((int) Math.floor(12.9));
-        }));
     }
 }

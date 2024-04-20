@@ -1,12 +1,14 @@
 package byx.script.core;
 
-import byx.script.core.interpreter.exception.InterruptException;
+import byx.script.core.interpreter.exception.*;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static byx.script.core.TestUtils.getOutput;
-import static byx.script.core.TestUtils.verify;
+import static byx.script.core.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ByxScriptTest {
@@ -14,8 +16,8 @@ public class ByxScriptTest {
     public void testEmptyList() {
         verify("""
                 var list = []
-                Console.println(list)
-                Console.println(list.length())
+                println(list)
+                println(list.length())
                 """, """
                 []
                 0
@@ -34,10 +36,10 @@ public class ByxScriptTest {
     public void testArgsPass() {
         verify("""
                 var f1 = (a, b) => 123 * 456
-                Console.println(f1())
+                println(f1())
                 
                 var f2 = (a, b) => a + b
-                Console.println(f2(100, 200, 400))
+                println(f2(100, 200, 400))
                 """, """
                 56088
                 300
@@ -54,11 +56,11 @@ public class ByxScriptTest {
                 arr[4].c[0] = 12
                 arr[4].c[1] -= 8
 
-                Console.println(arr[0])
-                Console.println(arr[1])
-                Console.println(arr[3][1])
-                Console.println(arr[4].c[0])
-                Console.println(arr[4].c[1])
+                println(arr[0])
+                println(arr[1])
+                println(arr[3][1])
+                println(arr[4].c[0])
+                println(arr[4].c[1])
                 """, """
                 5
                 12
@@ -76,7 +78,7 @@ public class ByxScriptTest {
                 obj.b -= 50
                 obj.c.d += 100
                 obj.c.e[0].m *= 10
-                Console.println(obj.a, obj.b, obj.c.d, obj.c.e[0].m)
+                println(obj.a, obj.b, obj.c.d, obj.c.e[0].m)
                 """, """
                 101 150 400 100
                 """);
@@ -85,7 +87,7 @@ public class ByxScriptTest {
                 obj.a = 100
                 obj.b = 3.14
                 obj.c = 'hello'
-                Console.println(obj.a, obj.b, obj.c)
+                println(obj.a, obj.b, obj.c)
                 """, """
                 100 3.14 hello
                 """);
@@ -95,20 +97,20 @@ public class ByxScriptTest {
     public void testfuncLiteral() {
         verify("""
                 var f1 = () => 123
-                Console.println(f1())
+                println(f1())
                 var f2 = () => 12.34
-                Console.println(f2())
+                println(f2())
                 var f3 = () => 'hello'
-                Console.println(f3())
+                println(f3())
                 var f4 = () => [100, 200, 300]
-                Console.println(f4())
+                println(f4())
                 var f5 = () => (1 + 2) * 3
-                Console.println(f5())
+                println(f5())
                 var f6 = () => 456
                 var f7 = () => f6()
-                Console.println(f7())
+                println(f7())
                 var f8 = () => {}
-                Console.println(f8())
+                println(f8())
                 """, """
                 123
                 12.34
@@ -120,13 +122,13 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var f1 = a => a + 1
-                Console.println(f1(10))
+                println(f1(10))
                 var f2 = (a) => a + 1
-                Console.println(f2(20))
+                println(f2(20))
                 var f3 = (a, b) => a + b
-                Console.println(f3(3, 5))
+                println(f3(3, 5))
                 var f4 = (a, b, c) => a * b * c
-                Console.println(f4(2, 4, 6))
+                println(f4(2, 4, 6))
                 """, """
                 11
                 21
@@ -135,22 +137,22 @@ public class ByxScriptTest {
                 """);
         verify("""
                 var f1 = () => {return 100}
-                Console.println(f1())
+                println(f1())
                 var f2 = () => {
                     var a = 10
                     var b = 20
                     return a + b
                 }
-                Console.println(f2())
+                println(f2())
                 var f3 = () => {
-                    Console.println('hello')
+                    println('hello')
                 }
-                Console.println(f3())
+                println(f3())
                 
                 var x = 1000
                 var f4 = () => {x += 1}
-                Console.println(f4())
-                Console.println(x)
+                println(f4())
+                println(x)
                 """, """
                 100
                 30
@@ -164,13 +166,13 @@ public class ByxScriptTest {
     @Test
     public void testfuncCallImmediately() {
         verify("""
-                Console.println((() => 12345)())
-                Console.println((m => m + 6)(10))
-                Console.println(((a, b) => a - b)(13, 7))
+                println((() => 12345)())
+                println((m => m + 6)(10))
+                println(((a, b) => a - b)(13, 7))
                 
                 var x = 10;
                 ((m, n) => {x += m + n})(12, 13)
-                Console.println(x)
+                println(x)
                 """, """
                 12345
                 16
@@ -183,11 +185,11 @@ public class ByxScriptTest {
     public void testClosure() {
         verify("""
                 var add = a => b => a + b
-                Console.println(add(2)(3))
-                Console.println(add(45)(67))
+                println(add(2)(3))
+                println(add(45)(67))
                 var add5 = add(5)
-                Console.println(add5(7))
-                Console.println(add5(100))
+                println(add5(7))
+                println(add5(100))
                 """, """
                 5
                 112
@@ -199,14 +201,14 @@ public class ByxScriptTest {
                 var fun = () => {x = x + 1}
                 fun()
                 fun()
-                Console.println(x);
+                println(x);
                 """, """
                 102
                 """);
         verify("""
                 var x = 1000;
                 (() => {x += 2})()
-                Console.println(x)
+                println(x)
                 """, """
                 1002
                 """);
@@ -214,7 +216,7 @@ public class ByxScriptTest {
                 var compose = (n, f, g) => g(f(n))
                 var f1 = n => n * 2
                 var f2 = n => n + 1
-                Console.println(compose(100, f1, f2))
+                println(compose(100, f1, f2))
                 """, """
                 201
                 """);
@@ -224,9 +226,9 @@ public class ByxScriptTest {
                     var x = 456
                     return () => x
                 }
-                Console.println(x)
-                Console.println(outer()())
-                Console.println(x)
+                println(x)
+                println(outer()())
+                println(x)
                 """, """
                 123
                 456
@@ -238,9 +240,9 @@ public class ByxScriptTest {
                     x = 456
                     return () => x
                 }
-                Console.println(x)
-                Console.println(outer()())
-                Console.println(x)
+                println(x)
+                println(outer()())
+                println(x)
                 """, """
                 123
                 456
@@ -253,9 +255,9 @@ public class ByxScriptTest {
                     return () => x
                 }
                 x = 789
-                Console.println(x)
-                Console.println(outer()())
-                Console.println(x)
+                println(x)
+                println(outer()())
+                println(x)
                 """, """
                 789
                 456
@@ -269,7 +271,7 @@ public class ByxScriptTest {
                 }
                 var s = 0
                 observer(n => {s = s + n})
-                Console.println(s)
+                println(s)
                 """, """
                 55
                 """);
@@ -281,7 +283,7 @@ public class ByxScriptTest {
                 }
                 var s = 0
                 observer(() => {s += 1})
-                Console.println(s)
+                println(s)
                 """, """
                 10
                 """);
@@ -300,16 +302,16 @@ public class ByxScriptTest {
 
                 var s1 = Student('Zhang San', 21, 87.5)
                 var s2 = Student('Li Si', 23, 95)
-                Console.println(s1.getName())
-                Console.println(s2.getScore())
-                Console.println(s1.getDescription())
-                Console.println(s2.getDescription())
+                println(s1.getName())
+                println(s2.getScore())
+                println(s1.getDescription())
+                println(s2.getDescription())
                 s1.setName('Xiao Ming')
                 s2.setScore(77.5)
-                Console.println(s1.getName())
-                Console.println(s2.getScore())
-                Console.println(s1.getDescription())
-                Console.println(s2.getDescription())
+                println(s1.getName())
+                println(s2.getScore())
+                println(s1.getDescription())
+                println(s2.getDescription())
                 """, """
                 Zhang San
                 95
@@ -325,19 +327,19 @@ public class ByxScriptTest {
     @Test
     public void testAdd() {
         verify("""
-                Console.println(123 + 456)
-                Console.println(123 + 3.14)
-                Console.println(12.34 + 555)
-                Console.println(12.34 + 56.78)
-                Console.println('hello ' + 'world!')
-                Console.println('hello ' + 123)
-                Console.println(123 + ' hello')
-                Console.println('world ' + 3.14)
-                Console.println(3.14 + ' world')
-                Console.println('abc ' + true)
-                Console.println(false + ' abc')
-                Console.println(null + ' xyz')
-                Console.println('xyz ' + null)
+                println(123 + 456)
+                println(123 + 3.14)
+                println(12.34 + 555)
+                println(12.34 + 56.78)
+                println('hello ' + 'world!')
+                println('hello ' + 123)
+                println(123 + ' hello')
+                println('world ' + 3.14)
+                println(3.14 + ' world')
+                println('abc ' + true)
+                println(false + ' abc')
+                println(null + ' xyz')
+                println('xyz ' + null)
                 """, getOutput(out -> {
             out.println(123 + 456);
             out.println(123 + 3.14);
@@ -358,10 +360,10 @@ public class ByxScriptTest {
     @Test
     public void testSub() {
         verify("""
-                Console.println(532 - 34)
-                Console.println(3.14 - 12)
-                Console.println(12 - 7.78)
-                Console.println(56.78 - 12.34)
+                println(532 - 34)
+                println(3.14 - 12)
+                println(12 - 7.78)
+                println(56.78 - 12.34)
                 """, getOutput(out -> {
             out.println(532 - 34);
             out.println(3.14 - 12);
@@ -373,10 +375,10 @@ public class ByxScriptTest {
     @Test
     public void testMul() {
         verify("""
-                Console.println(12 * 34)
-                Console.println(12 * 3.4)
-                Console.println(0.12 * 34)
-                Console.println(12.34 * 56.78)
+                println(12 * 34)
+                println(12 * 3.4)
+                println(0.12 * 34)
+                println(12.34 * 56.78)
                 """, getOutput(out -> {
             out.println(12 * 34);
             out.println(12 * 3.4);
@@ -388,10 +390,10 @@ public class ByxScriptTest {
     @Test
     public void testDiv() {
         verify("""
-                Console.println(5 / 2)
-                Console.println(12 / 3.4)
-                Console.println(0.12 / 34)
-                Console.println(56.78 / 12.34)
+                println(5 / 2)
+                println(12 / 3.4)
+                println(0.12 / 34)
+                println(56.78 / 12.34)
                 """, getOutput(out -> {
             out.println(5 / 2);
             out.println(12 / 3.4);
@@ -403,10 +405,10 @@ public class ByxScriptTest {
     @Test
     public void testRem() {
         verify("""
-                Console.println(12 % 3)
-                Console.println(12 % 5)
-                Console.println(3 % 7)
-                Console.println(6 % 3)
+                println(12 % 3)
+                println(12 % 5)
+                println(3 % 7)
+                println(6 % 3)
                 """, getOutput(out -> {
             out.println(12 % 3);
             out.println(12 % 5);
@@ -418,21 +420,25 @@ public class ByxScriptTest {
     @Test
     public void testGreaterThan() {
         verify("""
-                Console.println(100 > 50)
-                Console.println(100 > 100)
-                Console.println(3.14 > 50)
-                Console.println(3.14 > 1)
-                Console.println(3.14 > 456.23)
-                Console.println(3.14 > 3.14)
-                Console.println('banana' > 'apple')
-                Console.println('apple' > 'banana')
-                Console.println('apple' > 'apple')
+                println(100 > 50)
+                println(100 > 100)
+                println(3.14 > 50)
+                println(3.14 > 1)
+                println(3.14 > 456.23)
+                println(3.14 > 3.14)
+                println(12 > 3.14)
+                println(1 > 3.14)
+                println('banana' > 'apple')
+                println('apple' > 'banana')
+                println('apple' > 'apple')
                 """, """
                 true
                 false
                 false
                 true
                 false
+                false
+                true
                 false
                 true
                 false
@@ -443,15 +449,17 @@ public class ByxScriptTest {
     @Test
     public void testGreaterEqualThan() {
         verify("""
-                Console.println(100 >= 50)
-                Console.println(100 >= 100)
-                Console.println(3.14 >= 50)
-                Console.println(3.14 >= 1)
-                Console.println(3.14 >= 456.23)
-                Console.println(3.14 >= 3.14)
-                Console.println('banana' >= 'apple')
-                Console.println('apple' >= 'banana')
-                Console.println('apple' >= 'apple')
+                println(100 >= 50)
+                println(100 >= 100)
+                println(3.14 >= 50)
+                println(3.14 >= 1)
+                println(3.14 >= 456.23)
+                println(3.14 >= 3.14)
+                println(12 >= 3.14)
+                println(1 >= 3.14)
+                println('banana' >= 'apple')
+                println('apple' >= 'banana')
+                println('apple' >= 'apple')
                 """, """
                 true
                 true
@@ -459,6 +467,8 @@ public class ByxScriptTest {
                 true
                 false
                 true
+                true
+                false
                 true
                 false
                 true
@@ -468,15 +478,17 @@ public class ByxScriptTest {
     @Test
     public void testLessThan() {
         verify("""
-                Console.println(100 < 50)
-                Console.println(100 < 100)
-                Console.println(3.14 < 50)
-                Console.println(3.14 < 1)
-                Console.println(3.14 < 456.23)
-                Console.println(3.14 < 3.14)
-                Console.println('banana' < 'apple')
-                Console.println('apple' < 'banana')
-                Console.println('apple' < 'apple')
+                println(100 < 50)
+                println(100 < 100)
+                println(3.14 < 50)
+                println(3.14 < 1)
+                println(3.14 < 456.23)
+                println(3.14 < 3.14)
+                println(12 < 3.14)
+                println(1 < 3.14)
+                println('banana' < 'apple')
+                println('apple' < 'banana')
+                println('apple' < 'apple')
                 """, """
                 false
                 false
@@ -484,6 +496,8 @@ public class ByxScriptTest {
                 false
                 true
                 false
+                false
+                true
                 false
                 true
                 false
@@ -493,21 +507,25 @@ public class ByxScriptTest {
     @Test
     public void testLessEqualThan() {
         verify("""
-                Console.println(100 <= 50)
-                Console.println(100 <= 100)
-                Console.println(3.14 <= 50)
-                Console.println(3.14 <= 1)
-                Console.println(3.14 <= 456.23)
-                Console.println(3.14 <= 3.14)
-                Console.println('banana' <= 'apple')
-                Console.println('apple' <= 'banana')
-                Console.println('apple' <= 'apple')
+                println(100 <= 50)
+                println(100 <= 100)
+                println(3.14 <= 50)
+                println(3.14 <= 1)
+                println(3.14 <= 456.23)
+                println(3.14 <= 3.14)
+                println(12 <= 3.14)
+                println(1 <= 3.14)
+                println('banana' <= 'apple')
+                println('apple' <= 'banana')
+                println('apple' <= 'apple')
                 """, """
                 false
                 true
                 true
                 false
                 true
+                true
+                false
                 true
                 false
                 true
@@ -518,22 +536,22 @@ public class ByxScriptTest {
     @Test
     public void testEqual() {
         verify("""
-                Console.println(123 == 123)
-                Console.println(12.34 == 12.34)
-                Console.println(true == true)
-                Console.println(false == false)
-                Console.println('apple' == 'apple')
-                Console.println(123 == 45)
-                Console.println(3.14 == 12.56)
-                Console.println(true == false)
-                Console.println('apple' == 'banana')
-                Console.println({a: 123, b: 'hello'} == {a: 123, b: 'hello'})
+                println(123 == 123)
+                println(12.34 == 12.34)
+                println(true == true)
+                println(false == false)
+                println('apple' == 'apple')
+                println(123 == 45)
+                println(3.14 == 12.56)
+                println(true == false)
+                println('apple' == 'banana')
+                println({a: 123, b: 'hello'} == {a: 123, b: 'hello'})
                 
                 var a = {a: 123, b: 'hello'}
                 var b = a
                 var c = {a: 123, b: 'hello'}
-                Console.println(a == b)
-                Console.println(a == c)
+                println(a == b)
+                println(a == c)
                 """, """
                 true
                 true
@@ -553,22 +571,22 @@ public class ByxScriptTest {
     @Test
     public void testNotEqual() {
         verify("""
-                Console.println(123 != 123)
-                Console.println(12.34 != 12.34)
-                Console.println(true != true)
-                Console.println(false != false)
-                Console.println('apple' != 'apple')
-                Console.println(123 != 45)
-                Console.println(3.14 != 12.56)
-                Console.println(true != false)
-                Console.println('apple' != 'banana')
-                Console.println({a: 123, b: 'hello'} != {a: 123, b: 'hello'})
+                println(123 != 123)
+                println(12.34 != 12.34)
+                println(true != true)
+                println(false != false)
+                println('apple' != 'apple')
+                println(123 != 45)
+                println(3.14 != 12.56)
+                println(true != false)
+                println('apple' != 'banana')
+                println({a: 123, b: 'hello'} != {a: 123, b: 'hello'})
                 
                 var a = {a: 123, b: 'hello'}
                 var b = a
                 var c = {a: 123, b: 'hello'}
-                Console.println(a != b)
-                Console.println(a != c)
+                println(a != b)
+                println(a != c)
                 """, """
                 false
                 false
@@ -589,10 +607,10 @@ public class ByxScriptTest {
     @Test
     public void testAnd() {
         verify("""
-                Console.println(true && true)
-                Console.println(true && false)
-                Console.println(false && true)
-                Console.println(false && false)
+                println(true && true)
+                println(true && false)
+                println(false && true)
+                println(false && false)
                 """, """
                 true
                 false
@@ -604,10 +622,10 @@ public class ByxScriptTest {
     @Test
     public void testOr() {
         verify("""
-                Console.println(true || true)
-                Console.println(true || false)
-                Console.println(false || true)
-                Console.println(false || false)
+                println(true || true)
+                println(true || false)
+                println(false || true)
+                println(false || false)
                 """, """
                 true
                 true
@@ -619,8 +637,8 @@ public class ByxScriptTest {
     @Test
     public void testNot() {
         verify("""
-                Console.println(!true)
-                Console.println(!false)
+                println(!true)
+                println(!false)
                 """, """
                 false
                 true
@@ -630,23 +648,23 @@ public class ByxScriptTest {
     @Test
     public void testNull() {
         verify("""
-                Console.println(null == null)
-                Console.println(123 == null)
-                Console.println(null == 123)
-                Console.println(3.14 == null)
-                Console.println(null == 3.14)
-                Console.println('hello' == null)
-                Console.println(null == 'hello')
-                Console.println([] == null)
-                Console.println(null == [])
-                Console.println([1, 2, 3] == null)
-                Console.println(null == [1, 2, 3])
-                Console.println({} == null)
-                Console.println(null == {})
-                Console.println({m: 100} == null)
-                Console.println(null == {m: 100})
-                Console.println((a => a + 1) == null)
-                Console.println(null == (a => a + 1))
+                println(null == null)
+                println(123 == null)
+                println(null == 123)
+                println(3.14 == null)
+                println(null == 3.14)
+                println('hello' == null)
+                println(null == 'hello')
+                println([] == null)
+                println(null == [])
+                println([1, 2, 3] == null)
+                println(null == [1, 2, 3])
+                println({} == null)
+                println(null == {})
+                println({m: 100} == null)
+                println(null == {m: 100})
+                println((a => a + 1) == null)
+                println(null == (a => a + 1))
                 """, """
                 true
                 false
@@ -671,33 +689,33 @@ public class ByxScriptTest {
     @Test
     public void testExpr() {
         verify("""
-                Console.println(2 + 3*5)
-                Console.println((2+3) * 4 / (9-7))
-                Console.println(2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5)
-                Console.println(-2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5)
-                Console.println(77.58 * (6 / 3.14+55.2234) - 2 * 6.1 / (1.0 + 2 / (4.0 - 3.8*5)))
-                Console.println(77.58 * (6 / -3.14+55.2234) - 2 * (-6.1) / (1.0 + 2 / (4.0 - 3.8*5)))
-                Console.println(-100)
-                Console.println(-5 + 7)
-                Console.println(-(5 + 7))
-                Console.println(-3.14)
-                Console.println(-12.34-67.5)
-                Console.println(-(12.34-67.5))
+                println(2 + 3*5)
+                println((2+3) * 4 / (9-7))
+                println(2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5)
+                println(-2.4 / 5.774 * (6 / 3.57 + 6.37 )-2 * 7 / 5.2 + 5)
+                println(77.58 * (6 / 3.14+55.2234) - 2 * 6.1 / (1.0 + 2 / (4.0 - 3.8*5)))
+                println(77.58 * (6 / -3.14+55.2234) - 2 * (-6.1) / (1.0 + 2 / (4.0 - 3.8*5)))
+                println(-100)
+                println(-5 + 7)
+                println(-(5 + 7))
+                println(-3.14)
+                println(-12.34-67.5)
+                println(-(12.34-67.5))
                 
-                Console.println(!false || true)
-                Console.println(!(false || true))
-                Console.println(!true && false)
-                Console.println(!(true && false))
-                Console.println(true && !false)
-                Console.println(false || !true)
-                Console.println(false && false || true)
-                Console.println(false && (false || true))
-                Console.println(true || true && false)
-                Console.println((true || true) && false)
-                Console.println(true && true && true)
-                Console.println(true && true && false)
-                Console.println(true || false || true)
-                Console.println(false || false || false)
+                println(!false || true)
+                println(!(false || true))
+                println(!true && false)
+                println(!(true && false))
+                println(true && !false)
+                println(false || !true)
+                println(false && false || true)
+                println(false && (false || true))
+                println(true || true && false)
+                println((true || true) && false)
+                println(true && true && true)
+                println(true && true && false)
+                println(true || false || true)
+                println(false || false || false)
                 """, getOutput(out -> {
             out.println(2 + 3*5);
             out.println((2+3) * 4 / (9-7));
@@ -746,16 +764,16 @@ public class ByxScriptTest {
                 x = 0
                 y = 0
                 var b = f2() && f1()
-                Console.println(b)
-                Console.println(x)
-                Console.println(y)
+                println(b)
+                println(x)
+                println(y)
 
                 x = 0
                 y = 0
                 b = f1() || f2()
-                Console.println(b)
-                Console.println(x)
-                Console.println(y)
+                println(b)
+                println(x)
+                println(y)
                 """, """
                 false
                 0
@@ -776,8 +794,8 @@ public class ByxScriptTest {
                     var k = 3 ;
                     i = k;
                 }
-                Console.println(i)
-                Console.println(j)
+                println(i)
+                println(j)
                 """, """
                 3
                 124
@@ -797,7 +815,7 @@ public class ByxScriptTest {
                 if (i > 200) {
                     i = 456
                 }
-                Console.println(i)""", """
+                println(i)""", """
                 123
                 """);
         verify("""
@@ -805,7 +823,7 @@ public class ByxScriptTest {
                 if (200 > i) {
                     i = 456
                 }
-                Console.println(i)""", """
+                println(i)""", """
                 456
                 """);
         verify("""
@@ -813,7 +831,7 @@ public class ByxScriptTest {
                 if (i < 25 || !(i < 50)) {
                     i = 200
                 }
-                Console.println(i)""", """
+                println(i)""", """
                 200
                 """);
         verify("""
@@ -826,7 +844,7 @@ public class ByxScriptTest {
                     i = 1003
                     j = 1004
                 }
-                Console.println(i, j)""", """
+                println(i, j)""", """
                 1001 1002
                 """);
         verify("""
@@ -839,7 +857,7 @@ public class ByxScriptTest {
                     i = 1003
                     j = 1004
                 }
-                Console.println(i, j)""", """
+                println(i, j)""", """
                 1003 1004
                 """);
         verify("""
@@ -855,10 +873,10 @@ public class ByxScriptTest {
                     }
                 }
                 
-                Console.println(getLevel(92))
-                Console.println(getLevel(73))
-                Console.println(getLevel(81))
-                Console.println(getLevel(50))
+                println(getLevel(92))
+                println(getLevel(73))
+                println(getLevel(81))
+                println(getLevel(50))
                 """, """
                 excellent
                 pass
@@ -878,7 +896,7 @@ public class ByxScriptTest {
                 for (var i = 1; i <= 100; i++) {
                     s += i
                 }
-                Console.println(s)""", """
+                println(s)""", """
                 5050
                 """);
         verify("""
@@ -891,7 +909,7 @@ public class ByxScriptTest {
                         s2 = s2 + i
                     }
                 }
-                Console.println(s1, s2)""", """
+                println(s1, s2)""", """
                 2550 2500
                 """);
         verify("""
@@ -901,7 +919,7 @@ public class ByxScriptTest {
                         s = s + i
                     }
                 }
-                Console.println(s)""", """
+                println(s)""", """
                 29441
                 """);
         verify("""
@@ -911,7 +929,7 @@ public class ByxScriptTest {
                         s += i
                     }
                 }
-                Console.println(s)""", """
+                println(s)""", """
                 71357
                 """);
     }
@@ -925,7 +943,7 @@ public class ByxScriptTest {
                     s = s + i
                     i++
                 }
-                Console.println(s, i)""", """
+                println(s, i)""", """
                 5050 101
                 """);
         verify("""
@@ -940,7 +958,7 @@ public class ByxScriptTest {
                     }
                     i = i + 1
                 }
-                Console.println(s1, s2, i)""", """
+                println(s1, s2, i)""", """
                 2550 2500 101
                 """);
     }
@@ -955,7 +973,7 @@ public class ByxScriptTest {
                     }
                     s += i
                 }
-                Console.println(s)""", """
+                println(s)""", """
                 349866
                 """);
         verify("""
@@ -968,7 +986,7 @@ public class ByxScriptTest {
                     s = s + i
                     i = i + 1
                 }
-                Console.println(s, i)""", """
+                println(s, i)""", """
                 349866 837
                 """);
     }
@@ -979,7 +997,7 @@ public class ByxScriptTest {
                 for (var i = 0; i < 100; ++i) {
                     for (var j = 0; j < 100; ++j) {
                         if ((i * j) % 12 == 7 && (i * j) % 23 == 11) {
-                            Console.println(i, j)
+                            println(i, j)
                             break;
                         }
                     }
@@ -1006,7 +1024,7 @@ public class ByxScriptTest {
                     }
                     s += i * i
                 }
-                Console.println(s)""", """
+                println(s)""", """
                 277694
                 """);
         verify("""
@@ -1020,7 +1038,7 @@ public class ByxScriptTest {
                     s = s + i * i
                     ++i
                 }
-                Console.println(s, i)""", """
+                println(s, i)""", """
                 277694 100
                 """);
     }
@@ -1037,7 +1055,7 @@ public class ByxScriptTest {
                         s += i * j
                     }
                 }
-                Console.println(s)
+                println(s)
                 """, getOutput(out -> {
             int s = 0;
             for (int i = 0; i < 100; ++i) {
@@ -1064,7 +1082,7 @@ public class ByxScriptTest {
                     if (i == 7) {
                         break
                     }
-                    Console.println(i)
+                    println(i)
                     i++
                 }
                 """, getOutput(out -> {
@@ -1089,7 +1107,7 @@ public class ByxScriptTest {
                     if (i == 7) {
                         break
                     }
-                    Console.println(i)
+                    println(i)
                 }
                 """, getOutput(out -> {
             for (int i = 1; i <= 10; i++) {
@@ -1115,7 +1133,7 @@ public class ByxScriptTest {
                         s = s + i
                     }
                 }
-                Console.println(s)""", """
+                println(s)""", """
                 1 2 3 4 5 6 7 8 9 10
                 """);
         verify("""
@@ -1123,7 +1141,7 @@ public class ByxScriptTest {
                 for (var i = 0; i < 100; i = i + 1) {
                     s = s + 'hello'
                 }
-                Console.println(s)""", "hello".repeat(100));
+                println(s)""", "hello".repeat(100));
     }
 
     @Test
@@ -1133,7 +1151,7 @@ public class ByxScriptTest {
                 for (var i = 1; i <= 100; i++) {
                     s = s + 1.0/i
                 }
-                Console.println(s)""", getOutput(out -> {
+                println(s)""", getOutput(out -> {
             double s = 0.0;
             for (int i = 1; i <= 100; ++i) {
                 s += 1.0 / i;
@@ -1146,16 +1164,16 @@ public class ByxScriptTest {
     public void testEmptyString() {
         verify("""
                 var s = ''
-                Console.println(s)
+                println(s)
                 """, "");
     }
 
     @Test
     public void testStringLength() {
         verify("""
-                Console.println(''.length())
-                Console.println('abc'.length())
-                Console.println('hello，你好'.length())
+                println(''.length())
+                println('abc'.length())
+                println('hello，你好'.length())
                 """, """
                 0
                 3
@@ -1167,8 +1185,8 @@ public class ByxScriptTest {
     public void testStringSubstring() {
         verify("""
                 var s = 'hello';
-                Console.println(s.substring(1, 4))
-                Console.println('你好世界'.substring(1, 3))
+                println(s.substring(1, 4))
+                println('你好世界'.substring(1, 3))
                 """, """
                 ell
                 好世
@@ -1178,7 +1196,7 @@ public class ByxScriptTest {
     @Test
     public void testStringConcatMethod() {
         verify("""
-                Console.println('abc'.concat('defg'))
+                println('abc'.concat('defg'))
                 """, """
                 abcdefg
                 """);
@@ -1187,9 +1205,9 @@ public class ByxScriptTest {
     @Test
     public void testStringCast() {
         verify("""
-                Console.println('123'.toInt())
-                Console.println('3.14'.toDouble())
-                Console.println('true'.toBool())
+                println('123'.toInt())
+                println('3.14'.toDouble())
+                println('true'.toBool())
                 """, """
                 123
                 3.14
@@ -1201,9 +1219,9 @@ public class ByxScriptTest {
     public void testStringCharAt() {
         verify("""
                 var s = 'abc'
-                Console.println(s.charAt(0), s.charAt(1), s.charAt(2))
-                Console.println(s.charAt(1) == 'b')
-                Console.println('你好'[0] == '你')
+                println(s.charAt(0), s.charAt(1), s.charAt(2))
+                println(s.charAt(1) == 'b')
+                println('你好'[0] == '你')
                 """, """
                 a b c
                 true
@@ -1215,7 +1233,7 @@ public class ByxScriptTest {
     public void testStringCodeAt() {
         verify("""
                 var s = 'abc'
-                Console.println(s.codeAt(0), s.codeAt(1), s.codeAt(2))
+                println(s.codeAt(0), s.codeAt(1), s.codeAt(2))
                 """, """
                 97 98 99
                 """);
@@ -1225,8 +1243,8 @@ public class ByxScriptTest {
     public void testStringSubscript() {
         verify("""
                 var s = 'abc'
-                Console.println(s[0], s[1], s[2])
-                Console.println(s[1] == 'b')
+                println(s[0], s[1], s[2])
+                println(s[1] == 'b')
                 """, """
                 a b c
                 true
@@ -1237,10 +1255,10 @@ public class ByxScriptTest {
     public void testListLength() {
         verify("""
                 var arr1 = []
-                Console.println(arr1.length())
+                println(arr1.length())
                 var arr2 = [1, 2, 3, 4]
-                Console.println(arr2.length())
-                Console.println([1, 2, 3].length())
+                println(arr2.length())
+                println([1, 2, 3].length())
                 """, """
                 0
                 4
@@ -1252,14 +1270,14 @@ public class ByxScriptTest {
     public void testListAddFirst() {
         verify("""
                 var arr = [1, 2, 3]
-                Console.println(arr.length())
+                println(arr.length())
                 arr.addFirst(4)
                 arr.addFirst(5)
-                Console.println(arr.length())
+                println(arr.length())
                 arr.addFirst(3.14)
                 arr.addFirst('hello')
-                Console.println(arr.length())
-                Console.println(arr)
+                println(arr.length())
+                println(arr)
                 """, """
                 3
                 5
@@ -1272,8 +1290,8 @@ public class ByxScriptTest {
     public void testListRemoveFirst() {
         verify("""
                 var nums = [1, 2, 3, 4, 5]
-                Console.println(nums.removeFirst())
-                Console.println(nums)
+                println(nums.removeFirst())
+                println(nums)
                 """, """
                 1
                 [2, 3, 4, 5]
@@ -1284,14 +1302,14 @@ public class ByxScriptTest {
     public void testListAddLast() {
         verify("""
                 var arr = [1, 2, 3]
-                Console.println(arr.length())
+                println(arr.length())
                 arr.addLast(4)
                 arr.addLast(5)
-                Console.println(arr.length())
+                println(arr.length())
                 arr.addLast(3.14)
                 arr.addLast('hello')
-                Console.println(arr.length())
-                Console.println(arr)
+                println(arr.length())
+                println(arr)
                 """, """
                 3
                 5
@@ -1307,7 +1325,7 @@ public class ByxScriptTest {
                 for (var i = 0; i < nums.length(); i = i + 1) {
                     s = s + nums[i]
                 }
-                Console.println(s)
+                println(s)
                 """, """
                 338350
                 """);
@@ -1317,8 +1335,8 @@ public class ByxScriptTest {
     public void testListRemoveLast() {
         verify("""
                 var nums = [1, 2, 3, 4, 5]
-                Console.println(nums.removeLast())
-                Console.println(nums)
+                println(nums.removeLast())
+                println(nums)
                 """, """
                 5
                 [1, 2, 3, 4]
@@ -1332,7 +1350,7 @@ public class ByxScriptTest {
                 list.insert(0, 100)
                 list.insert(3, 'hello')
                 list.insert(7, 3.14)
-                Console.println(list)
+                println(list)
                 """, """
                 [100, 1, 2, hello, 3, 4, 5, 3.14]
                 """);
@@ -1342,8 +1360,8 @@ public class ByxScriptTest {
     public void testListRemove() {
         verify("""
                 var list = [1, 2, 3, 4, 5]
-                Console.println(list.remove(2))
-                Console.println(list)
+                println(list.remove(2))
+                println(list)
                 """, """
                 3
                 [1, 2, 4, 5]
@@ -1357,8 +1375,8 @@ public class ByxScriptTest {
                 var list2 = list1.copy()
                 list1[2] = 100
                 list2[3] = 200
-                Console.println(list1)
-                Console.println(list2)
+                println(list1)
+                println(list2)
                 """, """
                 [1, 2, 100, 4, 5]
                 [1, 2, 3, 200, 5]
@@ -1378,9 +1396,9 @@ public class ByxScriptTest {
                 
                 for (var i = 0; i < list.length(); ++i) {
                     for (var j = 0; j < list[i].length(); ++j) {
-                        Console.print(list[i][j] + ' ')
+                        print(list[i][j] + ' ')
                     }
-                    Console.println()
+                    println()
                 }
                 """, """
                 10 11 12 13
@@ -1393,13 +1411,13 @@ public class ByxScriptTest {
     @Test
     public void testCallableEqual() {
         verify("""
-                Console.println((() => {}) == (() => {}))
-                Console.println((a => a + 1) == (a => a + 1))
+                println((() => {}) == (() => {}))
+                println((a => a + 1) == (a => a + 1))
                 var f1 = (a, b) => a + b
                 var f2 = f1
                 var f3 = (a, b) => a + b
-                Console.println(f1 == f2)
-                Console.println(f2 == f3)
+                println(f1 == f2)
+                println(f2 == f3)
                 """, """
                 false
                 false
@@ -1411,14 +1429,14 @@ public class ByxScriptTest {
     @Test
     public void testListEqual() {
         verify("""
-                Console.println([] == [])
-                Console.println([1, 2, 3] == [1, 2, 3])
-                Console.println([1, 2, 3] == [1, 2, 3, 4])
+                println([] == [])
+                println([1, 2, 3] == [1, 2, 3])
+                println([1, 2, 3] == [1, 2, 3, 4])
                 var a = [1, 2, 3]
                 var b = a
                 var c = [1, 2, 3]
-                Console.println(a == b)
-                Console.println(b == c)
+                println(a == b)
+                println(b == c)
                 """, """
                 true
                 true
@@ -1431,13 +1449,13 @@ public class ByxScriptTest {
     @Test
     public void testObjectEqual() {
         verify("""
-                Console.println({} == {})
-                Console.println({a: 123, b: 'hello'} == {a: 123, b: 'hello'})
+                println({} == {})
+                println({a: 123, b: 'hello'} == {a: 123, b: 'hello'})
                 var o1 = {a: 123, b: 'hello'}
                 var o2 = o1
                 var o3 = {a: 123, b: 'hello'}
-                Console.println(o1 == o2)
-                Console.println(o2 == o3)
+                println(o1 == o2)
+                println(o2 == o3)
                 """, """
                 false
                 false
@@ -1459,10 +1477,10 @@ public class ByxScriptTest {
                 obj.c[0]++
                 ++obj.c[1]
                 
-                Console.println(i)
-                Console.println(obj.a)
-                Console.println(obj.c[0])
-                Console.println(obj.c[1])
+                println(i)
+                println(obj.a)
+                println(obj.c[0])
+                println(obj.c[1])
                 """, """
                 102
                 3
@@ -1484,10 +1502,10 @@ public class ByxScriptTest {
                 obj.c[0]--
                 --obj.c[1]
                 
-                Console.println(i)
-                Console.println(obj.a)
-                Console.println(obj.c[0])
-                Console.println(obj.c[1])
+                println(i)
+                println(obj.a)
+                println(obj.c[0])
+                println(obj.c[1])
                 """, """
                 98
                 -1
@@ -1500,9 +1518,9 @@ public class ByxScriptTest {
     public void testReturn() {
         verify("""
                 func fun() {
-                    Console.println('hello')
+                    println('hello')
                     return;
-                    Console.println('hi')
+                    println('hi')
                 }
                 
                 fun()
@@ -1518,23 +1536,23 @@ public class ByxScriptTest {
                     try {
                         f()
                     } catch (e) {
-                        Console.println('catch', e)
+                        println('catch', e)
                     }
                 }
                 
                 testException(() => {
-                    Console.println('test1')
+                    println('test1')
                 })
                 
                 testException(() => {
-                    Console.println('test2')
+                    println('test2')
                     throw 123
                 })
                 
                 testException(() => {
-                    Console.println('test3-1')
+                    println('test3-1')
                     throw 456
-                    Console.println('test3-2')
+                    println('test3-2')
                 })
                 """, """
                 test1
@@ -1545,11 +1563,11 @@ public class ByxScriptTest {
                 """);
         verify("""
                 try {
-                    Console.println(123)
+                    println(123)
                     throw 'hello'
-                    Console.println(456)
+                    println(456)
                 } catch (err) {
-                    Console.println('catch', err)
+                    println('catch', err)
                 }
                 """, """
                 123
@@ -1560,23 +1578,23 @@ public class ByxScriptTest {
     @Test
     public void testNestedTry() {
         verify("""
-            Console.println('begin')
+            println('begin')
             try {
-                Console.println('try1-1')
+                println('try1-1')
                 try {
-                    Console.println('try2-1')
+                    println('try2-1')
                     throw 123
-                    Console.println('try2-2')
+                    println('try2-2')
                 } catch (e) {
-                    Console.println('catch1-1', e)
+                    println('catch1-1', e)
                     throw 456
-                    Console.println('catch1-2', e)
+                    println('catch1-2', e)
                 }
-                Console.println('try1-2')
+                println('try1-2')
             } catch (e) {
-                Console.println('catch2', e)
+                println('catch2', e)
             }
-            Console.println('end')
+            println('end')
             """, """
             begin
             try1-1
@@ -1590,23 +1608,23 @@ public class ByxScriptTest {
     @Test
     public void testNestedCatch() {
         verify("""
-            Console.println('begin')
+            println('begin')
             try {
-                Console.println('try1-1')
+                println('try1-1')
                 throw 123
-                Console.println('try1-2')
+                println('try1-2')
             } catch (e) {
-                Console.println('catch1-1', e)
+                println('catch1-1', e)
                 try {
-                    Console.println('try2-1')
+                    println('try2-1')
                     throw 456
-                    Console.println('try2-2')
+                    println('try2-2')
                 } catch (e) {
-                    Console.println('catch2', e)
+                    println('catch2', e)
                 }
-                Console.println('catch1-2')
+                println('catch1-2')
             }
-            Console.println('end')
+            println('end')
             """, """
             begin
             try1-1
@@ -1630,15 +1648,15 @@ public class ByxScriptTest {
             func g() {
                 try {
                     f(123)
-                    Console.println('success')
+                    println('success')
                     return 'ok'
                 } catch (e) {
-                    Console.println('catch')
+                    println('catch')
                     return 'failed'
                 }
             }
             
-            Console.println(g())
+            println(g())
             """, """
             catch
             failed
@@ -1653,15 +1671,15 @@ public class ByxScriptTest {
             func g() {
                 try {
                     f(567)
-                    Console.println('success')
+                    println('success')
                     return 'ok'
                 } catch (e) {
-                    Console.println('catch')
+                    println('catch')
                     return 'failed'
                 }
             }
             
-            Console.println(g())
+            println(g())
             """, """
             success
             ok
@@ -1676,7 +1694,7 @@ public class ByxScriptTest {
                 var a = 456
                 throw 'error'
             } catch (e) {
-                Console.println(a)
+                println(a)
             }
             """, """
             123
@@ -1685,9 +1703,9 @@ public class ByxScriptTest {
             var a = 123
             try {
                 var a = 456
-                Console.println('hello'.charAt(10))
+                println('hello'.charAt(10))
             } catch (e) {
-                Console.println(a)
+                println(a)
             }
             """, """
             123
@@ -1707,7 +1725,7 @@ public class ByxScriptTest {
                 } catch (e) {
                     continue
                 }
-                Console.println(i)
+                println(i)
             }
             """, """
             4
@@ -1719,7 +1737,7 @@ public class ByxScriptTest {
     public void testTryAndBreak() {
         verify("""
             for (var i = 1; i <= 5; i++) {
-                Console.println(i)
+                println(i)
                 try {
                     for (var j = 1; j <= i; j++) {
                         if (j == 3) {
@@ -1740,31 +1758,104 @@ public class ByxScriptTest {
     @Test
     public void testBuiltinThrow() {
         verify("""
-            Console.println('begin')
+            println('begin')
             try {
-                Console.println('hello'.charAt(10))
+                println(max('hello', 'hi'))
             } catch (e) {
-                Console.println('catch')
+                println('catch')
             }
-            Console.println('end')
+            println('end')
             """, """
             begin
             catch
             end
             """);
         verify("""
-            Console.println('begin')
+            println('begin')
             try {
-                Console.println('hello'.charAt(1))
+                println(max(1, 2))
             } catch (e) {
-                Console.println('catch')
+                println('catch')
             }
-            Console.println('end')
+            println('end')
+            """, """
+            begin
+            2
+            end
+            """);
+        verify("""
+            println('begin')
+            try {
+                println('hello'.charAt(10))
+            } catch (e) {
+                println('catch')
+            }
+            println('end')
+            """, """
+            begin
+            catch
+            end
+            """);
+        verify("""
+            println('begin')
+            try {
+                println('hello'.charAt(1))
+            } catch (e) {
+                println('catch')
+            }
+            println('end')
             """, """
             begin
             e
             end
             """);
+    }
+
+    @Test
+    public void testDeepThrow() {
+        verify("""
+            func test(n) {
+                if (n == 100) {
+                    throw 'error'
+                }
+                test(n + 1)
+            }
+            
+            println('begin')
+            try {
+                test(0)
+            } catch (e) {
+                println('catch', e)
+            }
+            println('end')
+            """, """
+            begin
+            catch error
+            end
+            """);
+    }
+
+    @Test
+    public void testImport() throws Exception {
+        Path classPath = Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("./")).toURI());
+        verify(List.of(classPath.resolve("p1"), classPath.resolve("p2")), """
+                import a
+                import b
+                
+                println('main')
+                """, """
+                d
+                c
+                b
+                a
+                main
+                """
+        );
+        verifyException(ByxScriptRuntimeException.class, List.of(classPath.resolve("p3")), """
+                import x
+                
+                println('main')
+                """);
     }
 
     @Test
@@ -1794,6 +1885,24 @@ public class ByxScriptTest {
     }
 
     @Test
+    public void testInterrupt3() throws InterruptedException {
+        Thread t = new Thread(() -> {
+            ByxScriptRunner runner = new ByxScriptRunner();
+            assertThrows(InterruptException.class, () -> runner.run("""
+                func test() {
+                    test()
+                }
+                test()
+                """));
+            System.out.println("testInterrupt3 finish");
+        });
+        t.start();
+        TimeUnit.SECONDS.sleep(1);
+        t.interrupt();
+        t.join();
+    }
+
+    @Test
     public void testStackOverflow() {
         verify("""
             func sum(n) {
@@ -1803,7 +1912,7 @@ public class ByxScriptTest {
                 return sum(n - 1) + n
             }
             
-            Console.println(sum(10000))
+            println(sum(10000))
             """, """
             50005000
             """);
@@ -1813,10 +1922,128 @@ public class ByxScriptTest {
     public void testLongList() {
         String script = String.format("""
             var list = [%s]
-            Console.println(list[100])
+            println(list[100])
             """, "1" + ", 1".repeat(10000));
         verify(script, """
             1
+            """);
+    }
+
+    @Test
+    public void testBreakOutsideLoop() {
+        verifyException(BreakOutsideLoopException.class, "break");
+        verifyException(BreakOutsideLoopException.class, """
+            func test() {
+                break
+            }
+            test()
+            """);
+    }
+
+    @Test
+    public void testContinueOutsideLoop() {
+        verifyException(ContinueOutsideLoopException.class, "continue");
+        verifyException(ContinueOutsideLoopException.class, """
+            func test() {
+                continue
+            }
+            test()
+            """);
+    }
+
+    @Test
+    public void testReturnOutsideFunction() {
+        verifyException(ByxScriptRuntimeException.class, "return");
+        verifyException(ByxScriptRuntimeException.class, "return 123");
+    }
+
+    @Test
+    public void testUncaughtException() {
+        verifyException(UncaughtException.class, "throw 'error'");
+        verifyException(UncaughtException.class, """
+            func test() {
+                throw 'error'
+            }
+            test()
+            """);
+    }
+
+    @Test
+    public void testUnaryOpException() {
+        verifyException(UnaryOpException.class, "![]");
+        verifyException(UnaryOpException.class, "-{}");
+    }
+
+    @Test
+    public void testBinaryOpException() {
+        verifyException(BinaryOpException.class, "[] + {}");
+        verifyException(BinaryOpException.class, "[] - {}");
+        verifyException(BinaryOpException.class, "[] * {}");
+        verifyException(BinaryOpException.class, "[] / {}");
+        verifyException(BinaryOpException.class, "[] % {}");
+        verifyException(BinaryOpException.class, "[] < {}");
+        verifyException(BinaryOpException.class, "[] <= {}");
+        verifyException(BinaryOpException.class, "[] > {}");
+        verifyException(BinaryOpException.class, "[] >= {}");
+        verifyException(BinaryOpException.class, "[] && {}");
+        verifyException(BinaryOpException.class, "[] || {}");
+    }
+
+    @Test
+    public void testNotCallableException() {
+        verifyException(NotCallableException.class, "123()");
+    }
+
+    @Test
+    public void testFieldNotExistException() {
+        verifyException(FieldNotExistException.class, """
+            var obj = {
+                a: 123,
+                b: 'hello'
+            }
+            println(obj.c)
+            """);
+    }
+
+    @Test
+    public void testFieldAccessUnsupportedException() {
+        verifyException(FieldAccessUnsupportedException.class, "123.a");
+    }
+
+    @Test
+    public void testFieldAssignUnsupportedException() {
+        verifyException(FieldAssignUnsupportedException.class, "123.a = 456");
+    }
+
+    @Test
+    public void testInvalidSubscriptException() {
+        verifyException(InvalidSubscriptException.class, "[1, 2, 3]['hello']");
+        verifyException(InvalidSubscriptException.class, "'hello'[3.14]");
+        verifyException(InvalidSubscriptException.class, "[1, 2, 3][3.14] = 'a'");
+    }
+
+    @Test
+    public void testSSubscriptAccessUnsupportedException() {
+        verifyException(SubscriptAccessUnsupportedException.class, "123[1]");
+    }
+
+    @Test
+    public void testSubscriptAssignUnsupportedException() {
+        verifyException(SubscriptAssignUnsupportedException.class, "123[1] = 456");
+        verifyException(SubscriptAssignUnsupportedException.class, "'hello'[1] = 'a'");
+    }
+
+    @Test
+    public void testInvalidLoopConditionException() {
+        verifyException(InvalidLoopConditionException.class, """
+            while (123) {
+                println('hello')
+            }
+            """);
+        verifyException(InvalidLoopConditionException.class, """
+            for (var i = 0; 123; i++) {
+                println('hello')
+            }
             """);
     }
 }

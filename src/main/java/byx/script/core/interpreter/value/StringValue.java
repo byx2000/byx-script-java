@@ -3,6 +3,8 @@ package byx.script.core.interpreter.value;
 import java.util.List;
 import java.util.Objects;
 
+import static byx.script.core.util.ValueUtils.checkArgument;
+
 public class StringValue extends ObjectValue {
     private final String value;
 
@@ -36,11 +38,6 @@ public class StringValue extends ObjectValue {
     @Override
     public int hashCode() {
         return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
     }
 
     private Value length(List<Value> args) {

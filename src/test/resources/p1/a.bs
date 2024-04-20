@@ -1,4 +1,4 @@
 import b
 import c
 
-Console.println('a')
+println('a')

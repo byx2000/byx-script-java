@@ -2,10 +2,10 @@ package byx.script.core.interpreter.exception;
 
 import byx.script.core.common.FastException;
 
-public class JumpException extends FastException {
+public class ExitRecursionException extends FastException {
     private final Runnable runnable;
 
-    public JumpException(Runnable runnable) {
+    public ExitRecursionException(Runnable runnable) {
         this.runnable = runnable;
     }
 

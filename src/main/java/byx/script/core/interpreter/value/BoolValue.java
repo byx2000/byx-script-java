@@ -1,5 +1,7 @@
 package byx.script.core.interpreter.value;
 
+import byx.script.core.util.ValueUtils;
+
 import java.util.Objects;
 
 public class BoolValue implements Value {
@@ -35,7 +37,7 @@ public class BoolValue implements Value {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return ValueUtils.valueToString(this);
     }
 
     @Override

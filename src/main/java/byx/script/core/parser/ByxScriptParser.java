@@ -283,7 +283,7 @@ public class ByxScriptParser {
                 return new VarDeclare(functionName, new CallableLiteral(params, body));
             });
 
-    private static final Parser<Expr> assignable = identifier.and(alt(subscript, fieldAccess).many())
+    private static final Parser<Expr> assignable = expr.and(alt(subscript, fieldAccess).many())
             .map(ByxScriptParser::buildAssignable);
 
     // 赋值语句
@@ -441,8 +441,8 @@ public class ByxScriptParser {
         return expr;
     }
 
-    private static Expr buildAssignable(Pair<String, List<Object>> p) {
-        Expr e = new Var(p.first());
+    private static Expr buildAssignable(Pair<Expr, List<Object>> p) {
+        Expr e = p.first();
         for (Object o : p.second()) {
             if (o instanceof Expr) {
                 e = new Subscript(e, (Expr) o);

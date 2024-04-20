@@ -80,10 +80,10 @@ public class SampleTest {
 
                 var root = TreeNode(1, TreeNode(2, TreeNode(4, TreeNode(7), null), TreeNode(5)), TreeNode(3, null, TreeNode(6)))
 
-                Console.println(preorderTraverse(root))
-                Console.println(inorderTraverse(root))
-                Console.println(postorderTraverse(root))
-                Console.println(levelTraverse(root))
+                println(preorderTraverse(root))
+                println(inorderTraverse(root))
+                println(postorderTraverse(root))
+                println(levelTraverse(root))
                 """, """
                 [1, 2, 4, 7, 5, 3, 6]
                 [7, 4, 2, 5, 1, 3, 6]
@@ -105,17 +105,17 @@ public class SampleTest {
                 }
 
                 var c1 = SimpleCounter()
-                Console.println(c1())
-                Console.println(c1())
-                Console.println(c1())
+                println(c1())
+                println(c1())
+                println(c1())
 
                 var c2 = SimpleCounter()
-                Console.println(c2())
-                Console.println(c2())
-                Console.println(c2())
+                println(c2())
+                println(c2())
+                println(c2())
 
-                Console.println(c1())
-                Console.println(c2())
+                println(c1())
+                println(c2())
 
                 // 计数器
                 func Counter(init) {
@@ -131,26 +131,26 @@ public class SampleTest {
                 }
 
                 var c3 = Counter(100)
-                Console.println(c3.current()) // 100
+                println(c3.current()) // 100
                 c3.inc()
-                Console.println(c3.current()) // 101
+                println(c3.current()) // 101
                 c3.inc()
-                Console.println(c3.current()) // 102
+                println(c3.current()) // 102
                 c3.dec()
-                Console.println(c3.current()) // 101
+                println(c3.current()) // 101
                 c3.dec()
-                Console.println(c3.current()) // 100
+                println(c3.current()) // 100
 
                 var c4 = Counter(200)
-                Console.println(c4.current()) // 200
+                println(c4.current()) // 200
                 c4.inc()
-                Console.println(c4.current()) // 201
+                println(c4.current()) // 201
                 c4.inc()
-                Console.println(c4.current()) // 202
+                println(c4.current()) // 202
                 c4.dec()
-                Console.println(c4.current()) // 201
+                println(c4.current()) // 201
                 c4.dec()
-                Console.println(c4.current()) // 200
+                println(c4.current()) // 200
                 """, """
                 1
                 2
@@ -183,7 +183,7 @@ public class SampleTest {
                     return n * factorial(n - 1)
                 }
 
-                Console.println(factorial(10))
+                println(factorial(10))
                 """, """
                 3628800
                 """);
@@ -206,10 +206,10 @@ public class SampleTest {
                     return fib2(n - 1) + fib2(n - 2)
                 }
 
-                Console.println(fib1(10))
-                Console.println(fib1(20))
-                Console.println(fib2(10))
-                Console.println(fib2(20))
+                println(fib1(10))
+                println(fib1(20))
+                println(fib2(10))
+                println(fib2(20))
                 """, """
                 55
                 6765
@@ -239,7 +239,7 @@ public class SampleTest {
                 transpose(mat)
 
                 for (var i = 0; i < mat.length(); ++i) {
-                    Console.println(mat[i])
+                    println(mat[i])
                 }
                 """, """
                 [1, 4, 7]
@@ -294,7 +294,7 @@ public class SampleTest {
 
                 var nums = [3, 2, 1, 5, 4, 6, 9, 7, 8]
                 MergeSort(nums)
-                Console.println(nums)
+                println(nums)
                 """, """
                 [1, 2, 3, 4, 5, 6, 7, 8, 9]
                 """);
@@ -336,7 +336,7 @@ public class SampleTest {
                     ['1', '1', '0', '0', '0'],
                     ['0', '0', '0', '0', '0']
                 ]
-                Console.println(numberOfIslands(map1))
+                println(numberOfIslands(map1))
 
                 var map2 = [
                     ['1', '1', '0', '0', '0'],
@@ -344,7 +344,7 @@ public class SampleTest {
                     ['0', '0', '1', '0', '0'],
                     ['0', '0', '0', '1', '1']
                 ]
-                Console.println(numberOfIslands(map2))
+                println(numberOfIslands(map2))
                 """, """
                 1
                 3
@@ -379,10 +379,10 @@ public class SampleTest {
                     return maxLen
                 }
 
-                Console.println(LongestPalindrome1('babad'))
-                Console.println(LongestPalindrome1('cbbd'))
-                Console.println(LongestPalindrome1('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
-                Console.println(LongestPalindrome1('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
+                println(LongestPalindrome1('babad'))
+                println(LongestPalindrome1('cbbd'))
+                println(LongestPalindrome1('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
+                println(LongestPalindrome1('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
 
                 func LongestPalindrome2(s) {
                     var cache = []
@@ -423,10 +423,10 @@ public class SampleTest {
                     return maxLen
                 }
                 
-                Console.println(LongestPalindrome2('babad'))
-                Console.println(LongestPalindrome2('cbbd'))
-                Console.println(LongestPalindrome2('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
-                Console.println(LongestPalindrome2('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
+                println(LongestPalindrome2('babad'))
+                println(LongestPalindrome2('cbbd'))
+                println(LongestPalindrome2('dsfasfdsfadsfasdgfdadfasdgdsgasdfgasgsfd'))
+                println(LongestPalindrome2('asdasbvabsbasbasdabbabaabsdsbaabaabbababaddsbfbaba'))
                 """, """
                 3
                 2
@@ -475,7 +475,7 @@ public class SampleTest {
 
                 var result = permutation([1, 2, 3])
                 for (var i = 0; i < result.length(); ++i) {
-                    Console.println(result[i])
+                    println(result[i])
                 }
                 """, """
                 [1, 2, 3]
@@ -521,11 +521,11 @@ public class SampleTest {
 
                 var nums1 = [3, 2, 1, 5, 4, 6, 9, 7, 8]
                 qsort(nums1, 0, nums1.length() - 1)
-                Console.println(nums1)
+                println(nums1)
 
                 var nums2 = [2, 4, 3, 2, 5, 7]
                 qsort(nums2, 0, nums2.length() - 1)
-                Console.println(nums2)
+                println(nums2)
 
                 """, """
                 [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -571,8 +571,8 @@ public class SampleTest {
                 }
 
                 var head = LinkedList(1, LinkedList(2, LinkedList(3, LinkedList(4, LinkedList(5)))))
-                Console.println(toList(head))
-                Console.println(toList(reverse(head)))
+                println(toList(head))
+                println(toList(reverse(head)))
                 """, """
                 [1, 2, 3, 4, 5]
                 [5, 4, 3, 2, 1]
@@ -596,10 +596,10 @@ public class SampleTest {
 
                 var nums1 = [1, 2, 3, 4, 5]
                 reverse(nums1)
-                Console.println(nums1)
+                println(nums1)
                 var nums2 = [1, 2, 3, 4, 5, 6]
                 reverse(nums2)
-                Console.println(nums2)
+                println(nums2)
                 """, """
                 [5, 4, 3, 2, 1]
                 [6, 5, 4, 3, 2, 1]
@@ -625,7 +625,7 @@ public class SampleTest {
                 SelectionSort(nums)
 
                 for (var i = 0; i < nums.length(); ++i) {
-                    Console.print(nums[i] + ' ')
+                    print(nums[i] + ' ')
                 }
                 """, """
                 1 2 3 4 5 6 7 8 9
@@ -648,16 +648,16 @@ public class SampleTest {
                 stack.push(1)
                 stack.push(2)
                 stack.push(3)
-                Console.println(stack.pop())
-                Console.println(stack.pop())
+                println(stack.pop())
+                println(stack.pop())
                 stack.push(4)
                 stack.push(5)
-                Console.println(stack.top())
-                Console.println(stack.pop())
-                Console.println(stack.top())
+                println(stack.top())
+                println(stack.pop())
+                println(stack.top())
                 stack.pop()
-                Console.println(stack.top())
-                Console.println(stack.pop())
+                println(stack.top())
+                println(stack.pop())
                 """, """
                 3
                 2
@@ -681,10 +681,10 @@ public class SampleTest {
                     return result
                 }
 
-                Console.println(stringToInt('0'))
-                Console.println(stringToInt('2'))
-                Console.println(stringToInt('123'))
-                Console.println(stringToInt('32453532'))
+                println(stringToInt('0'))
+                println(stringToInt('2'))
+                println(stringToInt('123'))
+                println(stringToInt('32453532'))
                 """, """
                 0
                 2
@@ -718,7 +718,7 @@ public class SampleTest {
 
                 var result = SubSet([1, 2, 3])
                 for (var i = 0; i < result.length(); i++) {
-                    Console.println(result[i])
+                    println(result[i])
                 }
                 """, """
                 []
@@ -746,10 +746,10 @@ public class SampleTest {
                     return undefined
                 }
 
-                Console.println(twoSum([2, 7, 11, 15], 9))
-                Console.println(twoSum([3, 2, 4], 6))
-                Console.println(twoSum([3, 3], 6))
-                Console.println(twoSum([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))
+                println(twoSum([2, 7, 11, 15], 9))
+                println(twoSum([3, 2, 4], 6))
+                println(twoSum([3, 3], 6))
+                println(twoSum([23, 16, 76, 97, 240, 224, 5, 78, 443, 25], 103))
                 """, """
                 [0, 1]
                 [1, 2]

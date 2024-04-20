@@ -6,9 +6,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static util.GuardUtils.wrap;
-import static util.GuardUtils.wrapCont;
+import static byx.script.core.util.GuardUtils.wrap;
+import static byx.script.core.util.GuardUtils.wrapCont;
 
+/**
+ * 封装Continuation
+ */
 public interface Cont<T> {
     void run(Consumer<T> c);
 

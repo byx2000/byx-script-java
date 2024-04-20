@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import static byx.script.core.util.ValueUtils.checkArgument;
+
 public class ListValue extends ObjectValue {
     private final LinkedList<Value> elems;
 
@@ -39,11 +41,6 @@ public class ListValue extends ObjectValue {
     @Override
     public int hashCode() {
         return Objects.hash(elems);
-    }
-
-    @Override
-    public String toString() {
-        return elems.toString();
     }
 
     private Value length(List<Value> args) {

@@ -8,9 +8,10 @@ import byx.script.core.parser.ast.expr.*;
 import byx.script.core.parser.ast.stmt.*;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import static util.GuardUtils.run;
+import static byx.script.core.util.GuardUtils.run;
 
 public class ByxScriptEvaluator {
     private static final ThreadLocal<FunctionStack> FUNCTION_STACK_HOLDER = new ThreadLocal<>();
@@ -57,17 +58,17 @@ public class ByxScriptEvaluator {
             Expr lhs = n.lhs();
             Expr rhs = n.rhs();
             return switch (n.op()) {
-                case Add -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalAdd(v1, v2)));
-                case Sub -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalSub(v1, v2)));
-                case Mul -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalMul(v1, v2)));
-                case Div -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalDiv(v1, v2)));
-                case Rem -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalRem(v1, v2)));
-                case LessThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalLessThan(v1, v2)));
-                case LessEqualThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalLessEqualThan(v1, v2)));
-                case GreaterThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalGreaterThan(v1, v2)));
-                case GreaterEqualThan -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalGreaterEqualThan(v1, v2)));
-                case Equal -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalEqual(v1, v2)));
-                case NotEqual -> evalExpr(lhs, scope).flatMap(v1 -> evalExpr(rhs, scope).map(v2 -> evalNotEqual(v1, v2)));
+                case Add -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalAdd);
+                case Sub -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalSub);
+                case Mul -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalMul);
+                case Div -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalDiv);
+                case Rem -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalRem);
+                case LessThan -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalLessThan);
+                case LessEqualThan -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalLessEqualThan);
+                case GreaterThan -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalGreaterThan);
+                case GreaterEqualThan -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalGreaterEqualThan);
+                case Equal -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalEqual);
+                case NotEqual -> evalBinaryExpr(lhs, rhs, scope, ByxScriptEvaluator::evalNotEqual);
                 case And -> evalAnd(lhs, rhs, scope);
                 case Or -> evalOr(lhs, rhs, scope);
             };
@@ -163,21 +164,21 @@ public class ByxScriptEvaluator {
         } else if (node instanceof Break) {
             return cont -> {
                 if (frame.isBreakStackEmpty()) {
-                    throw new ByxScriptRuntimeException("break statement only allow in loop");
+                    throw new BreakOutsideLoopException();
                 }
                 frame.popBreakStack().accept(null);
             };
         } else if (node instanceof Continue) {
             return cont -> {
                 if (frame.isContinueStackEmpty()) {
-                    throw new ByxScriptRuntimeException("continue statement only allow in loop");
+                    throw new ContinueOutsideLoopException();
                 }
                 frame.peekContinueStack().accept(null);
             };
         } else if (node instanceof Return n) {
             return evalExpr(n.retVal(), scope).flatMap(v -> cont -> {
                 if (functionStack.isEmpty()) {
-                    throw new ByxScriptRuntimeException("return statement only allow in function");
+                    throw new ReturnOutsideFunctionException();
                 }
                 functionStack.pop().getReturnCont().accept(v);
             });
@@ -201,6 +202,12 @@ public class ByxScriptEvaluator {
         if (Thread.currentThread().isInterrupted()) {
             throw new InterruptException();
         }
+    }
+
+    private static Cont<Value> evalBinaryExpr(Expr lhs, Expr rhs, Scope scope, BiFunction<Value, Value, Value> opFunc) {
+        return evalExpr(lhs, scope)
+            .flatMap(v1 -> evalExpr(rhs, scope)
+                .map(v2 -> opFunc.apply(v1, v2)));
     }
 
     private static Cont<List<Value>> evalExprList(List<Expr> exprs, Scope scope) {
@@ -269,9 +276,11 @@ public class ByxScriptEvaluator {
             // 找到throw对应的try语句上下文
             ArrayDeque<TryContext> tryStack = TRY_STACK_HOLDER.get();
             if (tryStack.isEmpty()) {
-                throw new ByxScriptRuntimeException("uncaught exception from script: " + valueToThrow);
+                throw new UncaughtException(valueToThrow);
             }
             TryContext tryContext = tryStack.pop();
+
+            // 声明异常捕获变量
             Scope newScope = new Scope(tryContext.scope);
             newScope.declareVar(tryContext.catchVar, valueToThrow);
 
@@ -301,24 +310,16 @@ public class ByxScriptEvaluator {
                 }
             }
 
+            // 执行函数体
             return execStmt(body, newScope).map(v -> NullValue.INSTANCE);
         };
-    }
-
-    private static ByxScriptRuntimeException buildUnaryOpUnsupportedException(String op, Value v) {
-        return new ByxScriptRuntimeException(String.format("unsupported operator %s on %s", op, v.typeId()));
-    }
-
-    private static ByxScriptRuntimeException buildBinaryOpUnsupportedException(String op, Value lhs, Value rhs) {
-        return new ByxScriptRuntimeException(String.format("unsupported operator %s between %s and %s",
-            op, lhs.typeId(), rhs.typeId()));
     }
 
     private static Value evalNot(Value value) {
         if (value instanceof BoolValue v) {
             return BoolValue.of(!v.getValue());
         }
-        throw buildUnaryOpUnsupportedException("!", value);
+        throw new UnaryOpException("!", value);
     }
 
     private static Value evalNeg(Value value) {
@@ -327,7 +328,7 @@ public class ByxScriptEvaluator {
         } else if (value instanceof DoubleValue v) {
             return new DoubleValue(-v.value());
         }
-        throw buildUnaryOpUnsupportedException("-", value);
+        throw new UnaryOpException("-", value);
     }
 
     private static Value evalAdd(Value lhs, Value rhs) {
@@ -369,7 +370,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException("+", lhs, rhs);
+        throw new BinaryOpException("+", lhs, rhs);
     }
 
     private static Value evalSub(Value lhs, Value rhs) {
@@ -387,7 +388,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException("-", lhs, rhs);
+        throw new BinaryOpException("-", lhs, rhs);
     }
 
     private static Value evalMul(Value lhs, Value rhs) {
@@ -405,7 +406,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException("*", lhs, rhs);
+        throw new BinaryOpException("*", lhs, rhs);
     }
 
     private static Value evalDiv(Value lhs, Value rhs) {
@@ -423,7 +424,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException("/", lhs, rhs);
+        throw new BinaryOpException("/", lhs, rhs);
     }
 
     private static Value evalRem(Value lhs, Value rhs) {
@@ -431,7 +432,7 @@ public class ByxScriptEvaluator {
             return new IntegerValue(v1.value() % v2.value());
         }
 
-        throw buildBinaryOpUnsupportedException("%", lhs, rhs);
+        throw new BinaryOpException("%", lhs, rhs);
     }
 
     private static Value evalLessThan(Value lhs, Value rhs) {
@@ -453,7 +454,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException("<", lhs, rhs);
+        throw new BinaryOpException("<", lhs, rhs);
     }
 
     private static Value evalLessEqualThan(Value lhs, Value rhs) {
@@ -475,7 +476,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException("<=", lhs, rhs);
+        throw new BinaryOpException("<=", lhs, rhs);
     }
 
     private static Value evalGreaterThan(Value lhs, Value rhs) {
@@ -497,7 +498,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException(">", lhs, rhs);
+        throw new BinaryOpException(">", lhs, rhs);
     }
 
     private static Value evalGreaterEqualThan(Value lhs, Value rhs) {
@@ -519,7 +520,7 @@ public class ByxScriptEvaluator {
             }
         }
 
-        throw buildBinaryOpUnsupportedException(">=", lhs, rhs);
+        throw new BinaryOpException(">=", lhs, rhs);
     }
 
     private static Value evalEqual(Value lhs, Value rhs) {
@@ -568,7 +569,7 @@ public class ByxScriptEvaluator {
                     return BoolValue.of(b1.getValue() && b2.getValue());
                 }
 
-                throw buildBinaryOpUnsupportedException("&&", v1, v2);
+                throw new BinaryOpException("&&", v1, v2);
             });
         });
     }
@@ -585,7 +586,7 @@ public class ByxScriptEvaluator {
                     return BoolValue.of(b1.getValue() || b2.getValue());
                 }
 
-                throw buildBinaryOpUnsupportedException("||", v1, v2);
+                throw new BinaryOpException("||", v1, v2);
             });
         });
     }
@@ -600,25 +601,28 @@ public class ByxScriptEvaluator {
                         functionStack.pop();
                         return vv;
                     }).run(cont);
+                } catch (ByxScriptRuntimeException | ExitRecursionException e) {
+                    throw e;
                 } catch (BuiltinFunctionException e) {
                     execThrow(e.getValue()).run(x -> {});
+                } catch (Exception e) {
+                    execThrow(new StringValue("NativeError: " + e.getMessage())).run(x -> {});
                 }
             };
         } else {
-            throw new ByxScriptRuntimeException(String.format("%s is not callable", v.typeId()));
+            throw new NotCallableException(v);
         }
     }
 
-    private static Value getField(Value value, String field) {
+    private static Value getField(Value value, String fieldName) {
         if (value instanceof ObjectValue v) {
             Map<String, Value> fields = v.getFields();
-            if (!fields.containsKey(field)) {
-                throw new ByxScriptRuntimeException(String.format("field %s not exist", field));
+            if (!fields.containsKey(fieldName)) {
+                throw new FieldNotExistException(fieldName);
             }
-            return fields.get(field);
+            return fields.get(fieldName);
         }
-
-        throw new ByxScriptRuntimeException(String.format("unsupported field access: %s", value.typeId()));
+        throw new FieldAccessUnsupportedException(value);
     }
 
     private static Value evalSubscript(Value value, Value sub) {
@@ -627,18 +631,18 @@ public class ByxScriptEvaluator {
                 int index = s.value();
                 return v.getElems().get(index);
             } else {
-                throw new ByxScriptRuntimeException("subscript must be integer");
+                throw new InvalidSubscriptException(sub);
             }
         } else if (value instanceof StringValue v) {
             if (sub instanceof IntegerValue s) {
                 int index = s.value();
                 return new StringValue(String.valueOf(v.value().charAt(index)));
             } else {
-                throw new ByxScriptRuntimeException("subscript must be integer");
+                throw new InvalidSubscriptException(sub);
             }
         }
 
-        throw new ByxScriptRuntimeException(String.format("unsupported subscript: %s", value.typeId()));
+        throw new SubscriptAccessUnsupportedException(value);
     }
 
     private static void setField(Value value, String field, Value rhs) {
@@ -646,7 +650,7 @@ public class ByxScriptEvaluator {
             v.setField(field, rhs);
             return;
         }
-        throw new ByxScriptRuntimeException(String.format("unsupported field assign: %s", value.typeId()));
+        throw new FieldAssignUnsupportedException(value);
     }
 
     private static void setSubscript(Value value, Value sub, Value rhs) {
@@ -656,17 +660,16 @@ public class ByxScriptEvaluator {
                 v.getElems().set(index, rhs);
                 return;
             } else {
-                throw new ByxScriptRuntimeException("subscript must be integer");
+                throw new InvalidSubscriptException(sub);
             }
         }
-
-        throw new ByxScriptRuntimeException(String.format("unsupported subscript assign: %s", value.typeId()));
+        throw new SubscriptAssignUnsupportedException(value);
     }
 
     private static boolean getCondition(Value v) {
         if (v instanceof BoolValue) {
             return ((BoolValue) v).getValue();
         }
-        throw new ByxScriptRuntimeException("condition of if, while, for statement must be bool value");
+        throw new InvalidLoopConditionException(v);
     }
 }
