@@ -43,9 +43,9 @@ public interface Cont<T> {
     }
 
     default <U> Cont<U> flatMap(Function<T, Cont<U>> mapper) {
-        return wrapCont(c -> run(v -> {
+        return wrapCont(c -> run(wrap(v -> {
             Cont<U> next = mapper.apply(v);
             next.run(c);
-        }));
+        })));
     }
 }
