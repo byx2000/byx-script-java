@@ -180,14 +180,14 @@ public class ByxScriptParser {
     private static final Parser<List<String>> multiParamList = skip(lp).and(idList).skip(rp);
     private static final Parser<List<String>> lambdaParamList = singleParamList.or(multiParamList);
     private static final Parser<Expr> callableLiteral = lambdaParamList.skip(arrow).and(oneOf(
-            skip(lb).and(stmts).skip(rb_fatal).map(Block::new),
-            lazyExpr.map(Return::new)
+            skip(lb).and(stmts).skip(rb_fatal),
+            lazyExpr.map(e -> List.of(new Return(e)))
     )).map(p -> new CallableLiteral(p.first(), p.second()));
 
     // 对象字面量
     private static final Parser<Pair<String, Expr>> fieldPair = oneOf(
             identifier.skip(colon).and(lazyExpr),
-            identifier.skip(lp).and(idList).skip(rp_fatal).and(block_fatal)
+            identifier.skip(lp).and(idList).skip(rp_fatal.and(lb_fatal)).and(stmts).skip(rb_fatal)
                     .map(p -> new Pair<>(p.first().first(), new CallableLiteral(p.first().second(), p.second()))),
             identifier.map(id -> new Pair<>(id, new Var(id)))
     );
@@ -276,12 +276,7 @@ public class ByxScriptParser {
             .skip(rp_fatal.and(lb_fatal))
             .and(stmts)
             .skip(rb_fatal)
-            .map(p -> {
-                String functionName = p.first().first();
-                List<String> params = p.first().second();
-                Statement body = new Block(p.second());
-                return new VarDeclare(functionName, new CallableLiteral(params, body));
-            });
+            .map(p -> new VarDeclare(p.first().first(), new CallableLiteral(p.first().second(), p.second())));
 
     private static final Parser<Expr> assignable = expr.and(alt(subscript, fieldAccess).many())
             .map(ByxScriptParser::buildAssignable);
@@ -303,23 +298,9 @@ public class ByxScriptParser {
             .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Sub, e, new Literal(new IntegerValue(1)))));
 
     // if语句
-    private static final Parser<Pair<Expr, Statement>> ifPart =
-            skip(if_.and(lp_fatal))
-            .and(expr_fatal)
-            .skip(rp_fatal)
-            .and(block_fatal);
-    private static final Parser<List<Pair<Expr, Statement>>> elseifPart =
-            skip(else_.and(if_).and(lp_fatal))
-            .and(expr_fatal)
-            .skip(rp_fatal)
-            .and(block_fatal)
-            .many();
-    private static final Parser<Statement> elsePart =
-            skip(else_)
-            .and(block_fatal)
-            .opt(new Block(Collections.emptyList()));
-    private static final Parser<Statement> ifStmt = ifPart.and(elseifPart).and(elsePart)
-            .map(ByxScriptParser::buildIfNode);
+    private static final Parser<Statement> ifStmt = skip(if_.and(lp_fatal)).and(expr_fatal).skip(rp_fatal).and(lazyStmt)
+        .and(skip(else_).and(lazyStmt).opt(Block.EMPTY))
+        .map(p -> new If(p.first().first(), p.first().second(), p.second()));
 
     // for语句
     private static final Parser<Statement> forStmt =
@@ -479,16 +460,6 @@ public class ByxScriptParser {
         list.add(p.first());
         list.addAll(p.second());
         return list;
-    }
-
-    private static If buildIfNode(Pair<Pair<Pair<Expr, Statement>, List<Pair<Expr, Statement>>>, Statement> p) {
-        List<Pair<Expr, Statement>> cases = new ArrayList<>();
-        cases.add(new Pair<>(p.first().first().first(), p.first().first().second()));
-        for (Pair<Expr, Statement> pp : p.first().second()) {
-            cases.add(new Pair<>(pp.first(), pp.second()));
-        }
-        Statement elseBranch = p.second();
-        return new If(cases, elseBranch);
     }
 
     private static For buildForNode(Pair<Pair<Pair<Statement, Expr>, Statement>, Statement> p) {

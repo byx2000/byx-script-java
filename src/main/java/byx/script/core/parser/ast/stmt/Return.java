@@ -5,4 +5,4 @@ import byx.script.core.parser.ast.expr.Expr;
 /**
  * 函数返回语句
  */
-public record Return(Expr retVal) implements Statement {}
+public record Return(Expr expr) implements Statement {}

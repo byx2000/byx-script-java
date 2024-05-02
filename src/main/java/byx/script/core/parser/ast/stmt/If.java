@@ -1,9 +1,6 @@
 package byx.script.core.parser.ast.stmt;
 
-import byx.script.core.common.Pair;
 import byx.script.core.parser.ast.expr.Expr;
-
-import java.util.List;
 
 /**
  * if语句
@@ -12,4 +9,4 @@ import java.util.List;
  * ...
  * else stmt
  */
-public record If(List<Pair<Expr, Statement>> cases, Statement elseBranch) implements Statement {}
+public record If(Expr cond, Statement trueBody, Statement falseBody) implements Statement {}

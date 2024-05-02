@@ -1,6 +1,5 @@
 package byx.script.core.interpreter;
 
-import byx.script.core.common.Pair;
 import byx.script.core.interpreter.exception.*;
 import byx.script.core.interpreter.value.*;
 import byx.script.core.parser.ast.Program;
@@ -41,7 +40,7 @@ public class ByxScriptEvaluator {
         if (node instanceof Literal n) {
             return Cont.value(n.value());
         } else if (node instanceof ListLiteral n) {
-            return evalExprList(n.elems(), scope).map(ListValue::new);
+            return evalExprList(n.exprs(), scope).map(ListValue::new);
         } else if (node instanceof ObjectLiteral n) {
             return evalObjectLiteral(new ArrayList<>(n.fields().entrySet()), new HashMap<>(), 0, scope);
         } else if (node instanceof CallableLiteral n) {
@@ -74,7 +73,7 @@ public class ByxScriptEvaluator {
             };
         } else if (node instanceof FieldAccess n) {
             return evalExpr(n.expr(), scope)
-                .map(v -> getField(v, n.field()));
+                .map(v -> getField(v, n.fieldName()));
         } else if (node instanceof Subscript n) {
             return evalExpr(n.expr(), scope)
                 .flatMap(v -> evalExpr(n.subscript(), scope)
@@ -95,7 +94,7 @@ public class ByxScriptEvaluator {
         FunctionFrame frame = functionStack.peek();
 
         if (node instanceof VarDeclare n) {
-            return evalExpr(n.value(), scope).map(v -> {
+            return evalExpr(n.expr(), scope).map(v -> {
                 scope.declareVar(n.varName(), v);
                 return null;
             });
@@ -112,7 +111,7 @@ public class ByxScriptEvaluator {
                 // 字段赋值
                 return evalExpr(e.expr(), scope).flatMap(v1 ->
                     evalExpr(rhs, scope).map(v2 -> {
-                        setField(v1, e.field(), v2);
+                        setField(v1, e.fieldName(), v2);
                         return null;
                     }));
             } else if (lhs instanceof Subscript e) {
@@ -125,7 +124,13 @@ public class ByxScriptEvaluator {
                         })));
             }
         } else if (node instanceof If n) {
-            return execIf(n, 0, scope);
+            return evalExpr(n.cond(), scope).flatMap(v -> {
+                if (getCondition(v)) {
+                    return execStmt(n.trueBody(), scope);
+                } else {
+                    return execStmt(n.falseBody(), scope);
+                }
+            });
         } else if (node instanceof For n) {
             return cont -> {
                 frame.pushBreakStack(cont);
@@ -176,7 +181,7 @@ public class ByxScriptEvaluator {
                 frame.peekContinueStack().accept(null);
             };
         } else if (node instanceof Return n) {
-            return evalExpr(n.retVal(), scope).flatMap(v -> cont -> {
+            return evalExpr(n.expr(), scope).flatMap(v -> cont -> {
                 if (functionStack.isEmpty()) {
                     throw new ReturnOutsideFunctionException();
                 }
@@ -224,21 +229,6 @@ public class ByxScriptEvaluator {
             return evalExpr(e, scope).flatMap(v -> {
                 fields.put(key, v);
                 return evalObjectLiteral(entries, fields, i + 1, scope);
-            });
-        }
-    }
-
-    private static Cont<Void> execIf(If node, int i, Scope scope) {
-        if (i == node.cases().size()) {
-            return execStmt(node.elseBranch(), scope);
-        } else {
-            Pair<Expr, Statement> p = node.cases().get(i);
-            return evalExpr(p.first(), scope).flatMap(v -> {
-                if (getCondition(v)) {
-                    return execStmt(p.second(), scope);
-                } else {
-                    return execIf(node, i + 1, scope);
-                }
             });
         }
     }
@@ -297,10 +287,9 @@ public class ByxScriptEvaluator {
     }
 
     private static CallableValue makeCallableValue(CallableLiteral node, Scope scope) {
-        List<String> params = node.params();
-        Statement body = node.body();
         return args -> {
             // 传递实参
+            List<String> params = node.params();
             Scope newScope = new Scope(scope);
             for (int i = 0; i < params.size(); ++i) {
                 if (i < args.size()) {
@@ -311,7 +300,7 @@ public class ByxScriptEvaluator {
             }
 
             // 执行函数体
-            return execStmt(body, newScope).map(v -> NullValue.INSTANCE);
+            return execStmtList(node.body(), newScope).map(v -> NullValue.INSTANCE);
         };
     }
 

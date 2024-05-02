@@ -5,4 +5,4 @@ import java.util.List;
 /**
  * 列表字面量
  */
-public record ListLiteral(List<Expr> elems) implements Expr {}
+public record ListLiteral(List<Expr> exprs) implements Expr {}

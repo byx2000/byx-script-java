@@ -7,4 +7,4 @@ import java.util.List;
 /**
  * 函数字面量
  */
-public record CallableLiteral(List<String> params, Statement body) implements Expr {}
+public record CallableLiteral(List<String> params, List<Statement> body) implements Expr {}
