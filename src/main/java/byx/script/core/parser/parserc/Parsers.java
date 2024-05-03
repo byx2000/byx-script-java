@@ -222,6 +222,14 @@ public class Parsers {
     }
 
     /**
+     * 跳过连续多个解析器
+     * @param parsers parsers
+     */
+    public static SkipWrapper<?> skip(Parser<?>... parsers) {
+        return new SkipWrapper<>(seq(parsers));
+    }
+
+    /**
      * 在当前位置应用解析器predicate，解析成功不消耗任何输入，并返回value，解析失败抛出ParseException
      *
      * @param value value

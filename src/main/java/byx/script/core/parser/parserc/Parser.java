@@ -149,6 +149,14 @@ public interface Parser<R> {
     }
 
     /**
+     * 跳过连续多个解析器
+     * @param parsers parsers
+     */
+    default Parser<R> skip(Parser<?>... parsers) {
+        return this.and(Parsers.seq(parsers)).map(Pair::first);
+    }
+
+    /**
      * 在解析器p前后连接prefix和suffix
      * @param prefix 前缀
      * @param suffix 后缀

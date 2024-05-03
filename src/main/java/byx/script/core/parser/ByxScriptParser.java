@@ -187,7 +187,7 @@ public class ByxScriptParser {
     // 对象字面量
     private static final Parser<Pair<String, Expr>> fieldPair = oneOf(
             identifier.skip(colon).and(lazyExpr),
-            identifier.skip(lp).and(idList).skip(rp_fatal.and(lb_fatal)).and(stmts).skip(rb_fatal)
+            identifier.skip(lp).and(idList).skip(rp_fatal, lb_fatal).and(stmts).skip(rb_fatal)
                     .map(p -> new Pair<>(p.first().first(), new CallableLiteral(p.first().second(), p.second()))),
             identifier.map(id -> new Pair<>(id, new Var(id)))
     );
@@ -298,7 +298,7 @@ public class ByxScriptParser {
             .map(e -> new Assign(e, new BinaryExpr(BinaryOp.Sub, e, new Literal(new IntegerValue(1)))));
 
     // if语句
-    private static final Parser<Statement> ifStmt = skip(if_.and(lp_fatal)).and(expr_fatal).skip(rp_fatal).and(lazyStmt)
+    private static final Parser<Statement> ifStmt = skip(if_, lp_fatal).and(expr_fatal).skip(rp_fatal).and(lazyStmt)
         .and(skip(else_).and(lazyStmt).opt(Block.EMPTY))
         .map(p -> new If(p.first().first(), p.first().second(), p.second()));
 
@@ -316,7 +316,7 @@ public class ByxScriptParser {
 
     // while语句
     private static final Parser<Statement> whileStmt =
-            skip(while_.and(lp_fatal))
+            skip(while_, lp_fatal)
             .and(expr)
             .skip(rp_fatal)
             .and(block_fatal)
@@ -335,7 +335,7 @@ public class ByxScriptParser {
     // try-catch语句
     private static final Parser<Statement> tryPart = skip(try_).and(block_fatal);
     private static final Parser<Pair<String, Statement>> catchPart =
-            skip(catch_fatal.and(lp_fatal))
+            skip(catch_fatal, lp_fatal)
             .and(identifier)
             .skip(rp_fatal)
             .and(block_fatal);
